@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Linear Systems in Lisp</title>
+<!-- 2017-10-20 Fri 14:37 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="George Kontsevich" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="https://geokon-gh.github.io/static/worg.css" />
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Linear Systems in Lisp</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Intro</a></li>
+<li><a href="#sec-2">Matices</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Intro</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+I'm going through <i>Matrix Analysis &amp; Applied Linear Algebra</i> (Carl Meyer)  and implementing the algorithms in ELisp. An excuse to learn ELisp and solidy my linear algebra. There is no emphasis on performance - just on clarity and extensability
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Matices</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Linear system (ie. a system of equations) are for convenience represented using matrices. Once we define a matrix and all operations on it we can begin to use them for manipulating linear systems. The standard way of representing a matrix that you often see in C is using multidimensional arrays. For a 2D matrix this has 3 values: <code>number of rows</code> <code>number of columns</code> <code>values</code>
+</p>
+
+<p>
+The values are a long list of data of size <code>num-row * num-col</code>. When making a new matrix it's useful to be able to make a list of zeroes of the required size
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">build-list-of-zeroes</span> (size)
+  <span style="color: #cc0000;">"Recursively builds a list of zeroes of the given size"</span>
+  (<span style="color: #00af00;">if</span> (zerop size) 
+      '() <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">base case</span>
+    (cons 0 (build-empty-list-of-zeroes (- size 1))))) <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">"else"/iterative step</span>
+</pre>
+</div>
+<blockquote>
+<p>
+<code>zerop</code> tests if the values is zero
+</p>
+</blockquote>
+<blockquote>
+<p>
+<code>()</code> with a quote is the <i>empty-list</i> 
+</p>
+</blockquote>
+<blockquote>
+<p>
+<code>cons</code> attaches the first argument to the second argument (which is normally a list)
+</p>
+</blockquote>
+
+<p>
+Now we can build the actual matrix
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-zeroes</span> (number-of-rows number-of-columns)
+  <span style="color: #cc0000;">"Builds a matrix of zeroes"</span>
+  (list 
+   number-of-rows 
+   number-of-columns 
+   (build-list-of-zeroes (* number-of-rows number-of-columns))))
+</pre>
+</div>
+<blockquote>
+<p>
+<code>list</code> build a list of values equivalent to <code>(cons number-of-rows (cons number-of-columns (cons (build-list-of-zeroes ...) '() )))</code> <b>(note the last <i>empty-list</i> element)</b>
+</p>
+</blockquote>
+<p>
+Similarly we would like to be able to build lists of random integers
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">build-list-of-random-digits</span> (size)
+  <span style="color: #cc0000;">"Recursively builds a list of zeroes of the given size"</span>
+  (<span style="color: #00af00;">if</span> (zerop size) 
+      '() <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">base case</span>
+    (cons (random 10) (build-list-of-random-digits(- size 1)))))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-random-digits</span> (number-of-rows number-of-columns)
+  <span style="color: #cc0000;">"Builds a matrix of zeroes"</span>
+  (list 
+   number-of-rows 
+   number-of-columns 
+   (build-list-of-random-digits (* number-of-rows number-of-columns))))
+
+<span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">ex: (matrix-random-digits 2 3)</span>
+</pre>
+</div>
+<p>
+And list from manually entered values
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-from-values</span> (number-of-rows number-of-columns values)
+  <span style="color: #cc0000;">"Builds a matrix of zeroes"</span>
+  (list 
+   number-of-rows 
+   number-of-columns 
+   values))
+</pre>
+</div>
+<p>
+For debugging we need to be able to print out the matrix for inspection
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">get-first-n-values</span> (values n)
+      <span style="color: #cc0000;">"Given a list of values, get the first n in a string"</span>
+      (<span style="color: #00af00;">if</span> (zerop n)
+          <span style="color: #ff1f8b;">""</span> <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">base case</span>
+        (concat
+         (number-to-string (car values))
+         <span style="color: #ff1f8b;">" "</span>
+         (get-first-n-values (cdr values) (- n 1)))))
+
+  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">print-values</span> (number-of-rows number-of-columns values)
+    <span style="color: #cc0000;">"Print out values gives the dimension of the original matrix"</span>
+    (<span style="color: #00af00;">if</span> (zerop number-of-rows)
+        <span style="color: #ff1f8b;">""</span>
+      (concat
+       (get-first-n-values values number-of-columns)
+       <span style="color: #ff1f8b;">"\n"</span>
+       (print-values
+        (- number-of-rows 1)
+        number-of-columns
+        (nthcdr number-of-columns values )))))
+
+  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-print</span> (matrix)
+    <span style="color: #cc0000;">"Print out the matrix"</span>
+    (<span style="color: #00af00;">let</span>
+        ((number-of-rows (nth 0 matrix))
+         (number-of-columns (nth 1 matrix))
+         (values (nth 2 matrix)))
+      (concat <span style="color: #ff1f8b;">"\n"</span> (print-values
+                       number-of-rows
+                       number-of-columns
+                       values))))
+<span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">ex:  (message (matrix-print (matrix-from-values 2 2 '(1 2 3 4))))</span>
+</pre>
+</div>
+<blockquote>
+<p>
+<code>nth</code> gets the nth element of the list
+</p>
+</blockquote>
+<blockquote>
+<p>
+<code>cdr</code> returns the list without the first element
+</p>
+</blockquote>
+<blockquote>
+<p>
+This webpage is generated from an org-document (at <code>./index.org</code>) that also generates all the files described. 
+</p>
+
+<p>
+Once opened in Emacs:<br  />
+</p>
+<ul class="org-ul">
+<li><code>C-c C-e h h</code> generates the webpage  <br  />
+</li>
+<li><code>C-c C-v C-t</code> exports the code blocks into the appropriate files<br  />
+</li>
+</ul>
+</blockquote>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: George Kontsevich</p>
+<p class="date">Created: 2017-10-20 Fri 14:37</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.1.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
