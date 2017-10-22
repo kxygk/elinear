@@ -18,7 +18,7 @@ The values are a long list of data of size ~num-row * num-col~. When making a ne
     "Recursively builds a list of zeroes of the given size"
     (if (zerop size) 
         '() ;base case
-      (cons 0 (build-empty-list-of-zeroes (- size 1))))) ; "else"/iterative step
+      (cons 0 (build-list-of-zeroes (- size 1))))) ; "else"/iterative step
 #+END_SRC
 #+BEGIN_QUOTE
 ~zerop~ tests if the values is zero
