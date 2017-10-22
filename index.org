@@ -110,7 +110,39 @@ For debugging we need to be able to print out the matrix for inspection
 #+BEGIN_QUOTE
 ~cdr~ returns the list without the first element
 #+END_QUOTE
+* Matrix Operations
+Next we need to define some basics operations on the martices
+** Addition
+The simplest operation is addition. We need to check the matrices have the right size and then simple add the ~values~ lists
+#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+  (defun matrix-equal-size? (matrix1 matrix2)
+    (and
+     (equal
+      (nth 0 matrix1)
+      (nth 0 matrix2))
+     (equal
+      (nth 1 matrix1)
+      (nth 1 matrix2))))
+  (defun for-each-pair (list1 list2 operator)
+    (if (null list1)
+        '()
+      (cons
+       (funcall operator (car list1) (car list2))
+       (for-each-pair (cdr list1) (cdr list2) operator))))
+
+  (defun matrix-add (matrix1 matrix2)
+    (if (check-addition matrix1 matrix2)
+        (matrix-from-values
+         (nth 0 matrix1)
+         (nth 1 matrix1)
+         (for-each-pair
+          (nth 2 matrix1)
+          (nth 2 matrix2)
+          '+))))
+#+END_SRC
 #+BEGIN_QUOTE
+~funcall~ applied the first arugment (a function) with the remaining items in the list as arguments
+#+END_QUOTE
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
 
 Once opened in Emacs:\\
