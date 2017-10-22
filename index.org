@@ -13,7 +13,7 @@ I'm going through [[matrixanalysis.com][Matrix Analysis & Applied Linear Algebra
 Linear system (ie. a system of equations) are for convenience represented using matrices. Once we define a matrix and all operations on it we can begin to use them for manipulating linear systems. The standard way of representing a matrix that you often see in C is using multidimensional arrays. For a 2D matrix this has 3 values: ~number of rows~ ~number of columns~ ~values~
 
 The values are a long list of data of size ~num-row * num-col~. When making a new matrix it's useful to be able to make a list of zeroes of the required size
-#+BEGIN_SRC emacs-lisp :results output :session
+#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun build-list-of-zeroes (size)
     "Recursively builds a list of zeroes of the given size"
     (if (zerop size) 
@@ -31,7 +31,7 @@ The values are a long list of data of size ~num-row * num-col~. When making a ne
 #+END_QUOTE
 
 Now we can build the actual matrix
-#+BEGIN_SRC emacs-lisp :results output :session
+#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun matrix-zeroes (number-of-rows number-of-columns)
     "Builds a matrix of zeroes"
     (list 
@@ -43,7 +43,7 @@ Now we can build the actual matrix
 ~list~ build a list of values equivalent to ~(cons number-of-rows (cons number-of-columns (cons (build-list-of-zeroes ...) '() )))~ *(note the last /empty-list/ element)*
 #+END_QUOTE
 Similarly we would like to be able to build lists of random integers
-#+BEGIN_SRC emacs-lisp :results output :session
+#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun build-list-of-random-digits (size)
     "Recursively builds a list of zeroes of the given size"
     (if (zerop size) 
@@ -60,7 +60,7 @@ Similarly we would like to be able to build lists of random integers
   ; ex: (matrix-random-digits 2 3)
 #+END_SRC
 And list from manually entered values
-#+BEGIN_SRC emacs-lisp :results output :session
+#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
 
   (defun matrix-from-values (number-of-rows number-of-columns values)
     "Builds a matrix of zeroes"
@@ -70,7 +70,7 @@ And list from manually entered values
      values))
 #+END_SRC
 For debugging we need to be able to print out the matrix for inspection
-#+BEGIN_SRC emacs-lisp :results output :session
+#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun get-first-n-values (values n)
       "Given a list of values, get the first n in a string"
       (if (zerop n)
