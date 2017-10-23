@@ -116,6 +116,7 @@ Next we need to define some basics operations on the martices
 The simplest operation is addition. We need to check the matrices have the right size and then simple add the ~values~ lists
 #+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun matrix-equal-size? (matrix1 matrix2)
+    "Check if 2 matrices are the same size"
     (and
      (equal
       (nth 0 matrix1)
@@ -124,6 +125,7 @@ The simplest operation is addition. We need to check the matrices have the right
       (nth 1 matrix1)
       (nth 1 matrix2))))
   (defun for-each-pair (list1 list2 operator)
+    "Go through 2 lists applying an operator on each pair of elements"
     (if (null list1)
         '()
       (cons
@@ -131,6 +133,7 @@ The simplest operation is addition. We need to check the matrices have the right
        (for-each-pair (cdr list1) (cdr list2) operator))))
 
   (defun matrix-add (matrix1 matrix2)
+    "Add to matrices togethere"
     (if (check-addition matrix1 matrix2)
         (matrix-from-values
          (nth 0 matrix1)
@@ -147,6 +150,7 @@ The simplest operation is addition. We need to check the matrices have the right
 Next we want to be able to extract submatrices
 #+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun matrix-extract-subrow (matrix row start-column end-column)
+    "Get part of a row of a matrix and generate a row matrix from it"
     (let
         ((number-of-columns-on-input (nth 1 matrix))
          (number-of-columns-on-output (- end-column start-column)))
@@ -159,6 +163,7 @@ Next we want to be able to extract submatrices
         (+ (* row number-of-columns-on-input) end-column)))))
 
   (defun matrix-append (matrix1 matrix2)
+    "Append one matrix (set of linear equations) to another"
     (matrix-from-values
      (+
       (nth 0 matrix2)
@@ -169,6 +174,7 @@ Next we want to be able to extract submatrices
       (nth 2 matrix2))))
 
   (defun matrix-submatrix (matrix start-row start-column end-row end-column)
+    "Get a submatrix"
     (if (equal start-row end-row)
         '()
       (cons
