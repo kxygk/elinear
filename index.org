@@ -143,6 +143,44 @@ The simplest operation is addition. We need to check the matrices have the right
 #+BEGIN_QUOTE
 ~funcall~ applied the first arugment (a function) with the remaining items in the list as arguments
 #+END_QUOTE
+** Submatrices
+Next we want to be able to extract submatrices
+#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+  (defun matrix-extract-subrow (matrix row start-column end-column)
+    (let
+        ((number-of-columns-on-input (nth 1 matrix))
+         (number-of-columns-on-output (- end-column start-column)))
+      (matrix-from-values
+       1
+       number-of-columns-on-output
+       (subseq
+        (nth 2 matrix)
+        (+ (* row number-of-columns-on-input) start-column)
+        (+ (* row number-of-columns-on-input) end-column)))))
+
+  (defun matrix-append (matrix1 matrix2)
+    (matrix-from-values
+     (+
+      (nth 0 matrix2)
+      (nth 0 matrix1))
+     (nth 1 matrix1)
+     (append
+      (nth 2 matrix1)
+      (nth 2 matrix2))))
+
+  (defun matrix-submatrix (matrix start-row start-column end-row end-column)
+    (if (equal start-row end-row)
+        '()
+      (cons
+       (matrix-extract-subrow matrix start-row start-column end-column)
+       (matrix-submatrix
+        matrix
+        (+ start-row 1)
+        start-column
+        end-row
+        end-column))))
+#+END_SRC
+
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
 
 Once opened in Emacs:\\
