@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2017-10-20 Fri 14:37 -->
+<!-- 2017-10-23 Mon 10:55 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -145,6 +145,13 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#sec-1">Intro</a></li>
 <li><a href="#sec-2">Matices</a></li>
+<li><a href="#sec-3">Matrix Operations</a>
+<ul>
+<li><a href="#sec-3-1">Addition</a></li>
+<li><a href="#sec-3-2">Submatrices</a></li>
+<li><a href="#sec-3-3">Multiplication</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -173,7 +180,7 @@ The values are a long list of data of size <code>num-row * num-col</code>. When 
   <span style="color: #cc0000;">"Recursively builds a list of zeroes of the given size"</span>
   (<span style="color: #00af00;">if</span> (zerop size) 
       '() <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">base case</span>
-    (cons 0 (build-empty-list-of-zeroes (- size 1))))) <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">"else"/iterative step</span>
+    (cons 0 (build-list-of-zeroes (- size 1))))) <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">"else"/iterative step</span>
 </pre>
 </div>
 <blockquote>
@@ -293,6 +300,124 @@ For debugging we need to be able to print out the matrix for inspection
 <code>cdr</code> returns the list without the first element
 </p>
 </blockquote>
+</div>
+</div>
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">Matrix Operations</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Next we need to define some basics operations on the martices
+</p>
+</div>
+<div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1">Addition</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+The simplest operation is addition. We need to check the matrices have the right size and then simple add the <code>values</code> lists
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-equal-size?</span> (matrix1 matrix2)
+  <span style="color: #cc0000;">"Check if 2 matrices are the same size"</span>
+  (<span style="color: #00af00;">and</span>
+   (equal
+    (nth 0 matrix1)
+    (nth 0 matrix2))
+   (equal
+    (nth 1 matrix1)
+    (nth 1 matrix2))))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">for-each-pair</span> (list1 list2 operator)
+  <span style="color: #cc0000;">"Go through 2 lists applying an operator on each pair of elements"</span>
+  (<span style="color: #00af00;">if</span> (null list1)
+      '()
+    (cons
+     (funcall operator (car list1) (car list2))
+     (for-each-pair (cdr list1) (cdr list2) operator))))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-add</span> (matrix1 matrix2)
+  <span style="color: #cc0000;">"Add to matrices togethere"</span>
+  (<span style="color: #00af00;">if</span> (check-addition matrix1 matrix2)
+      (matrix-from-values
+       (nth 0 matrix1)
+       (nth 1 matrix1)
+       (for-each-pair
+        (nth 2 matrix1)
+        (nth 2 matrix2)
+        '+))))
+</pre>
+</div>
+<blockquote>
+<p>
+<code>funcall</code> applied the first arugment (a function) with the remaining items in the list as arguments
+</p>
+</blockquote>
+</div>
+</div>
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2">Submatrices</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Next we want to be able to extract submatrices
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-extract-subrow</span> (matrix row start-column end-column)
+  <span style="color: #cc0000;">"Get part of a row of a matrix and generate a row matrix from it"</span>
+  (<span style="color: #00af00;">let</span>
+      ((number-of-columns-on-input (nth 1 matrix))
+       (number-of-columns-on-output (- end-column start-column)))
+    (matrix-from-values
+     1
+     number-of-columns-on-output
+     (subseq
+      (nth 2 matrix)
+      (+ (* row number-of-columns-on-input) start-column)
+      (+ (* row number-of-columns-on-input) end-column)))))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-append</span> (matrix1 matrix2)
+  <span style="color: #cc0000;">"Append one matrix (set of linear equations) to another"</span>
+  (matrix-from-values
+   (+
+    (nth 0 matrix2)
+    (nth 0 matrix1))
+   (nth 1 matrix1)
+   (append
+    (nth 2 matrix1)
+    (nth 2 matrix2))))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-submatrix</span> (matrix start-row start-column end-row end-column)
+  <span style="color: #cc0000;">"Get a submatrix"</span>
+  (<span style="color: #00af00;">if</span> (equal start-row end-row)
+      '()
+    (cons
+     (matrix-extract-subrow matrix start-row start-column end-column)
+     (matrix-submatrix
+      matrix
+      (+ start-row 1)
+      start-column
+      end-row
+      end-column))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3">Multiplication</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+To do multiplcation we need to work in small steps
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-conformable?</span> (matrix1 matrix2)
+   (equal
+    (nth 1 matrix1)
+    (nth 0 matrix2)))
+</pre>
+</div>
+
 <blockquote>
 <p>
 This webpage is generated from an org-document (at <code>./index.org</code>) that also generates all the files described. 
@@ -311,9 +436,10 @@ Once opened in Emacs:<br  />
 </div>
 </div>
 </div>
+</div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2017-10-20 Fri 14:37</p>
+<p class="date">Created: 2017-10-23 Mon 10:55</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.1.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
