@@ -185,6 +185,23 @@ Next we want to be able to extract submatrices
         start-column
         end-row
         end-column))))
+
+  (defun matrix-row (matrix row-number)
+    "Get a row from a matrix"
+    (matrix-extract-subrow
+     matrix
+     row-number
+     0
+     (nth 1 matrix)))
+
+  (defun matrix-column (matrix column-number)
+    "Get a column from a matrix"
+    (matrix-submatrix
+     matrix
+     0
+     column-number
+     (nth 0 matrix)
+     (+ column-number 1)))
 #+END_SRC
 
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
