@@ -150,10 +150,12 @@ The simplest operation is addition. We need to check the matrices have the right
 Next we want to be able to extract submatrices
 #+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun matrix-extract-subrow (matrix row start-column end-column)
-    "Get part of a row of a matrix and generate a row matrix from it"
+    "Get part of a row of a matrix and generate a row matrix from it. START-COLUMN is inclusive,  END-COLUMN is exclusive"
     (let
         ((number-of-columns-on-input (nth 1 matrix))
-         (number-of-columns-on-output (- end-column start-column)))
+         (number-of-columns-on-output (-
+                                       end-column 
+                                       start-column)))
       (matrix-from-values
        1
        number-of-columns-on-output
@@ -176,7 +178,7 @@ Next we want to be able to extract submatrices
         (nth 2 matrix2)))))
 
   (defun matrix-submatrix (matrix start-row start-column end-row end-column)
-    "Get a submatrix"
+    "Get a submatrix. start-row/column are inclusive. end-row/column are exclusive"
     (if (equal start-row end-row)
         '()
       (cons
@@ -188,22 +190,22 @@ Next we want to be able to extract submatrices
         end-row
         end-column))))
 
-  (defun matrix-row (matrix row-number)
-    "Get a row from a matrix"
+  (defun matrix-row (matrix row)
+    "Get a row from a matrix. Index starts are ZERO"
     (matrix-extract-subrow
      matrix
-     row-number
+     row
      0
      (nth 1 matrix)))
 
-  (defun matrix-column (matrix column-number)
-    "Get a column from a matrix"
+  (defun matrix-column (matrix column)
+    "Get a column from a matrix. Index starts are ZERO"
     (matrix-submatrix
      matrix
      0
-     column-number
+     column
      (nth 0 matrix)
-     (+ column-number 1)))
+     (+ column 1)))
 #+END_SRC
 
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
