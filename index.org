@@ -69,6 +69,18 @@ And matrices from manually entered data values
      number-of-columns 
      data-list))
 #+END_SRC
+A couple of helper function to get the 3 fields will also improve readability
+#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+  (defun matrix-rows (matrix)
+    "Get the number of rows"
+    (nth 0 matrix))
+  (defun matrix-columns (matrix)
+    "Get the number of columns"
+    (nth 1 matrix))
+  (defun matrix-data (matrix)
+    "Get the data list from the matrix"
+    (nth 2 matrix))
+#+END_SRC
 For debugging we need to be able to print out the matrix for inspection
 #+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun matrix-data-get-first-n-values (data n)
