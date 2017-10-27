@@ -48,7 +48,7 @@ Similarly we would like to be able to build matrices of random integers
     "Recursively builds a list of zeroes of the given size"
     (if (zerop size) 
         '() ;base case
-      (cons (random 10) (build-list-of-random-digits(- size 1)))))
+      (cons (random 10) (build-list-of-random-digits(- size 1))))) ; iterative step
 
   (defun matrix-random-digits (number-of-rows number-of-columns)
     "Builds a matrix of zeroes"
@@ -81,25 +81,28 @@ A couple of helper function to get the 3 fields will also improve readability
     "Get the data list from the matrix"
     (nth 2 matrix))
 #+END_SRC
+#+BEGIN_QUOTE
+~nth~ gets the nth element of the list
+#+END_QUOTE
 For debugging we need to be able to print out the matrix for inspection
 #+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun matrix-data-get-first-n-values (data n)
-      "Given a list of values, get the first n in a string"
-      (if (zerop n)
-          "" ;base case
-        (concat
-         (number-to-string (car data))
-         " "
-         (matrix-data-get-first-n-values (cdr data) (- n 1)))))
+    "Given a list of values, get the first n in a string"
+    (if (zerop n)
+        "" ;base case
+      (concat
+       (number-to-string (car data))
+       " "
+       (matrix-data-get-first-n-values (cdr data) (- n 1))))) ;iterative step
 
   (defun matrix-data-print (number-of-rows number-of-columns data)
     "Print out the data list gives the dimension of the original matrix"
     (if (zerop number-of-rows)
-        ""
+        "" ;base case
       (concat
        (matrix-data-get-first-n-values data number-of-columns)
        "\n"
-       (matrix-data-print
+       (matrix-data-print ;iterative step
         (- number-of-rows 1)
         number-of-columns
         (nthcdr number-of-columns data )))))
@@ -112,9 +115,6 @@ For debugging we need to be able to print out the matrix for inspection
                   (matrix-data matrix))))
   ; ex:  (message (matrix-print (matrix-from-values 2 2 '(1 2 3 4))))
 #+END_SRC
-#+BEGIN_QUOTE
-~nth~ gets the nth element of the list
-#+END_QUOTE
 #+BEGIN_QUOTE
 ~cdr~ returns the list without the first element
 #+END_QUOTE
@@ -155,7 +155,7 @@ The simplest operation is addition. We need to check the matrices have the right
 ~funcall~ applied the first arugment (a function) with the remaining items in the list as arguments
 #+END_QUOTE
 ** Submatrices
-Next we want to be able to extract submatrices
+The next fundamental step is we want to be able to extract submatrices
 #+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun matrix-extract-subrow (matrix row start-column end-column)
     "Get part of a row of a matrix and generate a row matrix from it. START-COLUMN is inclusive,  END-COLUMN is exclusive"
@@ -198,6 +198,9 @@ Next we want to be able to extract submatrices
         end-row
         end-column))))
 
+#+END_SRC
+Which allows us to build these two very familiar function
+#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun matrix-get-row (matrix row)
     "Get a row from a matrix. Index starts are ZERO"
     (matrix-extract-subrow
@@ -217,15 +220,8 @@ Next we want to be able to extract submatrices
 #+END_SRC
 
 ** Multiplication
-To do multiplcation we need to work in small steps
-
+To do multiplcation we need to work in small steps and first define the inner product
 #+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
-  (defun matrix-conformable? (matrix1 matrix2)
-    "Check that two matrices can be multiplied"
-    (equal
-     (matrix-columns matrix1)
-     (matrix-rows matrix2)))
-
   (defun matrix-inner-product (row column)
     "Multiply a row times a column and returns a scalar"
     (reduce
@@ -234,15 +230,20 @@ To do multiplcation we need to work in small steps
       (matrix-data row)
       (matrix-data column)
       '*)))
-
+#+END_SRC
+#+BEGIN_QUOTE
+~reduce~ works down the list elements-by-element applying the operator on each cumulative result
+#+END_QUOTE
+Once we have the inner product we can calculate each value (it's just ~row * column~) and build up to calculating the whole matrix product.
+#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun matrix-multiplication-one-value (matrix1 matrix2 row column)
-    "Get a value in the resulting matrix of multiplying two matrices"
+    "Calculate one value in the resulting matrix of the product of two matrices"
     (matrix-inner-product
      (matrix-get-row matrix1 row )
      (matrix-get-column matrix2 column)))
 
   (defun matrix-multiplication-rec (matrix1 matrix2 row column)
-    "A recursive helper function that builds the matrix multiplication value vector. Always invoke with 0 0 as arguements"
+    "A recursive helper function that builds the matrix multiplication's data vector"
     (if (equal (matrix-rows matrix1) row)
         '()
       (if (equal (matrix-columns matrix2) column)
@@ -262,6 +263,12 @@ To do multiplcation we need to work in small steps
           row
           (1+ column))))))
 
+  (defun matrix-conformable? (matrix1 matrix2)
+    "Check that two matrices can be multiplied"
+    (equal
+     (matrix-columns matrix1)
+     (matrix-rows matrix2)))
+
   (defun matrix-multiplication (matrix1 matrix2)
     "Multiply two matrices"
     (matrix-from-data-list
@@ -273,9 +280,6 @@ To do multiplcation we need to work in small steps
       0
       0)))
 #+END_SRC
-#+BEGIN_QUOTE
-~reduce~ works down the list elements-by-element applying the operator on each cumulative result
-#+END_QUOTE
 
 
 
