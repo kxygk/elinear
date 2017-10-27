@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2017-10-23 Mon 10:55 -->
+<!-- 2017-10-27 Fri 13:45 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -168,11 +168,11 @@ I'm going through <i>Matrix Analysis &amp; Applied Linear Algebra</i> (Carl Meye
 <h2 id="sec-2">Matices</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-Linear system (ie. a system of equations) are for convenience represented using matrices. Once we define a matrix and all operations on it we can begin to use them for manipulating linear systems. The standard way of representing a matrix that you often see in C is using multidimensional arrays. For a 2D matrix this has 3 values: <code>number of rows</code> <code>number of columns</code> <code>values</code>
+Linear system (ie. a system of equations) are for convenience represented using matrices. Once we define a matrix and all operations on it we can begin to use them for manipulating linear systems. The standard way of representing a matrix that you often see in C is using multidimensional arrays. For a 2D matrix this has 3 values: <code>number of rows</code> <code>number of columns</code> <code>data</code>
 </p>
 
 <p>
-The values are a long list of data of size <code>num-row * num-col</code>. When making a new matrix it's useful to be able to make a list of zeroes of the required size
+<code>data</code> is a long list of size <code>num-row * num-col</code>. When making a new matrix it's useful to be able to make a list of zeroes of the required size
 </p>
 <div class="org-src-container">
 
@@ -180,12 +180,12 @@ The values are a long list of data of size <code>num-row * num-col</code>. When 
   <span style="color: #cc0000;">"Recursively builds a list of zeroes of the given size"</span>
   (<span style="color: #00af00;">if</span> (zerop size) 
       '() <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">base case</span>
-    (cons 0 (build-list-of-zeroes (- size 1))))) <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">"else"/iterative step</span>
+    (cons 0 (build-list-of-zeroes (1- size))))) <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">"else"/iterative step</span>
 </pre>
 </div>
 <blockquote>
 <p>
-<code>zerop</code> tests if the values is zero
+<code>zerop</code> tests if the value is zero
 </p>
 </blockquote>
 <blockquote>
@@ -218,7 +218,7 @@ Now we can build the actual matrix
 </p>
 </blockquote>
 <p>
-Similarly we would like to be able to build lists of random integers
+Similarly we would like to be able to build matrices of random integers
 </p>
 <div class="org-src-container">
 
@@ -226,7 +226,7 @@ Similarly we would like to be able to build lists of random integers
   <span style="color: #cc0000;">"Recursively builds a list of zeroes of the given size"</span>
   (<span style="color: #00af00;">if</span> (zerop size) 
       '() <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">base case</span>
-    (cons (random 10) (build-list-of-random-digits(- size 1)))))
+    (cons (random 10) (build-list-of-random-digits(1- size))))) <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">iterative step</span>
 
 (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-random-digits</span> (number-of-rows number-of-columns)
   <span style="color: #cc0000;">"Builds a matrix of zeroes"</span>
@@ -239,55 +239,32 @@ Similarly we would like to be able to build lists of random integers
 </pre>
 </div>
 <p>
-And list from manually entered values
+And matrices from manually entered data values
 </p>
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-from-values</span> (number-of-rows number-of-columns values)
-  <span style="color: #cc0000;">"Builds a matrix of zeroes"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-from-data-list</span> (number-of-rows number-of-columns data-list)
+  <span style="color: #cc0000;">"Builds a matrix from a data list"</span>
   (list 
    number-of-rows 
    number-of-columns 
-   values))
+   data-list))
 </pre>
 </div>
 <p>
-For debugging we need to be able to print out the matrix for inspection
+A couple of helper function to get the 3 fields will also improve readability
 </p>
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">get-first-n-values</span> (values n)
-      <span style="color: #cc0000;">"Given a list of values, get the first n in a string"</span>
-      (<span style="color: #00af00;">if</span> (zerop n)
-          <span style="color: #ff1f8b;">""</span> <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">base case</span>
-        (concat
-         (number-to-string (car values))
-         <span style="color: #ff1f8b;">" "</span>
-         (get-first-n-values (cdr values) (- n 1)))))
-
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">print-values</span> (number-of-rows number-of-columns values)
-    <span style="color: #cc0000;">"Print out values gives the dimension of the original matrix"</span>
-    (<span style="color: #00af00;">if</span> (zerop number-of-rows)
-        <span style="color: #ff1f8b;">""</span>
-      (concat
-       (get-first-n-values values number-of-columns)
-       <span style="color: #ff1f8b;">"\n"</span>
-       (print-values
-        (- number-of-rows 1)
-        number-of-columns
-        (nthcdr number-of-columns values )))))
-
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-print</span> (matrix)
-    <span style="color: #cc0000;">"Print out the matrix"</span>
-    (<span style="color: #00af00;">let</span>
-        ((number-of-rows (nth 0 matrix))
-         (number-of-columns (nth 1 matrix))
-         (values (nth 2 matrix)))
-      (concat <span style="color: #ff1f8b;">"\n"</span> (print-values
-                       number-of-rows
-                       number-of-columns
-                       values))))
-<span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">ex:  (message (matrix-print (matrix-from-values 2 2 '(1 2 3 4))))</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-rows</span> (matrix)
+  <span style="color: #cc0000;">"Get the number of rows"</span>
+  (nth 0 matrix))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-columns</span> (matrix)
+  <span style="color: #cc0000;">"Get the number of columns"</span>
+  (nth 1 matrix))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-data</span> (matrix)
+  <span style="color: #cc0000;">"Get the data list from the matrix"</span>
+  (nth 2 matrix))
 </pre>
 </div>
 <blockquote>
@@ -295,6 +272,41 @@ For debugging we need to be able to print out the matrix for inspection
 <code>nth</code> gets the nth element of the list
 </p>
 </blockquote>
+<p>
+For debugging we need to be able to print out the matrix for inspection
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-data-get-first-n-values</span> (data n)
+  <span style="color: #cc0000;">"Given a list of values, get the first n in a string"</span>
+  (<span style="color: #00af00;">if</span> (zerop n)
+      <span style="color: #ff1f8b;">""</span> <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">base case</span>
+    (concat
+     (number-to-string (car data))
+     <span style="color: #ff1f8b;">" "</span>
+     (matrix-data-get-first-n-values (cdr data) (1- n))))) <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">iterative step</span>
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-data-print</span> (number-of-rows number-of-columns data)
+  <span style="color: #cc0000;">"Print out the data list gives the dimension of the original matrix"</span>
+  (<span style="color: #00af00;">if</span> (zerop number-of-rows)
+      <span style="color: #ff1f8b;">""</span> <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">base case</span>
+    (concat
+     (matrix-data-get-first-n-values data number-of-columns)
+     <span style="color: #ff1f8b;">"\n"</span>
+     (matrix-data-print <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">iterative step</span>
+      (1- number-of-rows)
+      number-of-columns
+      (nthcdr number-of-columns data )))))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-print</span> (matrix)
+  <span style="color: #cc0000;">"Print out the matrix"</span>
+  (concat <span style="color: #ff1f8b;">"\n"</span> (matrix-data-print
+                (matrix-rows matrix)
+                (matrix-columns matrix)
+                (matrix-data matrix))))
+<span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">ex:  (message (matrix-print (matrix-from-values 2 2 '(1 2 3 4))))</span>
+</pre>
+</div>
 <blockquote>
 <p>
 <code>cdr</code> returns the list without the first element
@@ -321,11 +333,11 @@ The simplest operation is addition. We need to check the matrices have the right
   <span style="color: #cc0000;">"Check if 2 matrices are the same size"</span>
   (<span style="color: #00af00;">and</span>
    (equal
-    (nth 0 matrix1)
-    (nth 0 matrix2))
+    (matrix-rows matrix1)
+    (matrix-rows matrix2))
    (equal
-    (nth 1 matrix1)
-    (nth 1 matrix2))))
+    (matrix-columns matrix1)
+    (matrix-columns matrix2))))
 (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">for-each-pair</span> (list1 list2 operator)
   <span style="color: #cc0000;">"Go through 2 lists applying an operator on each pair of elements"</span>
   (<span style="color: #00af00;">if</span> (null list1)
@@ -337,12 +349,12 @@ The simplest operation is addition. We need to check the matrices have the right
 (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-add</span> (matrix1 matrix2)
   <span style="color: #cc0000;">"Add to matrices togethere"</span>
   (<span style="color: #00af00;">if</span> (check-addition matrix1 matrix2)
-      (matrix-from-values
-       (nth 0 matrix1)
-       (nth 1 matrix1)
+      (matrix-from-data-list
+       (matrix-rows matrix1)
+       (matrix-columns matrix1)
        (for-each-pair
-        (nth 2 matrix1)
-        (nth 2 matrix2)
+        (matrix-data matrix1)
+        (matrix-data matrix2)
         '+))))
 </pre>
 </div>
@@ -357,46 +369,73 @@ The simplest operation is addition. We need to check the matrices have the right
 <h3 id="sec-3-2">Submatrices</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
-Next we want to be able to extract submatrices
+The next fundamental step is we want to be able to extract submatrices
 </p>
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-extract-subrow</span> (matrix row start-column end-column)
-  <span style="color: #cc0000;">"Get part of a row of a matrix and generate a row matrix from it"</span>
+  <span style="color: #cc0000;">"Get part of a row of a matrix and generate a row matrix from it. START-COLUMN is inclusive,  END-COLUMN is exclusive"</span>
   (<span style="color: #00af00;">let</span>
-      ((number-of-columns-on-input (nth 1 matrix))
-       (number-of-columns-on-output (- end-column start-column)))
-    (matrix-from-values
+      ((number-of-columns-on-input (matrix-columns matrix))
+       (number-of-columns-on-output (-
+                                     end-column 
+                                     start-column)))
+    (matrix-from-data-list
      1
      number-of-columns-on-output
      (subseq
-      (nth 2 matrix)
+      (matrix-data matrix)
       (+ (* row number-of-columns-on-input) start-column)
       (+ (* row number-of-columns-on-input) end-column)))))
 
 (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-append</span> (matrix1 matrix2)
   <span style="color: #cc0000;">"Append one matrix (set of linear equations) to another"</span>
-  (matrix-from-values
-   (+
-    (nth 0 matrix2)
-    (nth 0 matrix1))
-   (nth 1 matrix1)
-   (append
-    (nth 2 matrix1)
-    (nth 2 matrix2))))
+  (<span style="color: #00af00;">if</span> (null matrix2)
+      matrix1
+    (matrix-from-data-list
+     (+
+      (matrix-rows matrix2)
+      (matrix-rows matrix1))
+     (matrix-columns matrix1)
+     (append
+      (matrix-data matrix1)
+      (matrix-data matrix2)))))
 
 (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-submatrix</span> (matrix start-row start-column end-row end-column)
-  <span style="color: #cc0000;">"Get a submatrix"</span>
+  <span style="color: #cc0000;">"Get a submatrix. start-row/column are inclusive. end-row/column are exclusive"</span>
   (<span style="color: #00af00;">if</span> (equal start-row end-row)
       '()
-    (cons
+    (matrix-append
      (matrix-extract-subrow matrix start-row start-column end-column)
      (matrix-submatrix
       matrix
-      (+ start-row 1)
+      (1+ start-row)
       start-column
       end-row
       end-column))))
+</pre>
+</div>
+<p>
+Which allows us to build these two very familiar function
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-get-row</span> (matrix row)
+  <span style="color: #cc0000;">"Get a row from a matrix. Index starts are ZERO"</span>
+  (matrix-extract-subrow
+   matrix
+   row
+   0
+   (matrix-columns matrix)))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-get-column</span> (matrix column)
+  <span style="color: #cc0000;">"Get a column from a matrix. Index starts are ZERO"</span>
+  (matrix-submatrix
+   matrix
+   0
+   column
+   (nth 0 matrix)
+   (1+ column)))
 </pre>
 </div>
 </div>
@@ -406,17 +445,77 @@ Next we want to be able to extract submatrices
 <h3 id="sec-3-3">Multiplication</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
-To do multiplcation we need to work in small steps
+To do multiplcation we need to work in small steps and first define the inner product
 </p>
-
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-conformable?</span> (matrix1 matrix2)
-   (equal
-    (nth 1 matrix1)
-    (nth 0 matrix2)))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-inner-product</span> (row column)
+  <span style="color: #cc0000;">"Multiply a row times a column and returns a scalar"</span>
+  (reduce
+   '+
+   (for-each-pair
+    (matrix-data row)
+    (matrix-data column)
+    '*)))
 </pre>
 </div>
+<blockquote>
+<p>
+<code>reduce</code> works down the list elements-by-element applying the operator on each cumulative result
+</p>
+</blockquote>
+<p>
+Once we have the inner product we can calculate each value (it's just <code>row * column</code>) and build up to calculating the whole matrix product.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-multiplication-one-value</span> (matrix1 matrix2 row column)
+  <span style="color: #cc0000;">"Calculate one value in the resulting matrix of the product of two matrices"</span>
+  (matrix-inner-product
+   (matrix-get-row matrix1 row )
+   (matrix-get-column matrix2 column)))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-multiplication-rec</span> (matrix1 matrix2 row column)
+  <span style="color: #cc0000;">"A recursive helper function that builds the matrix multiplication's data vector"</span>
+  (<span style="color: #00af00;">if</span> (equal (matrix-rows matrix1) row)
+      '()
+    (<span style="color: #00af00;">if</span> (equal (matrix-columns matrix2) column)
+        (matrix-multiplication-rec
+         matrix1
+         matrix2
+         (1+ row)
+         0)
+      (cons
+       (matrix-multiplication-one-value
+        matrix1
+        matrix2
+        row column)
+       (matrix-multiplication-rec
+        matrix1
+        matrix2
+        row
+        (1+ column))))))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-conformable?</span> (matrix1 matrix2)
+  <span style="color: #cc0000;">"Check that two matrices can be multiplied"</span>
+  (equal
+   (matrix-columns matrix1)
+   (matrix-rows matrix2)))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-multiplication</span> (matrix1 matrix2)
+  <span style="color: #cc0000;">"Multiply two matrices"</span>
+  (matrix-from-data-list
+   (matrix-rows matrix1)
+   (matrix-columns matrix2)
+   (matrix-multiplication-rec
+    matrix1
+    matrix2
+    0
+    0)))
+</pre>
+</div>
+
+
 
 <blockquote>
 <p>
@@ -439,7 +538,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2017-10-23 Mon 10:55</p>
+<p class="date">Created: 2017-10-27 Fri 13:45</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.1.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
