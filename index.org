@@ -18,7 +18,7 @@ Linear system (ie. a system of equations) are for convenience represented using 
     "Recursively builds a list of zeroes of the given size"
     (if (zerop size) 
         '() ;base case
-      (cons 0 (build-list-of-zeroes (- size 1))))) ; "else"/iterative step
+      (cons 0 (build-list-of-zeroes (1- size))))) ; "else"/iterative step
 #+END_SRC
 #+BEGIN_QUOTE
 ~zerop~ tests if the value is zero
@@ -48,7 +48,7 @@ Similarly we would like to be able to build matrices of random integers
     "Recursively builds a list of zeroes of the given size"
     (if (zerop size) 
         '() ;base case
-      (cons (random 10) (build-list-of-random-digits(- size 1))))) ; iterative step
+      (cons (random 10) (build-list-of-random-digits(1- size))))) ; iterative step
 
   (defun matrix-random-digits (number-of-rows number-of-columns)
     "Builds a matrix of zeroes"
@@ -93,7 +93,7 @@ For debugging we need to be able to print out the matrix for inspection
       (concat
        (number-to-string (car data))
        " "
-       (matrix-data-get-first-n-values (cdr data) (- n 1))))) ;iterative step
+       (matrix-data-get-first-n-values (cdr data) (1- n))))) ;iterative step
 
   (defun matrix-data-print (number-of-rows number-of-columns data)
     "Print out the data list gives the dimension of the original matrix"
@@ -103,7 +103,7 @@ For debugging we need to be able to print out the matrix for inspection
        (matrix-data-get-first-n-values data number-of-columns)
        "\n"
        (matrix-data-print ;iterative step
-        (- number-of-rows 1)
+        (1- number-of-rows)
         number-of-columns
         (nthcdr number-of-columns data )))))
 
@@ -193,7 +193,7 @@ The next fundamental step is we want to be able to extract submatrices
        (matrix-extract-subrow matrix start-row start-column end-column)
        (matrix-submatrix
         matrix
-        (+ start-row 1)
+        (1+ start-row)
         start-column
         end-row
         end-column))))
@@ -216,7 +216,7 @@ Which allows us to build these two very familiar function
      0
      column
      (nth 0 matrix)
-     (+ column 1)))
+     (1+ column)))
 #+END_SRC
 
 ** Multiplication
