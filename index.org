@@ -10,9 +10,9 @@
 I'm going through [[matrixanalysis.com][Matrix Analysis & Applied Linear Algebra]] (Carl Meyer)  and implementing the algorithms in ELisp. An excuse to learn ELisp and solidy my linear algebra. There is no emphasis on performance - just on clarity and extensability
 
 * Matices
-Linear system (ie. a system of equations) are for convenience represented using matrices. Once we define a matrix and all operations on it we can begin to use them for manipulating linear systems. The standard way of representing a matrix that you often see in C is using multidimensional arrays. For a 2D matrix this has 3 values: ~number of rows~ ~number of columns~ ~values~
+Linear system (ie. a system of equations) are for convenience represented using matrices. Once we define a matrix and all operations on it we can begin to use them for manipulating linear systems. The standard way of representing a matrix that you often see in C is using multidimensional arrays. For a 2D matrix this has 3 values: ~number of rows~ ~number of columns~ ~data~
 
-The values are a long list of data of size ~num-row * num-col~. When making a new matrix it's useful to be able to make a list of zeroes of the required size
+~data~ is a long list of size ~num-row * num-col~. When making a new matrix it's useful to be able to make a list of zeroes of the required size
 #+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun build-list-of-zeroes (size)
     "Recursively builds a list of zeroes of the given size"
@@ -21,7 +21,7 @@ The values are a long list of data of size ~num-row * num-col~. When making a ne
       (cons 0 (build-list-of-zeroes (- size 1))))) ; "else"/iterative step
 #+END_SRC
 #+BEGIN_QUOTE
-~zerop~ tests if the values is zero
+~zerop~ tests if the value is zero
 #+END_QUOTE
 #+BEGIN_QUOTE
 ~()~ with a quote is the /empty-list/ 
@@ -42,7 +42,7 @@ Now we can build the actual matrix
 #+BEGIN_QUOTE
 ~list~ build a list of values equivalent to ~(cons number-of-rows (cons number-of-columns (cons (build-list-of-zeroes ...) '() )))~ *(note the last /empty-list/ element)*
 #+END_QUOTE
-Similarly we would like to be able to build lists of random integers
+Similarly we would like to be able to build matrices of random integers
 #+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
   (defun build-list-of-random-digits (size)
     "Recursively builds a list of zeroes of the given size"
@@ -59,49 +59,48 @@ Similarly we would like to be able to build lists of random integers
 
   ; ex: (matrix-random-digits 2 3)
 #+END_SRC
-And list from manually entered values
+And matrices from manually entered data values
 #+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
 
-  (defun matrix-from-values (number-of-rows number-of-columns values)
-    "Builds a matrix of zeroes"
+  (defun matrix-from-data-list (number-of-rows number-of-columns data-list)
+    "Builds a matrix from a data list"
     (list 
      number-of-rows 
      number-of-columns 
-     values))
+     data-list))
 #+END_SRC
 For debugging we need to be able to print out the matrix for inspection
 #+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
-  (defun get-first-n-values (values n)
+  (defun matrix-data-get-first-n-values (data n)
       "Given a list of values, get the first n in a string"
       (if (zerop n)
           "" ;base case
         (concat
-         (number-to-string (car values))
+         (number-to-string (car data))
          " "
-         (get-first-n-values (cdr values) (- n 1)))))
+         (matrix-data-get-first-n-values (cdr data) (- n 1)))))
 
-  (defun print-values (number-of-rows number-of-columns values)
-    "Print out values gives the dimension of the original matrix"
+  (defun matrix-data-print (number-of-rows number-of-columns data)
+    "Print out the data list gives the dimension of the original matrix"
     (if (zerop number-of-rows)
         ""
       (concat
-       (get-first-n-values values number-of-columns)
+       (matrix-data-get-first-n-values data number-of-columns)
        "\n"
-       (print-values
+       (matrix-data-print
         (- number-of-rows 1)
         number-of-columns
-        (nthcdr number-of-columns values )))))
+        (nthcdr number-of-columns data )))))
 
   (defun matrix-print (matrix)
     "Print out the matrix"
     (let
         ((number-of-rows (nth 0 matrix))
-         (number-of-columns (nth 1 matrix))
-         (values (nth 2 matrix)))
-      (concat "\n" (print-values
+         (number-of-columns (nth 1 matrix)))
+      (concat "\n" (matrix-data-print
                        number-of-rows
                        number-of-columns
-                       values))))
+                       (matrix-data matrix)))))
 ; ex:  (message (matrix-print (matrix-from-values 2 2 '(1 2 3 4))))
 #+END_SRC
 #+BEGIN_QUOTE
@@ -135,7 +134,7 @@ The simplest operation is addition. We need to check the matrices have the right
   (defun matrix-add (matrix1 matrix2)
     "Add to matrices togethere"
     (if (check-addition matrix1 matrix2)
-        (matrix-from-values
+        (matrix-from-data-list
          (nth 0 matrix1)
          (nth 1 matrix1)
          (for-each-pair
@@ -156,7 +155,7 @@ Next we want to be able to extract submatrices
          (number-of-columns-on-output (-
                                        end-column 
                                        start-column)))
-      (matrix-from-values
+      (matrix-from-data-list
        1
        number-of-columns-on-output
        (subseq
@@ -168,7 +167,7 @@ Next we want to be able to extract submatrices
     "Append one matrix (set of linear equations) to another"
     (if (null matrix2)
         matrix1
-      (matrix-from-values
+      (matrix-from-data-list
        (+
         (nth 0 matrix2)
         (nth 0 matrix1))
@@ -256,7 +255,7 @@ To do multiplcation we need to work in small steps
 
   (defun matrix-multiplication (matrix1 matrix2)
     "Multiply two matrices"
-    (matrix-from-values
+    (matrix-from-data-list
      (nth 0 matrix1)
      (nth 1 matrix2)
      (matrix-multiplication-rec
