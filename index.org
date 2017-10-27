@@ -198,7 +198,7 @@ Next we want to be able to extract submatrices
         end-row
         end-column))))
 
-  (defun matrix-row (matrix row)
+  (defun matrix-get-row (matrix row)
     "Get a row from a matrix. Index starts are ZERO"
     (matrix-extract-subrow
      matrix
@@ -206,7 +206,7 @@ Next we want to be able to extract submatrices
      0
      (matrix-columns matrix)))
 
-  (defun matrix-column (matrix column)
+  (defun matrix-get-column (matrix column)
     "Get a column from a matrix. Index starts are ZERO"
     (matrix-submatrix
      matrix
@@ -238,8 +238,8 @@ To do multiplcation we need to work in small steps
   (defun matrix-multiplication-one-value (matrix1 matrix2 row column)
     "Get a value in the resulting matrix of multiplying two matrices"
     (matrix-inner-product
-     (matrix-row matrix1 row )
-     (matrix-column matrix2 column)))
+     (matrix-get-row matrix1 row )
+     (matrix-get-column matrix2 column)))
 
   (defun matrix-multiplication-rec (matrix1 matrix2 row column)
     "A recursive helper function that builds the matrix multiplication value vector. Always invoke with 0 0 as arguements"
