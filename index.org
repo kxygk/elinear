@@ -164,14 +164,16 @@ Next we want to be able to extract submatrices
 
   (defun matrix-append (matrix1 matrix2)
     "Append one matrix (set of linear equations) to another"
-    (matrix-from-values
-     (+
-      (nth 0 matrix2)
-      (nth 0 matrix1))
-     (nth 1 matrix1)
-     (append
-      (nth 2 matrix1)
-      (nth 2 matrix2))))
+    (if (null matrix2)
+        matrix1
+      (matrix-from-values
+       (+
+        (nth 0 matrix2)
+        (nth 0 matrix1))
+       (nth 1 matrix1)
+       (append
+        (nth 2 matrix1)
+        (nth 2 matrix2)))))
 
   (defun matrix-submatrix (matrix start-row start-column end-row end-column)
     "Get a submatrix"
