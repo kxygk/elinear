@@ -181,7 +181,7 @@ Next we want to be able to extract submatrices
     "Get a submatrix. start-row/column are inclusive. end-row/column are exclusive"
     (if (equal start-row end-row)
         '()
-      (cons
+      (matrix-append
        (matrix-extract-subrow matrix start-row start-column end-column)
        (matrix-submatrix
         matrix
