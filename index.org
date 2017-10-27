@@ -106,14 +106,11 @@ For debugging we need to be able to print out the matrix for inspection
 
   (defun matrix-print (matrix)
     "Print out the matrix"
-    (let
-        ((number-of-rows (nth 0 matrix))
-         (number-of-columns (nth 1 matrix)))
-      (concat "\n" (matrix-data-print
-                       number-of-rows
-                       number-of-columns
-                       (matrix-data matrix)))))
-; ex:  (message (matrix-print (matrix-from-values 2 2 '(1 2 3 4))))
+    (concat "\n" (matrix-data-print
+                  (matrix-rows matrix)
+                  (matrix-columns matrix)
+                  (matrix-data matrix))))
+  ; ex:  (message (matrix-print (matrix-from-values 2 2 '(1 2 3 4))))
 #+END_SRC
 #+BEGIN_QUOTE
 ~nth~ gets the nth element of the list
@@ -130,11 +127,11 @@ The simplest operation is addition. We need to check the matrices have the right
     "Check if 2 matrices are the same size"
     (and
      (equal
-      (nth 0 matrix1)
-      (nth 0 matrix2))
+      (matrix-rows matrix1)
+      (matrix-rows matrix2))
      (equal
-      (nth 1 matrix1)
-      (nth 1 matrix2))))
+      (matrix-columns matrix1)
+      (matrix-columns matrix2))))
   (defun for-each-pair (list1 list2 operator)
     "Go through 2 lists applying an operator on each pair of elements"
     (if (null list1)
@@ -147,11 +144,11 @@ The simplest operation is addition. We need to check the matrices have the right
     "Add to matrices togethere"
     (if (check-addition matrix1 matrix2)
         (matrix-from-data-list
-         (nth 0 matrix1)
-         (nth 1 matrix1)
+         (matrix-rows matrix1)
+         (matrix-columns matrix1)
          (for-each-pair
-          (nth 2 matrix1)
-          (nth 2 matrix2)
+          (matrix-data matrix1)
+          (matrix-data matrix2)
           '+))))
 #+END_SRC
 #+BEGIN_QUOTE
@@ -163,7 +160,7 @@ Next we want to be able to extract submatrices
   (defun matrix-extract-subrow (matrix row start-column end-column)
     "Get part of a row of a matrix and generate a row matrix from it. START-COLUMN is inclusive,  END-COLUMN is exclusive"
     (let
-        ((number-of-columns-on-input (nth 1 matrix))
+        ((number-of-columns-on-input (matrix-columns matrix))
          (number-of-columns-on-output (-
                                        end-column 
                                        start-column)))
@@ -171,7 +168,7 @@ Next we want to be able to extract submatrices
        1
        number-of-columns-on-output
        (subseq
-        (nth 2 matrix)
+        (matrix-data matrix)
         (+ (* row number-of-columns-on-input) start-column)
         (+ (* row number-of-columns-on-input) end-column)))))
 
@@ -181,12 +178,12 @@ Next we want to be able to extract submatrices
         matrix1
       (matrix-from-data-list
        (+
-        (nth 0 matrix2)
-        (nth 0 matrix1))
-       (nth 1 matrix1)
+        (matrix-rows matrix2)
+        (matrix-rows matrix1))
+       (matrix-columns matrix1)
        (append
-        (nth 2 matrix1)
-        (nth 2 matrix2)))))
+        (matrix-data matrix1)
+        (matrix-data matrix2)))))
 
   (defun matrix-submatrix (matrix start-row start-column end-row end-column)
     "Get a submatrix. start-row/column are inclusive. end-row/column are exclusive"
@@ -207,7 +204,7 @@ Next we want to be able to extract submatrices
      matrix
      row
      0
-     (nth 1 matrix)))
+     (matrix-columns matrix)))
 
   (defun matrix-column (matrix column)
     "Get a column from a matrix. Index starts are ZERO"
@@ -226,16 +223,16 @@ To do multiplcation we need to work in small steps
   (defun matrix-conformable? (matrix1 matrix2)
     "Check that two matrices can be multiplied"
     (equal
-     (nth 1 matrix1)
-     (nth 0 matrix2)))
+     (matrix-columns matrix1)
+     (matrix-rows matrix2)))
 
   (defun matrix-inner-product (row column)
     "Multiply a row times a column and returns a scalar"
     (reduce
      '+
      (for-each-pair
-      (nth 2 row)
-      (nth 2 column)
+      (matrix-data row)
+      (matrix-data column)
       '*)))
 
   (defun matrix-multiplication-one-value (matrix1 matrix2 row column)
@@ -246,9 +243,9 @@ To do multiplcation we need to work in small steps
 
   (defun matrix-multiplication-rec (matrix1 matrix2 row column)
     "A recursive helper function that builds the matrix multiplication value vector. Always invoke with 0 0 as arguements"
-    (if (equal (nth 0 matrix1) row)
+    (if (equal (matrix-rows matrix1) row)
         '()
-      (if (equal (nth 1 matrix2) column)
+      (if (equal (matrix-columns matrix2) column)
           (matrix-multiplication-rec
            matrix1
            matrix2
@@ -268,8 +265,8 @@ To do multiplcation we need to work in small steps
   (defun matrix-multiplication (matrix1 matrix2)
     "Multiply two matrices"
     (matrix-from-data-list
-     (nth 0 matrix1)
-     (nth 1 matrix2)
+     (matrix-rows matrix1)
+     (matrix-columns matrix2)
      (matrix-multiplication-rec
       matrix1
       matrix2
