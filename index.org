@@ -208,6 +208,70 @@ Next we want to be able to extract submatrices
      (+ column 1)))
 #+END_SRC
 
+** Multiplication
+To do multiplcation we need to work in small steps
+
+#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+  (defun matrix-conformable? (matrix1 matrix2)
+    "Check that two matrices can be multiplied"
+    (equal
+     (nth 1 matrix1)
+     (nth 0 matrix2)))
+
+  (defun matrix-inner-product (row column)
+    "Multiply a row times a column and returns a scalar"
+    (reduce
+     '+
+     (for-each-pair
+      (nth 2 row)
+      (nth 2 column)
+      '*)))
+
+  (defun matrix-multiplication-one-value (matrix1 matrix2 row column)
+    "Get a value in the resulting matrix of multiplying two matrices"
+    (matrix-inner-product
+     (matrix-row matrix1 row )
+     (matrix-column matrix2 column)))
+
+  (defun matrix-multiplication-rec (matrix1 matrix2 row column)
+    "A recursive helper function that builds the matrix multiplication value vector. Always invoke with 0 0 as arguements"
+    (if (equal (nth 0 matrix1) row)
+        '()
+      (if (equal (nth 1 matrix2) column)
+          (matrix-multiplication-rec
+           matrix1
+           matrix2
+           (1+ row)
+           0)
+        (cons
+         (matrix-multiplication-one-value
+          matrix1
+          matrix2
+          row column)
+         (matrix-multiplication-rec
+          matrix1
+          matrix2
+          row
+          (1+ column))))))
+
+  (defun matrix-multiplication (matrix1 matrix2)
+    "Multiply two matrices"
+    (matrix-from-values
+     (nth 0 matrix1)
+     (nth 1 matrix2)
+     (matrix-multiplication-rec
+      matrix1
+      matrix2
+      0
+      0)))
+#+END_SRC
+#+BEGIN_QUOTE
+~reduce~ works down the list elements-by-element applying the operator on each cumulative result
+#+END_QUOTE
+
+
+
+#+BEGIN_QUOTE
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
 
 Once opened in Emacs:\\
