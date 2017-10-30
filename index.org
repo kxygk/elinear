@@ -2,7 +2,7 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://geokon-gh.github.io/static/worg.css" />
 #+options: num:nil
 # This will export a README.org file for Github, so that people that land in my repo know where to find the relevant webpage
-#+BEGIN_SRC org :tangle README.org :exports none
+#+BEGIN_SRC org :tangle README.org :exports none :eval never
   see description [[http://geokon-gh.github.io/linearsystems/index.html][here]]
 #+END_SRC
 
@@ -13,7 +13,7 @@ I'm going through [[matrixanalysis.com][Matrix Analysis & Applied Linear Algebra
 Linear system (ie. a system of equations) are for convenience represented using matrices. Once we define a matrix and all operations on it we can begin to use them for manipulating linear systems. The standard way of representing a matrix that you often see in C is using multidimensional arrays. For a 2D matrix this has 3 values: ~number of rows~ ~number of columns~ ~data~
 
 ~data~ is a long list of size ~num-row * num-col~. When making a new matrix it's useful to be able to make a list of zeroes of the required size
-#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun build-list-of-zeroes (size)
     "Recursively builds a list of zeroes of the given size"
     (if (zerop size) 
@@ -31,7 +31,7 @@ Linear system (ie. a system of equations) are for convenience represented using 
 #+END_QUOTE
 
 Now we can build the actual matrix
-#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-zeroes (number-of-rows number-of-columns)
     "Builds a matrix of zeroes"
     (list 
@@ -43,7 +43,7 @@ Now we can build the actual matrix
 ~list~ build a list of values equivalent to ~(cons number-of-rows (cons number-of-columns (cons (build-list-of-zeroes ...) '() )))~ *(note the last /empty-list/ element)*
 #+END_QUOTE
 Similarly we would like to be able to build matrices of random integers
-#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun build-list-of-random-digits (size)
     "Recursively builds a list of zeroes of the given size"
     (if (zerop size) 
@@ -60,7 +60,7 @@ Similarly we would like to be able to build matrices of random integers
   ; ex: (matrix-random-digits 2 3)
 #+END_SRC
 And matrices from manually entered data values
-#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
 
   (defun matrix-from-data-list (number-of-rows number-of-columns data-list)
     "Builds a matrix from a data list"
@@ -70,7 +70,7 @@ And matrices from manually entered data values
      data-list))
 #+END_SRC
 A couple of helper function to get the 3 fields will also improve readability
-#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-rows (matrix)
     "Get the number of rows"
     (nth 0 matrix))
@@ -85,7 +85,7 @@ A couple of helper function to get the 3 fields will also improve readability
 ~nth~ gets the nth element of the list
 #+END_QUOTE
 For debugging we need to be able to print out the matrix for inspection
-#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-data-get-first-n-values (data n)
     "Given a list of values, get the first n in a string"
     (if (zerop n)
@@ -122,7 +122,7 @@ For debugging we need to be able to print out the matrix for inspection
 Next we need to define some basics operations on the martices
 ** Addition
 The simplest operation is addition. We need to check the matrices have the right size and then simple add the ~values~ lists
-#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-equal-size? (matrix1 matrix2)
     "Check if 2 matrices are the same size"
     (and
@@ -156,7 +156,7 @@ The simplest operation is addition. We need to check the matrices have the right
 #+END_QUOTE
 ** Submatrices
 The next fundamental step is we want to be able to extract submatrices
-#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-extract-subrow (matrix row start-column end-column)
     "Get part of a row of a matrix and generate a row matrix from it. START-COLUMN is inclusive,  END-COLUMN is exclusive"
     (let
@@ -200,7 +200,7 @@ The next fundamental step is we want to be able to extract submatrices
 
 #+END_SRC
 Which allows us to build these two very familiar function
-#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-get-row (matrix row)
     "Get a row from a matrix. Index starts are ZERO"
     (matrix-extract-subrow
@@ -221,7 +221,7 @@ Which allows us to build these two very familiar function
 
 ** Multiplication
 To do multiplcation we need to work in small steps and first define the inner product
-#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-inner-product (row column)
     "Multiply a row times a column and returns a scalar"
     (reduce
@@ -235,7 +235,7 @@ To do multiplcation we need to work in small steps and first define the inner pr
 ~reduce~ works down the list elements-by-element applying the operator on each cumulative result
 #+END_QUOTE
 Once we have the inner product we can calculate each value (it's just ~row * column~) and build up to calculating the whole matrix product.
-#+BEGIN_SRC emacs-lisp :results output :session :tangle matrix.el
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-multiplication-one-value (matrix1 matrix2 row column)
     "Calculate one value in the resulting matrix of the product of two matrices"
     (matrix-inner-product
