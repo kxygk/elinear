@@ -282,6 +282,37 @@ Once we have the inner product we can calculate each value (it's just ~row * col
 #+END_SRC
 
 
+* Elementary Matrices
+** Identity Matrix
+The simplest matrix is the identity matrix *I*. For any matrix *A* * *I* = *A*. This is the matrix of all *1*'s on the diagonal.
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-build-identity-rec (rank row column)
+  "Helper function that build the data vector of the identity matrix"
+  (if (equal column rank) ; time to build next row
+      (if (equal row rank)
+          '() ; we're done
+        (matrix-build-identity-rec 
+         rank
+         (1+ row)
+         0))
+    (if (equal row column)
+        (cons 
+         1
+         (matrix-build-identity-rec
+          rank 
+          row 
+          (1+ column)))
+      (cons 
+         0
+         (matrix-build-identity-rec
+          rank 
+          row 
+          (1+ column))))))
+
+  (defun matrix-identity (rank)
+  "Build an identity matrix of the given size/rank"
+  (matrix-from-values rank rank (matrix-build-identity-rec rank 0 0 )))
+#+END_SRC
 
 #+BEGIN_QUOTE
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
