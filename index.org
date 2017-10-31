@@ -150,6 +150,17 @@ The simplest operation is addition. We need to check the matrices have the right
           (matrix-data matrix1)
           (matrix-data matrix2)
           '+))))
+
+  (defun matrix-subtract (matrix1 matrix2)
+    "Add to matrices togethere"
+    (if (check-addition matrix1 matrix2)
+        (matrix-from-data-list
+         (matrix-rows matrix1)
+         (matrix-columns matrix1)
+         (for-each-pair
+          (matrix-data matrix1)
+          (matrix-data matrix2)
+          '-))))
 #+END_SRC
 #+BEGIN_QUOTE
 ~funcall~ applied the first arugment (a function) with the remaining items in the list as arguments
