@@ -324,6 +324,37 @@ The simplest matrix is the identity matrix *I*. For any matrix *A* * *I* = *A*. 
   "Build an identity matrix of the given size/rank"
   (matrix-from-values rank rank (matrix-build-identity-rec rank 0 0 )))
 #+END_SRC
+** Unit Column
+The next simplest matrix is the unit column
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-unit-column (row size)
+    "Build a unit column. ROW is where you want the 1 to be placed. SIZE is the overall length"
+    (letrec
+        ((matrix-unit-column-data-rec
+         (lambda (row size)
+           (if (equal size 0)
+               '()
+             (if (equal row 1)
+                 (cons
+                  1
+                  (funcall matrix-unit-column-data-rec
+                   (1- row)
+                   (1- size)))
+               (cons
+                0
+                (funcall matrix-unit-column-data-rec
+                 (1- row)
+                 (1- size))))))))
+    (matrix-from-values
+     size
+     1
+     (funcall matrix-unit-column-data-rec
+              row
+              size))))
+#+END_SRC
+#+BEGIN_QUOTE
+Here I'm just trying out a new notation. With ~letrec~ we can hide the recursive helper function inside the function that uses it.
+#+END_QUOTE
 
 #+BEGIN_QUOTE
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
