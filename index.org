@@ -315,7 +315,8 @@ Transposition is quick and easy using our existing tools
          (matrix-rows matrix)
          (matrix-columns matrix))))))
 #+END_SRC
-#+BEGIN_SRC emacs-lisp :results output silent :session :exports none :tangle matrix.el
+** TESTS :noexport:
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (ert-deftest matrix-test-operations ()
     "Testing - Matrix Operations"
     (let ((matrix1 '(2 2 (1 2 3 4)))
