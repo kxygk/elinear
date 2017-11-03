@@ -247,28 +247,28 @@ To do multiplcation we need to work in small steps and first define the inner pr
 #+END_QUOTE
 Once we have the inner product we can calculate each value (it's just ~row * column~) and build up to calculating the whole matrix product.
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-multiplication-one-value (matrix1 matrix2 row column)
+  (defun matrix-product-one-value (matrix1 matrix2 row column)
     "Calculate one value in the resulting matrix of the product of two matrices"
     (matrix-inner-product
      (matrix-get-row matrix1 row )
      (matrix-get-column matrix2 column)))
 
-  (defun matrix-multiplication-rec (matrix1 matrix2 row column)
+  (defun matrix-product-rec (matrix1 matrix2 row column)
     "A recursive helper function that builds the matrix multiplication's data vector"
     (if (equal (matrix-rows matrix1) row)
         '()
       (if (equal (matrix-columns matrix2) column)
-          (matrix-multiplication-rec
+          (matrix-product-rec
            matrix1
            matrix2
            (1+ row)
            0)
         (cons
-         (matrix-multiplication-one-value
+         (matrix-product-one-value
           matrix1
           matrix2
           row column)
-         (matrix-multiplication-rec
+         (matrix-product-rec
           matrix1
           matrix2
           row
@@ -280,12 +280,12 @@ Once we have the inner product we can calculate each value (it's just ~row * col
      (matrix-columns matrix1)
      (matrix-rows matrix2)))
 
-  (defun matrix-multiplication (matrix1 matrix2)
+  (defun matrix-product (matrix1 matrix2)
     "Multiply two matrices"
     (matrix-from-data-list
      (matrix-rows matrix1)
      (matrix-columns matrix2)
-     (matrix-multiplication-rec
+     (matrix-product-rec
       matrix1
       matrix2
       0
