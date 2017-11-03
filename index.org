@@ -378,6 +378,23 @@ The next simplest matrix is the unit column
 #+BEGIN_QUOTE
 Here I'm just trying out a new notation. With ~letrec~ we can hide the recursive helper function inside the function that uses it.
 #+END_QUOTE
+** Matrix Elementary Transformations
+Taking the identity matrix we can change it into any matrix we want. The manipulation of matrices can be broken down into 3 fundamental elementary operation
+*** Type I - Row/Column Interchange
+    Interchaning rows (or columns) /i/ and /j/
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-elementary-interchange (rowcol1 rowcol2 rank)
+    "Make an elementary row/column interchange matrix for ROWCOL1 and ROWCOL2 (ZERO indexed)"
+    (let ((u
+           (matrix-subtract
+            (matrix-unit-column rowcol1 rank)
+            (matrix-unit-column rowcol2 rank))))
+    (matrix-subtract
+     (matrix-identity rank)
+     (matrix-product
+      u
+      (matrix-transpose u)))))
+#+END_SRC
 
 #+BEGIN_QUOTE
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
