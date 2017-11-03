@@ -374,7 +374,7 @@ The next simplest matrix is the unit column
          (lambda (row size)
            (if (equal size 0)
                '()
-             (if (equal row 1)
+             (if (equal row 0)
                  (cons
                   1
                   (funcall matrix-unit-column-data-rec
