@@ -323,7 +323,7 @@ The simplest matrix is the identity matrix *I*. For any matrix *A* * *I* = *A*. 
   (defun matrix-build-identity-rec (rank row column)
   "Helper function that build the data vector of the identity matrix"
   (if (equal column rank) ; time to build next row
-      (if (equal row rank)
+      (if (equal row (1- rank))
           '() ; we're done
         (matrix-build-identity-rec 
          rank
