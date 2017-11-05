@@ -485,6 +485,10 @@ Adding a multiple of a row (or column) /i/ to row (or column) /j/
                      (matrix-elementary-addition 0 2 7 3)
                      '(3 3 (1 0 0 0 1 0 7 0 1))))))
 #+END_SRC
+
+* TODOs
+Remove zero matrix and random values matrix. Makes things longer and confusing and isn't necessary at all
+
 #+BEGIN_QUOTE
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
 
