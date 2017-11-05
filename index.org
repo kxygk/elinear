@@ -231,7 +231,19 @@ Which allows us to build these two very familiar function
 #+END_SRC
 
 ** Multiplication
-To do multiplcation we need to work in small steps and first define the inner product
+There are fundamentally two different multiplications for matrices. One is multiplying 2 conformable matrices, and the other is multiplying a matrix by a scalar. First I will deal with the latter b/c it's the  simpler case.
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-scalar-product (matrix scalar)
+    "Multiple the matrix by a scalar. ie. multiply each value by the scalar"
+    (matrix-from-values
+     (matrix-rows matrix)
+     (matrix-columns matrix)
+     (mapcar
+     (lambda (x) 
+       (* scalar x))
+     (matrix-data matrix))))
+#+END_SRC
+To do matrix multiplcation we need to work in small steps and first define the inner product
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-inner-product (row column)
     "Multiply a row times a column and returns a scalar"
@@ -317,22 +329,28 @@ Transposition is quick and easy using our existing tools
 #+END_SRC
 ** TESTS :noexport:
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (ert-deftest matrix-test-operations ()
-    "Testing - Matrix Operations"
-    (let ((matrix1 '(2 2 (1 2 3 4)))
-          (matrix2 '(2 2 (5 6 7 8))))
-    (should (equal
-             (matrix-extract-subrow '(2 2 (1 2 3 4)) 1 0 2)
-             '(1 2 (3 4))))
-    (should (equal
-             (matrix-equal-size-p matrix1 matrix2)
-             't))
-    (should (equal
-             (matrix-add matrix1 matrix2)
-             '(2 2 (6 8 10 12))))
-    (should (equal
-             (matrix-subtract matrix1 matrix2)
-             '(2 2 (-4 -4 -4 -4))))))
+    (ert-deftest matrix-test-operations ()
+      "Testing - Matrix Operations"
+      (let ((matrix1 '(2 2 (1 2 3 4)))
+            (matrix2 '(2 2 (5 6 7 8))))
+      (should (equal
+               (matrix-extract-subrow '(2 2 (1 2 3 4)) 1 0 2)
+               '(1 2 (3 4))))
+      (should (equal
+               (matrix-equal-size-p matrix1 matrix2)
+               't))
+      (should (equal
+               (matrix-add matrix1 matrix2)
+               '(2 2 (6 8 10 12))))
+      (should (equal
+               (matrix-subtract matrix1 matrix2)
+               '(2 2 (-4 -4 -4 -4))))
+      (should (equal
+               (matrix-scalar-product
+                (matrix-identity 3)
+                7)
+               '(3 3 (7 0 0 0 7 0 0 0 7))))))
+
 #+END_SRC
 * Elementary Matrices
 ** Identity Matrix
