@@ -141,7 +141,7 @@ The simplest operation is addition. We need to check the matrices have the right
        (for-each-pair (cdr list1) (cdr list2) operator))))
 
   (defun matrix-add (matrix1 matrix2)
-    "Add to matrices togethere"
+    "Add to matrices together"
     (if (check-addition matrix1 matrix2)
         (matrix-from-data-list
          (matrix-rows matrix1)
@@ -152,7 +152,7 @@ The simplest operation is addition. We need to check the matrices have the right
           '+))))
 
   (defun matrix-subtract (matrix1 matrix2)
-    "Add to matrices togethere"
+    "Subtract MATRIX2 from MATRIX1"
     (if (check-addition matrix1 matrix2)
         (matrix-from-data-list
          (matrix-rows matrix1)
@@ -329,27 +329,27 @@ Transposition is quick and easy using our existing tools
 #+END_SRC
 ** TESTS :noexport:
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-    (ert-deftest matrix-test-operations ()
-      "Testing - Matrix Operations"
-      (let ((matrix1 '(2 2 (1 2 3 4)))
-            (matrix2 '(2 2 (5 6 7 8))))
-      (should (equal
-               (matrix-extract-subrow '(2 2 (1 2 3 4)) 1 0 2)
-               '(1 2 (3 4))))
-      (should (equal
-               (matrix-equal-size-p matrix1 matrix2)
-               't))
-      (should (equal
-               (matrix-add matrix1 matrix2)
-               '(2 2 (6 8 10 12))))
-      (should (equal
-               (matrix-subtract matrix1 matrix2)
-               '(2 2 (-4 -4 -4 -4))))
-      (should (equal
-               (matrix-scalar-product
-                (matrix-identity 3)
-                7)
-               '(3 3 (7 0 0 0 7 0 0 0 7))))))
+  (ert-deftest matrix-test-operations ()
+    "Testing - Matrix Operations"
+    (let ((matrix1 '(2 2 (1 2 3 4)))
+          (matrix2 '(2 2 (5 6 7 8))))
+    (should (equal
+             (matrix-extract-subrow '(2 2 (1 2 3 4)) 1 0 2)
+             '(1 2 (3 4))))
+    (should (equal
+             (matrix-equal-size-p matrix1 matrix2)
+             't))
+    (should (equal
+             (matrix-add matrix1 matrix2)
+             '(2 2 (6 8 10 12))))
+    (should (equal
+             (matrix-subtract matrix1 matrix2)
+             '(2 2 (-4 -4 -4 -4))))
+    (should (equal
+             (matrix-scalar-product
+              (matrix-identity 3)
+              7)
+             '(3 3 (7 0 0 0 7 0 0 0 7))))))
 
 #+END_SRC
 * Elementary Matrices
@@ -465,25 +465,25 @@ Adding a multiple of a row (or column) /i/ to row (or column) /j/
 
 ** TESTS :noexport:
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-        (ert-deftest matrix-test-elementary-operation ()
-          "Testing - Elementary Matrix Transformations"
-          (let ((matrix1 '(2 2 (1 2 3 4)))
-                (matrix2 '(2 2 (5 6 7 8))))
-            (should (equal
-                     (matrix-identity 3)
-                     '(3 3 (1 0 0 0 1 0 0 0 1))))
-            (should (equal
-                     (matrix-unit-column 3 5)
-                     '( 5 1 (0 0 0 1 0))))
-            (should (equal
-                     (matrix-elementary-interchange 0 1 3)
-                     '(3 3 (0 1 0 1 0 0 0 0 1))))
-            (should (equal
-                     (matrix-elementary-multiply 1 7 3)
-                     '(3 3 (1 0 0 0 7 0 0 0 1))))
-            (should (equal
-                     (matrix-elementary-addition 0 2 7 3)
-                     '(3 3 (1 0 0 0 1 0 7 0 1))))))
+  (ert-deftest matrix-test-elementary-operation ()
+    "Testing - Elementary Matrix Transformations"
+    (let ((matrix1 '(2 2 (1 2 3 4)))
+          (matrix2 '(2 2 (5 6 7 8))))
+      (should (equal
+               (matrix-identity 3)
+               '(3 3 (1 0 0 0 1 0 0 0 1))))
+      (should (equal
+               (matrix-unit-column 3 5)
+               '( 5 1 (0 0 0 1 0))))
+      (should (equal
+               (matrix-elementary-interchange 0 1 3)
+               '(3 3 (0 1 0 1 0 0 0 0 1))))
+      (should (equal
+               (matrix-elementary-multiply 1 7 3)
+               '(3 3 (1 0 0 0 7 0 0 0 1))))
+      (should (equal
+               (matrix-elementary-addition 0 2 7 3)
+               '(3 3 (1 0 0 0 1 0 7 0 1))))))
 #+END_SRC
 
 * TODOs
