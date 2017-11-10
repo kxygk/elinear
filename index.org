@@ -6,62 +6,71 @@
   see description [[http://geokon-gh.github.io/linearsystems/index.html][here]]
 #+END_SRC
 
-* Intro
-I'm going through [[matrixanalysis.com][Matrix Analysis & Applied Linear Algebra]] (Carl Meyer)  and implementing the algorithms in ELisp. An excuse to learn ELisp and solidy my linear algebra. There is no emphasis on performance - just on clarity and extensability
+* Preface
+This text is primarily my personal notes on linear algebra as I go through [[matrixanalysis.com][Matrix Analysis & Applied Linear Algebra]]. At the same time this document is a literate program that can be executed in Emacs so the text will be slowly building up a linear algebra library of sorts. This will often not match the order things are presented in the book. There is no emphasis on performance - just on clarity, extensability and correctness when possible. This is purely (self)educational with my primary motivation being to help me better understand what I learn (through having to explain it) and to sanity check with actual programs. Things that are adequately explained in the book will not be repeated here.
 
-* Matices
-Linear system (ie. a system of equations) are for convenience represented using matrices. Once we define a matrix and all operations on it we can begin to use them for manipulating linear systems. The standard way of representing a matrix that you often see in C is using multidimensional arrays. For a 2D matrix this has 3 values: ~number of rows~ ~number of columns~ ~data~
+This is my first program in Elisp, so if you see any issues, please leave a note in the [[https://github.com/geokon-gh/linearsystems/issues][issues]] tab of [[https://github.com/geokon-gh/linearsystems/][the repository]]. There you can also find the original org-mode file and the generated elisp files - both of which have additional unit-tests ommited from this webpage.
 
-~data~ is a long list of size ~num-row * num-col~. When making a new matrix it's useful to be able to make a list of zeroes of the required size
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun build-list-of-zeroes (size)
-    "Recursively builds a list of zeroes of the given size"
-    (if (zerop size) 
-        '() ;base case
-      (cons 0 (build-list-of-zeroes (1- size))))) ; "else"/iterative step
-#+END_SRC
+This is very much a work in progress and will change often...
+
+* Systems of linear equations
+The book's opening problem from ancient China of calculating the price of bushels of crop serves as a good example of a linear problem. I've simplified the problem a bit for clarity - but I will expand on it and refer back to it extensively:
+** A farming problem
 #+BEGIN_QUOTE
-~zerop~ tests if the value is zero
-#+END_QUOTE
-#+BEGIN_QUOTE
-~()~ with a quote is the /empty-list/ 
-#+END_QUOTE
-#+BEGIN_QUOTE
-~cons~ attaches the first argument to the second argument (which is normally a list)
-#+END_QUOTE
+You have a 3 fruit farms in a region of ancient China. In a given year:
 
-Now we can build the actual matrix
+*Given 1:*\\
+Farm 1 produces 3 tons of apples 2 ton of  oranges and 1 ton  of lemons\\
+Farm 2 produces 2 tons of apples 3 tons of oranges and 1 ton  of lemons\\
+Farm 3 produces 1 ton  of apples 2 tons of oranges and 3 tons of lemons\\
+
+*Given 2:*\\
+Farm 1 sold its fruit for 39 yuan\\
+Farm 2 sold its fruit for 34 yuan\\
+Farm 3 sold its fruit for 26 yuan\\
+
+What is the price of the a ton of apples/oranges/lemons?
+#+END_QUOTE 
+This is a familiar problem that can be restated as a system of linear equations
+\begin{equation}
+\begin{split}
+3x+2y+z = 39\\
+2x+3y+z = 34\\
+x+ 2y + 3z = 26
+\end{split}
+\end{equation}
+Where ~x~, ~y~ and ~z~ represent ~apples~ ~oranges~ and ~lemons~ respectively
+
+We know how to solve this system by manipulating the equations, solving for a variable and then back-substituting the results.
+
+It's not accident I split up the problem into two sets of *Givens*. It's important to note that the problem actually has two distinct and independent parts. There is the farm/crop *linear system* (~Given 1~), and then there is the *constraint* of the profits of each farm (~Given 2~)
+
+We are looking for the input fruit-prices that will yield the given profits for each farm
+
+* Matices as representations of linear systems
+The *linear system* can be represented with a matrix
+
+\begin{pmatrix}
+3 & 2 & 1\\
+2 & 3 & 1\\
+1 & 2 & 3\\
+\end{pmatrix}
+
+or flipped::
+
+\begin{pmatrix}
+3 & 2 & 1\\
+2 & 3 & 2\\
+1 & 1 & 3\\
+\end{pmatrix}
+
+We prefer the first representation, but both ways work as long as you remember what each row and column represents
+
+** The Matrix in the computer
+Once we've chosen a layout the easiest way to store the matrix in the computer is to remember 3 values: ~number-of-rows~ ~number-of-columns~ ~data~
+
+The ~data~ value will be a long list of size ~num-row * num-col~ that contains all the values of the matrix; row after row. So given a list ~data~ and a pair of sizes we simply build the matrix into a list of these three values: 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-zeroes (number-of-rows number-of-columns)
-    "Builds a matrix of zeroes"
-    (list 
-     number-of-rows 
-     number-of-columns 
-     (build-list-of-zeroes (* number-of-rows number-of-columns))))
-#+END_SRC
-#+BEGIN_QUOTE
-~list~ build a list of values equivalent to ~(cons number-of-rows (cons number-of-columns (cons (build-list-of-zeroes ...) '() )))~ *(note the last /empty-list/ element)*
-#+END_QUOTE
-Similarly we would like to be able to build matrices of random integers
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun build-list-of-random-digits (size)
-    "Recursively builds a list of zeroes of the given size"
-    (if (zerop size) 
-        '() ;base case
-      (cons (random 10) (build-list-of-random-digits(1- size))))) ; iterative step
-
-  (defun matrix-random-digits (number-of-rows number-of-columns)
-    "Builds a matrix of zeroes"
-    (list 
-     number-of-rows 
-     number-of-columns 
-     (build-list-of-random-digits (* number-of-rows number-of-columns))))
-
-  ; ex: (matrix-random-digits 2 3)
-#+END_SRC
-And matrices from manually entered data values
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-
   (defun matrix-from-data-list (number-of-rows number-of-columns data-list)
     "Builds a matrix from a data list"
     (list 
@@ -69,7 +78,8 @@ And matrices from manually entered data values
      number-of-columns 
      data-list))
 #+END_SRC
-A couple of helper function to get the 3 fields will also improve readability
+*** Some helpers
+With a couple of helper function we can get back these 3 fields. This will improve the readability of the code as we go along
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-rows (matrix)
     "Get the number of rows"
@@ -84,7 +94,7 @@ A couple of helper function to get the 3 fields will also improve readability
 #+BEGIN_QUOTE
 ~nth~ gets the nth element of the list
 #+END_QUOTE
-For debugging we need to be able to print out the matrix for inspection
+For debugging and looking at results we also need to be able to print out the matrix for inspection
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-data-get-first-n-values (data n)
     "Given a list of values, get the first n in a string"
@@ -116,12 +126,350 @@ For debugging we need to be able to print out the matrix for inspection
   ; ex:  (message (matrix-print (matrix-from-values 2 2 '(1 2 3 4))))
 #+END_SRC
 #+BEGIN_QUOTE
+~zerop~ tests if the value is zero
+#+END_QUOTE
+#+BEGIN_QUOTE
+~()~ with a quote is the /empty-list/ 
+#+END_QUOTE
+#+BEGIN_QUOTE
+~cons~ attaches the first argument to the second argument (which is normally a list)
+#+END_QUOTE
+#+BEGIN_QUOTE
 ~cdr~ returns the list without the first element
 #+END_QUOTE
-* Matrix Operations
-Next we need to define some basics operations on the martices
+** Transposition: Getting the other equivalent matrix
+Since we have two equivalent matrices that represent our linear system we need a mechanism to go from one to the other. This method is the matrix transpose which flips the matrix along the diagonal. The text goes into depth on the properties of the matrix transpose, but in short, as long as you take the transpose of both sides of your equations equivalances will be preserved.
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-transpose (matrix)
+    "Get the transpose of a matrix"
+    (if (equal (matrix-columns matrix) 1)
+      (matrix-from-values
+       1
+       (matrix-rows matrix)
+       (matrix-data matrix))
+      (matrix-append
+       (matrix-from-values
+        1
+        (matrix-rows matrix)
+        (matrix-data (matrix-get-column matrix 0)))
+       (matrix-transpose
+        (matrix-submatrix
+         matrix
+         0
+         1
+         (matrix-rows matrix)
+         (matrix-columns matrix))))))
+#+END_SRC
+* Representing the whole system of equations
+Now that we can represent the fruit/profits system we want a mechanism to represent the whole system of equations so that given a contraint, we can solve for a solution.
+** Matrix Multiplication
+This is done notationally with matrix multiplication. The notation allows us to keep the two *Givens* separated and allows us to visually chain linear systems together. As a shorthand, we write the product of two matrices ~A~ and ~B~ as ~AB = C~, with the order of ~A~ and ~B~ being important. For every value (at a given row and column position) in the resulting matrix ~C~ we take the equivalent row in ~A~ and multiply it by its equivalent column in ~B~. From this we can conclude that ~C~ will have as many rows as ~A~ and as many column as ~B~
+
+Multiplying a row times a column is called an ~inner product~
+
+*** Inner Product
+The ~inner-product~ is defined as the sum of the product of every pair of equivalent elements in the two vectors. The sum will naturally return one scalar value. This operation only makes sense if both the row and column have the same number of values.
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-inner-product (row column)
+    "Multiply a row times a column and returns a scalar"
+    (reduce
+     '+
+     (for-each-pair
+      (matrix-data row)
+      (matrix-data column)
+      '*)))
+#+END_SRC
+#+BEGIN_QUOTE
+~reduce~ works down the list elements-by-element applying the operator on each cumulative result
+#+END_QUOTE
+
+*** Submatrices
+To get rows and columns (and other submatrices) we need a few more helper functions
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-extract-subrow (matrix row start-column end-column)
+    "Get part of a row of a matrix and generate a row matrix from it. START-COLUMN is inclusive,  END-COLUMN is exclusive"
+    (let
+        ((number-of-columns-on-input (matrix-columns matrix))
+         (number-of-columns-on-output (-
+                                       end-column 
+                                       start-column)))
+      (matrix-from-data-list
+       1
+       number-of-columns-on-output
+       (subseq
+        (matrix-data matrix)
+        (+ (* row number-of-columns-on-input) start-column)
+        (+ (* row number-of-columns-on-input) end-column)))))
+
+  (defun matrix-append (matrix1 matrix2)
+    "Append one matrix (set of linear equations) to another"
+    (if (null matrix2)
+        matrix1
+      (matrix-from-data-list
+       (+
+        (matrix-rows matrix2)
+        (matrix-rows matrix1))
+       (matrix-columns matrix1)
+       (append
+        (matrix-data matrix1)
+        (matrix-data matrix2)))))
+
+  (defun matrix-submatrix (matrix start-row start-column end-row end-column)
+    "Get a submatrix. start-row/column are inclusive. end-row/column are exclusive"
+    (if (equal start-row end-row)
+        '()
+      (matrix-append
+       (matrix-extract-subrow matrix start-row start-column end-column)
+       (matrix-submatrix
+        matrix
+        (1+ start-row)
+        start-column
+        end-row
+        end-column))))
+
+  (defun matrix-get-row (matrix row)
+    "Get a row from a matrix. Index starts are ZERO"
+    (matrix-extract-subrow
+     matrix
+     row
+     0
+     (matrix-columns matrix)))
+
+  (defun matrix-get-column (matrix column)
+    "Get a column from a matrix. Index starts are ZERO"
+    (matrix-submatrix
+     matrix
+     0
+     column
+     (nth 0 matrix)
+     (1+ column)))
+#+END_SRC
+
+*** Matrix Product
+Now we have all the tools we need to write down the algorithm for calculating the matrix product. First we write a function to calculate the product for one value at a given position
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-product-one-value (matrix1 matrix2 row column)
+    "Calculate one value in the resulting matrix of the product of two matrices"
+    (matrix-inner-product
+     (matrix-get-row matrix1 row )
+     (matrix-get-column matrix2 column)))
+#+END_SRC
+And then we recursively apply it to construct the resulting matrix
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-product-rec (matrix1 matrix2 row column)
+    "A recursive helper function that builds the matrix multiplication's data vector"
+    (if (equal (matrix-rows matrix1) row)
+        '()
+      (if (equal (matrix-columns matrix2) column)
+          (matrix-product-rec
+           matrix1
+           matrix2
+           (1+ row)
+           0)
+        (cons
+         (matrix-product-one-value
+          matrix1
+          matrix2
+          row column)
+         (matrix-product-rec
+          matrix1
+          matrix2
+          row
+          (1+ column))))))
+
+
+  (defun matrix-product (matrix1 matrix2)
+    "Multiply two matrices"
+    (matrix-from-data-list
+     (matrix-rows matrix1)
+     (matrix-columns matrix2)
+     (matrix-product-rec
+      matrix1
+      matrix2
+      0
+      0)))
+#+END_SRC
+
+*** Matrix Conformability
+You will notice that the algorithm won't make sense if the number of columns of ~A~ doesn't match the number of rows of ~B~. When the values match the matrices are called *conformable*. When they /don't/ match you will see that inner product isn't defined and therefore neither is the product.
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-conformable? (matrix1 matrix2)
+    "Check that two matrices can be multiplied"
+    (equal
+     (matrix-columns matrix1)
+     (matrix-rows matrix2)))
+#+END_SRC
+*** Addendum: Scalar Product
+An additional form of matrix multiplication is between a matrix and a scalar. Here we simply multiply each element of the matrix times the scalar to construct the resulting matrix. The order of multiplication is not important -> *\alpha{}A=A\alpha{}*
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-scalar-product (matrix scalar)
+    "Multiple the matrix by a scalar. ie. multiply each value by the scalar"
+    (matrix-from-values
+     (matrix-rows matrix)
+     (matrix-columns matrix)
+     (mapcar
+     (lambda (x) 
+       (* scalar x))
+     (matrix-data matrix))))
+#+END_SRC
+
+** TESTS :noexport:
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (ert-deftest matrix-test-multiplication-and-submatrices ()
+    "Testing - Matrix Operations"
+    (let ((matrix1 '(2 2 (1 2 3 4)))
+          (matrix2 '(2 2 (5 6 7 8))))
+    (should (equal
+             (matrix-extract-subrow '(2 2 (1 2 3 4)) 1 0 2)
+             '(1 2 (3 4))))
+    (should (equal
+             (matrix-scalar-product
+              (matrix-identity 3)
+              7)
+             '(3 3 (7 0 0 0 7 0 0 0 7))))))
+
+#+END_SRC
+** A system of equations as matrix product
+Now that we have all our tools we can write down a matrix product that will mimic our system of equation.
+
+\begin{equation}
+\begin{pmatrix}
+3 & 2 & 1\\
+2 & 3 & 1\\
+1 & 2 & 3\\
+\end{pmatrix}
+\begin{pmatrix}
+x\\
+y\\
+z\\
+\end{pmatrix}
+=
+\begin{pmatrix}
+39\\
+34\\
+26\\
+\end{pmatrix}
+\end{equation}
+
+Going through our algorithm manually we see that the resulting matrix is:
+
+\begin{equation}
+\begin{pmatrix}
+3x + 2y + z\\
+2x + 3y + z\\
+x + 2y + 3z\\
+\end{pmatrix}
+=
+\begin{pmatrix}
+39\\
+34\\
+26\\
+\end{pmatrix}
+\end{equation}
+
+
+and it's equivalent to our original system! Each value in the column on the left matches its equivalent on the right
+
+*** The mirror universe
+
+Now I said that flipped matrix was also a valid representation. We can confirm this by taking the transpose of both sides 
+
+
+\begin{equation}
+\begin{pmatrix}
+x & y & z\\
+\end{pmatrix}
+\begin{pmatrix}
+3 & 2 & 1\\
+2 & 3 & 2\\
+1 & 1 & 3\\
+\end{pmatrix}
+=
+\begin{pmatrix}
+39 & 34 & 26\\
+\end{pmatrix}
+\end{equation}
+
+
+It yields another matrix product that mimics the equations, however you'll see in the textbook that we always prefer the first notation.
+
+* Equivalent matrices
+Looking again at the equations we started with - how do we normally solve such a problem? We take different combinations and multiples of the equations to eliminate values till we solve for some value. Then through substituting it back into our remaining equations we solve for the remaining values. Every time we combine equations (ie. rows in our matrix product) the solution is sure to remain the same but at each step we will get new intermediate equations. They in turn will have matrices that represent them. These are called *equivalent* matrices.
+
+However it's important to note in what way they are not the same as our original matrix. Once you combine row 1 with row 2, information about the rows is lost. So in our example you would no longer know anything about any individual farm. This represents an interesting interdependence between the rows and columns of each matrix. Both in a sense encode some information.
+
+To generate *equivalent* matrices we need to generate special *elementary matrices* that can manipulate the rows of our matrix - and for that we need a couple more tools.
+
+Once we have *elementary matrice* we can start to formulate a general algorithm for finding solutions to our equations.
+
+** Identity Matrix
+The simplest matrix we will build is the identity matrix *I*. For any matrix *A*,  *A*I* = *A*. Given the dimensions, *I* has to be a square matrix. It will have *1*'s on the diagonal (where ~row=column~) and zeroes everywhere else. We build it recursively:
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-build-identity-rec (rank row column)
+  "Helper function that build the data vector of the identity matrix"
+  (if (equal column rank) ; time to build next row
+      (if (equal row (1- rank))
+          '() ; we're done
+        (matrix-build-identity-rec 
+         rank
+         (1+ row)
+         0))
+    (if (equal row column)
+        (cons 
+         1
+         (matrix-build-identity-rec
+          rank 
+          row 
+          (1+ column)))
+      (cons 
+         0
+         (matrix-build-identity-rec
+          rank 
+          row 
+          (1+ column))))))
+
+  (defun matrix-identity (rank)
+  "Build an identity matrix of the given size/rank"
+  (matrix-from-values rank rank (matrix-build-identity-rec rank 0 0 )))
+#+END_SRC
+
+** Unit Column
+The next step is building the *unit column* : a matrix that when put into our system returns a particular column. If you take it's transpose it will extract a particular row.
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-unit-column (row size)
+    "Build a unit column. ROW is where you want the 1 to be placed. SIZE is the overall length"
+    (letrec
+        ((matrix-unit-column-data-rec
+          (lambda (row size)
+            (if (equal size 0)
+                '()
+              (if (equal row 0)
+                  (cons
+                   1
+                   (funcall matrix-unit-column-data-rec
+                            (1- row)
+                            (1- size)))
+                (cons
+                 0
+                 (funcall matrix-unit-column-data-rec
+                          (1- row)
+                          (1- size))))))))
+      (matrix-from-values
+       size
+       1
+       (funcall matrix-unit-column-data-rec
+                row
+                size))))
+#+END_SRC
+#+BEGIN_QUOTE
+Here I'm just trying out a new notation. With ~letrec~ we can hide the recursive helper function inside the function that uses it.
+#+END_QUOTE
+
 ** Addition
-The simplest operation is addition. We need to check the matrices have the right size and then simple add the ~values~ lists
+To be able to easily build new matrices, we also need a way to easily add two matrices, ie. add their values one to one. Matrices that are added need to have the same size.
+
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-equal-size-p (matrix1 matrix2)
     "Check if 2 matrices are the same size"
@@ -165,257 +513,31 @@ The simplest operation is addition. We need to check the matrices have the right
 #+BEGIN_QUOTE
 ~funcall~ applied the first arugment (a function) with the remaining items in the list as arguments
 #+END_QUOTE
-** Submatrices
-The next fundamental step is we want to be able to extract submatrices
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-extract-subrow (matrix row start-column end-column)
-    "Get part of a row of a matrix and generate a row matrix from it. START-COLUMN is inclusive,  END-COLUMN is exclusive"
-    (let
-        ((number-of-columns-on-input (matrix-columns matrix))
-         (number-of-columns-on-output (-
-                                       end-column 
-                                       start-column)))
-      (matrix-from-data-list
-       1
-       number-of-columns-on-output
-       (subseq
-        (matrix-data matrix)
-        (+ (* row number-of-columns-on-input) start-column)
-        (+ (* row number-of-columns-on-input) end-column)))))
-
-  (defun matrix-append (matrix1 matrix2)
-    "Append one matrix (set of linear equations) to another"
-    (if (null matrix2)
-        matrix1
-      (matrix-from-data-list
-       (+
-        (matrix-rows matrix2)
-        (matrix-rows matrix1))
-       (matrix-columns matrix1)
-       (append
-        (matrix-data matrix1)
-        (matrix-data matrix2)))))
-
-  (defun matrix-submatrix (matrix start-row start-column end-row end-column)
-    "Get a submatrix. start-row/column are inclusive. end-row/column are exclusive"
-    (if (equal start-row end-row)
-        '()
-      (matrix-append
-       (matrix-extract-subrow matrix start-row start-column end-column)
-       (matrix-submatrix
-        matrix
-        (1+ start-row)
-        start-column
-        end-row
-        end-column))))
-
-#+END_SRC
-Which allows us to build these two very familiar function
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-get-row (matrix row)
-    "Get a row from a matrix. Index starts are ZERO"
-    (matrix-extract-subrow
-     matrix
-     row
-     0
-     (matrix-columns matrix)))
-
-  (defun matrix-get-column (matrix column)
-    "Get a column from a matrix. Index starts are ZERO"
-    (matrix-submatrix
-     matrix
-     0
-     column
-     (nth 0 matrix)
-     (1+ column)))
-#+END_SRC
-
-** Multiplication
-There are fundamentally two different multiplications for matrices. One is multiplying 2 conformable matrices, and the other is multiplying a matrix by a scalar. First I will deal with the latter b/c it's the  simpler case.
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-scalar-product (matrix scalar)
-    "Multiple the matrix by a scalar. ie. multiply each value by the scalar"
-    (matrix-from-values
-     (matrix-rows matrix)
-     (matrix-columns matrix)
-     (mapcar
-     (lambda (x) 
-       (* scalar x))
-     (matrix-data matrix))))
-#+END_SRC
-To do matrix multiplcation we need to work in small steps and first define the inner product
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-inner-product (row column)
-    "Multiply a row times a column and returns a scalar"
-    (reduce
-     '+
-     (for-each-pair
-      (matrix-data row)
-      (matrix-data column)
-      '*)))
-#+END_SRC
-#+BEGIN_QUOTE
-~reduce~ works down the list elements-by-element applying the operator on each cumulative result
-#+END_QUOTE
-Once we have the inner product we can calculate each value (it's just ~row * column~) and build up to calculating the whole matrix product.
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-product-one-value (matrix1 matrix2 row column)
-    "Calculate one value in the resulting matrix of the product of two matrices"
-    (matrix-inner-product
-     (matrix-get-row matrix1 row )
-     (matrix-get-column matrix2 column)))
-
-  (defun matrix-product-rec (matrix1 matrix2 row column)
-    "A recursive helper function that builds the matrix multiplication's data vector"
-    (if (equal (matrix-rows matrix1) row)
-        '()
-      (if (equal (matrix-columns matrix2) column)
-          (matrix-product-rec
-           matrix1
-           matrix2
-           (1+ row)
-           0)
-        (cons
-         (matrix-product-one-value
-          matrix1
-          matrix2
-          row column)
-         (matrix-product-rec
-          matrix1
-          matrix2
-          row
-          (1+ column))))))
-
-  (defun matrix-conformable? (matrix1 matrix2)
-    "Check that two matrices can be multiplied"
-    (equal
-     (matrix-columns matrix1)
-     (matrix-rows matrix2)))
-
-  (defun matrix-product (matrix1 matrix2)
-    "Multiply two matrices"
-    (matrix-from-data-list
-     (matrix-rows matrix1)
-     (matrix-columns matrix2)
-     (matrix-product-rec
-      matrix1
-      matrix2
-      0
-      0)))
-#+END_SRC
-
-** Transposition
-Transposition is quick and easy using our existing tools
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-transpose (matrix)
-    "Get the transpose of a matrix"
-    (if (equal (matrix-columns matrix) 1)
-      (matrix-from-values
-       1
-       (matrix-rows matrix)
-       (matrix-data matrix))
-      (matrix-append
-       (matrix-from-values
-        1
-        (matrix-rows matrix)
-        (matrix-data (matrix-get-column matrix 0)))
-       (matrix-transpose
-        (matrix-submatrix
-         matrix
-         0
-         1
-         (matrix-rows matrix)
-         (matrix-columns matrix))))))
-#+END_SRC
 ** TESTS :noexport:
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (ert-deftest matrix-test-operations ()
     "Testing - Matrix Operations"
     (let ((matrix1 '(2 2 (1 2 3 4)))
           (matrix2 '(2 2 (5 6 7 8))))
-    (should (equal
-             (matrix-extract-subrow '(2 2 (1 2 3 4)) 1 0 2)
-             '(1 2 (3 4))))
-    (should (equal
-             (matrix-equal-size-p matrix1 matrix2)
-             't))
-    (should (equal
-             (matrix-add matrix1 matrix2)
-             '(2 2 (6 8 10 12))))
-    (should (equal
-             (matrix-subtract matrix1 matrix2)
-             '(2 2 (-4 -4 -4 -4))))
-    (should (equal
-             (matrix-scalar-product
-              (matrix-identity 3)
-              7)
-             '(3 3 (7 0 0 0 7 0 0 0 7))))))
+      (should (equal
+               (matrix-identity 3)
+               '(3 3 (1 0 0 0 1 0 0 0 1))))
+      (should (equal
+               (matrix-unit-column 3 5)
+               '( 5 1 (0 0 0 1 0))))
+      (should (equal
+               (matrix-equal-size-p matrix1 matrix2)
+               't))
+      (should (equal
+               (matrix-add matrix1 matrix2)
+               '(2 2 (6 8 10 12))))
+      (should (equal
+               (matrix-subtract matrix1 matrix2)
+               '(2 2 (-4 -4 -4 -4))))))
+#+END_SRC
 
-#+END_SRC
-* Elementary Matrices
-** Identity Matrix
-The simplest matrix is the identity matrix *I*. For any matrix *A* * *I* = *A*. This is the matrix of all *1*'s on the diagonal.
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-build-identity-rec (rank row column)
-  "Helper function that build the data vector of the identity matrix"
-  (if (equal column rank) ; time to build next row
-      (if (equal row (1- rank))
-          '() ; we're done
-        (matrix-build-identity-rec 
-         rank
-         (1+ row)
-         0))
-    (if (equal row column)
-        (cons 
-         1
-         (matrix-build-identity-rec
-          rank 
-          row 
-          (1+ column)))
-      (cons 
-         0
-         (matrix-build-identity-rec
-          rank 
-          row 
-          (1+ column))))))
-
-  (defun matrix-identity (rank)
-  "Build an identity matrix of the given size/rank"
-  (matrix-from-values rank rank (matrix-build-identity-rec rank 0 0 )))
-#+END_SRC
-** Unit Column
-The next simplest matrix is the unit column
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-unit-column (row size)
-    "Build a unit column. ROW is where you want the 1 to be placed. SIZE is the overall length"
-    (letrec
-        ((matrix-unit-column-data-rec
-         (lambda (row size)
-           (if (equal size 0)
-               '()
-             (if (equal row 0)
-                 (cons
-                  1
-                  (funcall matrix-unit-column-data-rec
-                   (1- row)
-                   (1- size)))
-               (cons
-                0
-                (funcall matrix-unit-column-data-rec
-                 (1- row)
-                 (1- size))))))))
-    (matrix-from-values
-     size
-     1
-     (funcall matrix-unit-column-data-rec
-              row
-              size))))
-#+END_SRC
-#+BEGIN_QUOTE
-Here I'm just trying out a new notation. With ~letrec~ we can hide the recursive helper function inside the function that uses it.
-#+END_QUOTE
-** Matrix Elementary Transformations
-Taking the identity matrix we can change it into any matrix we want. The manipulation of matrices can be broken down into 3 fundamental elementary operation
+** Elementary Matrices
+Using the 3 tools above we can build 3 fundamental types of *elementary matrices* that when multiplied with our *linear systems* will generate *equivalent* matrices, preserve the solution and allow us to manipulate the rows of matrix (ie. make combinations of the linear equations)
 *** Type I - Row/Column Interchange
     Interchaning rows (or columns) /i/ and /j/
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
@@ -470,12 +592,6 @@ Adding a multiple of a row (or column) /i/ to row (or column) /j/
     (let ((matrix1 '(2 2 (1 2 3 4)))
           (matrix2 '(2 2 (5 6 7 8))))
       (should (equal
-               (matrix-identity 3)
-               '(3 3 (1 0 0 0 1 0 0 0 1))))
-      (should (equal
-               (matrix-unit-column 3 5)
-               '( 5 1 (0 0 0 1 0))))
-      (should (equal
                (matrix-elementary-interchange 0 1 3)
                '(3 3 (0 1 0 1 0 0 0 0 1))))
       (should (equal
@@ -487,7 +603,8 @@ Adding a multiple of a row (or column) /i/ to row (or column) /j/
 #+END_SRC
 
 * TODOs
-Remove zero matrix and random values matrix. Makes things longer and confusing and isn't necessary at all
+Write a better example that I can expand on easily later
+Update and move tests around
 
 #+BEGIN_QUOTE
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
