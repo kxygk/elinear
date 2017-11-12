@@ -2,6 +2,7 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://geokon-gh.github.io/static/worg.css" />
 #+options: num:nil
 # This will export a README.org file for Github, so that people that land in my repo know where to find the relevant webpage
+#+HTML_MATHJAX: path: "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"
 #+BEGIN_SRC org :tangle README.org :exports none :eval never
   see description [[http://geokon-gh.github.io/linearsystems/index.html][here]]
 #+END_SRC
@@ -32,6 +33,7 @@ Farm 3 sold its fruit for 26 yuan\\
 What is the price of the a ton of apples/oranges/lemons?
 #+END_QUOTE 
 This is a familiar problem that can be restated as a system of linear equations
+
 \begin{equation}
 \begin{split}
 3x+2y+z = 39\\
@@ -39,6 +41,7 @@ This is a familiar problem that can be restated as a system of linear equations
 x+ 2y + 3z = 26
 \end{split}
 \end{equation}
+
 Where ~x~, ~y~ and ~z~ represent ~apples~ ~oranges~ and ~lemons~ respectively
 
 We know how to solve this system by manipulating the equations, solving for a variable and then back-substituting the results.
