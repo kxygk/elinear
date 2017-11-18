@@ -372,9 +372,6 @@ x + 2y + 3z\\
 \end{pmatrix}
 \end{equation}
 
-
-and it's equivalent to our original system! Each value in the column on the left matches its equivalent on the right
-
 *** The mirror universe
 
 Now I said that flipped matrix was also a valid representation. We can confirm this by taking the transpose of both sides 
@@ -397,6 +394,48 @@ x & y & z\\
 
 
 It yields another matrix product that mimics the equations, however you'll see in the textbook that we always prefer the first notation.
+
+** Chaining problems through matrix composition and taxing the farmer
+The real power of matrix multiplication is in its ability to chain systems together through *linear composition*
+
+If we are given a new problem that take the output of our first system and produces a new output - composition gives us a mechanism to combine the systems into one.
+
+*** Taxing our farmers
+Say the imperial palace has a system for collecting taxes
+#+BEGIN_QUOTE
+*Given*:\\
+The farms have to pay a percentage of their income to different regional governements. The breakdown is as follows:\\
+The town taxes Farm 1 at 5%, Farm 2 at 3%, Farm 3 at 7%\\
+The province taxes all Farm 1 at 2% Farm 2 at 4%, Farm 3 at 2%\\
+The palace taxes all farms at 7%
+#+END_QUOTE
+Now, given the income of each farm *i* we can build a new matrix *B* and calculate the tax revenue of each government - *t*.\\
+
+\begin{equation}
+Bi=t
+\end{equation}
+
+From the previous problem we know that the income of each farm was already a system of equation with the price of fruit as input *f*\\
+
+\begin{equation}
+Af=i
+\end{equation}
+
+So we just plug one into the other and get\\
+\begin{equation}
+B(Af)=t
+\end{equation}
+
+and compose a new equation that given the price of fruit gives us the regional tax revenue. By carrying out the product we can generate one linear system\\
+
+\begin{equation}
+(BA)f=t\\
+\end{equation} 
+Where if *BA=C* the final composed system is:
+\begin{equation}
+Cf=t
+\end{equation} 
+
 
 * Equivalent matrices
 Looking again at the equations we started with - how do we normally solve such a problem? We take different combinations and multiples of the equations to eliminate values till we solve for some value. Then through substituting it back into our remaining equations we solve for the remaining values. Every time we combine equations (ie. rows in our matrix product) the solution is sure to remain the same but at each step we will get new intermediate equations. They in turn will have matrices that represent them. These are called *equivalent* matrices.
@@ -439,7 +478,11 @@ The simplest matrix we will build is the identity matrix *I*. For any matrix *A*
 #+END_SRC
 
 ** Unit Column
-The next step is building the *unit column* : a matrix that when put into our system returns a particular column. If you take it's transpose it will extract a particular row.
+The next step is building the *unit column* (denoted *e_{/j/}*) - which contains a *1* in the given postion (here: /j/) and *0s* everwhere else. Its transpose is naturally the *unit row*\\
+*Ae_{/j/}* = the /j/ column of A\\
+*e_{/i/}^{T}A* = the /i/ row of A\\
+*e_{/i/}^{T}Ae_{/j/}* = gets the [ /i/, /j/ ] element in A
+
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-unit-column (row size)
     "Build a unit column. ROW is where you want the 1 to be placed. SIZE is the overall length"
