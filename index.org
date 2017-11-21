@@ -53,19 +53,19 @@ We are looking for the input fruit-prices that will yield the given profits for 
 * Matices as representations of linear systems
 The *linear system* can be represented with a matrix
 
-\begin{pmatrix}
+\begin{bmatrix}
 3 & 2 & 1\\
 2 & 3 & 1\\
 1 & 2 & 3\\
-\end{pmatrix}
+\end{bmatrix}
 
 or flipped::
 
-\begin{pmatrix}
+\begin{bmatrix}
 3 & 2 & 1\\
 2 & 3 & 2\\
 1 & 1 & 3\\
-\end{pmatrix}
+\end{bmatrix}
 
 We prefer the first representation, but both ways work as long as you remember what each row and column represents
 
@@ -338,38 +338,38 @@ An additional form of matrix multiplication is between a matrix and a scalar. He
 Now that we have all our tools we can write down a matrix product that will mimic our system of equation.
 
 \begin{equation}
-\begin{pmatrix}
+\begin{bmatrix}
 3 & 2 & 1\\
 2 & 3 & 1\\
 1 & 2 & 3\\
-\end{pmatrix}
-\begin{pmatrix}
+\end{bmatrix}
+\begin{bmatrix}
 x\\
 y\\
 z\\
-\end{pmatrix}
+\end{bmatrix}
 =
-\begin{pmatrix}
+\begin{bmatrix}
 39\\
 34\\
 26\\
-\end{pmatrix}
+\end{bmatrix}
 \end{equation}
 
 Going through our algorithm manually we see that the resulting matrix is:
 
 \begin{equation}
-\begin{pmatrix}
+\begin{bmatrix}
 3x + 2y + z\\
 2x + 3y + z\\
 x + 2y + 3z\\
-\end{pmatrix}
+\end{bmatrix}
 =
-\begin{pmatrix}
+\begin{bmatrix}
 39\\
 34\\
 26\\
-\end{pmatrix}
+\end{bmatrix}
 \end{equation}
 
 *** The mirror universe
@@ -378,24 +378,24 @@ Now I said that flipped matrix was also a valid representation. We can confirm t
 
 
 \begin{equation}
-\begin{pmatrix}
+\begin{bmatrix}
 x & y & z\\
-\end{pmatrix}
-\begin{pmatrix}
+\end{bmatrix}
+\begin{bmatrix}
 3 & 2 & 1\\
 2 & 3 & 2\\
 1 & 1 & 3\\
-\end{pmatrix}
+\end{bmatrix}
 =
-\begin{pmatrix}
+\begin{bmatrix}
 39 & 34 & 26\\
-\end{pmatrix}
+\end{bmatrix}
 \end{equation}
 
 
 It yields another matrix product that mimics the equations, however you'll see in the textbook that we always prefer the first notation.
 
-** Chaining problems through matrix composition and taxing the farmer
+** Chaining problems through matrix composition
 The real power of matrix multiplication is in its ability to chain systems together through *linear composition*
 
 If we are given a new problem that take the output of our first system and produces a new output - composition gives us a mechanism to combine the systems into one.
@@ -435,6 +435,7 @@ Where if *BA=C* the final composed system is:
 \begin{equation}
 Cf=t
 \end{equation} 
+Note that the rows of *BA* are the combination of the rows of *A* and the columns of *BA* are the combination of the columns of *B* - at the same time! (see page 98)
 
 
 * Equivalent matrices
