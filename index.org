@@ -436,8 +436,89 @@ Where if *BA=C* the final composed system is:
 Cf=t
 \end{equation} 
 Note that the rows of *BA* are the combination of the rows of *A* and the columns of *BA* are the combination of the columns of *B* - at the same time! (see page 98)
+*** EXAMPLE: Geometrical transformations
+A very simple example are the linear systems that takes coordinates /x y/ and do transformations on them
 
+*Rotation*
+\begin{equation}
+\begin{bmatrix}
+\cos \theta & -\sin \theta \\
+\sin \theta & \cos \theta \\
+\end{bmatrix}
+\begin{bmatrix}
+x \\
+y \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+x_{rotated}\\
+y_{rotated}\\
+\end{bmatrix}
+\end{equation}
 
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-rotate-2D (radians)
+    "Generate a matrix that will rotates a [x y] column vector by RADIANS"
+    (matrix-from-data-list
+     2
+     2
+     (list
+       (cos radians)
+       (- (sin radians))
+       (sin radians)
+       (cos radians))))
+#+END_SRC
+*Reflection about X-Axis*
+\begin{equation}
+\begin{bmatrix}
+1 & 0 \\
+0 & -1\\
+\end{bmatrix}
+\begin{bmatrix}
+x \\
+y \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+x_{rotated}\\
+y_{rotated}\\
+\end{bmatrix}
+\end{equation}
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-reflect-around-x-2D ()
+    "Generate a matrix that will reflect a [x y] column vector around the x axis"
+    (matrix-from-data-list
+     2
+     2
+     '(1 0 0 -1)))
+#+END_SRC
+*Projection on line*
+\begin{equation}
+\begin{bmatrix}
+1 & 0 \\
+0 & -1\\
+\end{bmatrix}
+\begin{bmatrix}
+x \\
+y \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+x_{rotated}\\
+y_{rotated}\\
+\end{bmatrix}
+\end{equation}
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-project-on-x=y-diagonal-2D ()
+    "Generate a matrix that projects a point ([x y] column vector) onto a line (defined w/ a unit-vector)"
+    (matrix-from-data-list
+     2
+     2
+     '(0.5 0.5 0.5 0.5)))
+#+END_SRC
+So given a point /[x y]/ (represented by the column vector *v*) we can use these 3 transformation matrices to move it around our 2D space. We simple write a chain of transformations *T* and multiply them times the given vector *T_{1}T_{2}T_{3}v=v_new*. These transformation matrices can then be multiplied together into one that will carry out the transformation in one matrix product. *T_{1}T_{2}T_{3}=T_{total}* => *T_{total}v=v_new* 
 * Equivalent matrices
 Looking again at the equations we started with - how do we normally solve such a problem? We take different combinations and multiples of the equations to eliminate values till we solve for some value. Then through substituting it back into our remaining equations we solve for the remaining values. Every time we combine equations (ie. rows in our matrix product) the solution is sure to remain the same but at each step we will get new intermediate equations. They in turn will have matrices that represent them. These are called *equivalent* matrices.
 
