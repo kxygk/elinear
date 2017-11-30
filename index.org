@@ -164,7 +164,7 @@ Since we have two equivalent matrices that represent our linear system we need a
          (matrix-columns matrix))))))
 #+END_SRC
 * Representing the whole system of equations
-Now that we can represent the fruit/profits system we want a mechanism to represent the whole system of equations so that given a contraint, we can solve for a solution.
+Now that we can represent the fruit/profits system we want a mechanism to represent the whole system of equations so that given a constraint, we can solve for a solution.
 ** Matrix Multiplication
 This is done notationally with matrix multiplication. The notation allows us to keep the two *Givens* separated and allows us to visually chain linear systems together. As a shorthand, we write the product of two matrices ~A~ and ~B~ as ~AB = C~, with the order of ~A~ and ~B~ being important. For every value (at a given row and column position) in the resulting matrix ~C~ we take the equivalent row in ~A~ and multiply it by its equivalent column in ~B~. From this we can conclude that ~C~ will have as many rows as ~A~ and as many column as ~B~
 
@@ -520,16 +520,10 @@ y_{projected}\\
 #+END_SRC
 So given a point /[x y]/ (represented by the column vector *v*) we can use these 3 transformation matrices to move it around our 2D space. We simple write a chain of transformations *T* and multiply them times the given vector *T_{1}T_{2}T_{3}v=v_new*. These transformation matrices can then be multiplied together into one that will carry out the transformation in one matrix product. *T_{1}T_{2}T_{3}=T_{total}* => *T_{total}v=v_new* 
 * Equivalent matrices
-Looking again at the equations we started with - how do we normally solve such a problem? We take different combinations and multiples of the equations to eliminate values till we solve for some value. Then through substituting it back into our remaining equations we solve for the remaining values. Every time we combine equations (ie. rows in our matrix product) the solution is sure to remain the same but at each step we will get new intermediate equations. They in turn will have matrices that represent them. These are called *equivalent* matrices.
-
-However it's important to note in what way they are not the same as our original matrix. Once you combine row 1 with row 2, information about the rows is lost. So in our example you would no longer know anything about any individual farm. This represents an interesting interdependence between the rows and columns of each matrix. Both in a sense encode some information.
-
-To generate *equivalent* matrices we need to generate special *elementary matrices* that can manipulate the rows of our matrix - and for that we need a couple more tools.
-
-Once we have *elementary matrice* we can start to formulate a general algorithm for finding solutions to our equations.
+Now thanks to matrix multiplication we can represent linear systems and we can chain them together. The next step is extending multiplication to represent general manipulations of matrices.
 
 ** Identity Matrix
-The simplest matrix we will build is the identity matrix *I*. For any matrix *A*,  *A*I* = *A*. Given the dimensions, *I* has to be a square matrix. It will have *1*'s on the diagonal (where ~row=column~) and zeroes everywhere else. We build it recursively:
+For any matrix *A*, the identity matrix *I* is such that *A*I* = *A* = *I*A*. Given the dimensions, *I* has to be a square matrix. It will have *1*'s on the diagonal (ie. where ~row==column~) and zeroes everywhere else. We build it recursively:
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-build-identity-rec (rank row column)
   "Helper function that build the data vector of the identity matrix"
@@ -560,7 +554,7 @@ The simplest matrix we will build is the identity matrix *I*. For any matrix *A*
 #+END_SRC
 
 ** Unit Column
-The next step is building the *unit column* (denoted *e_{/j/}*) - which contains a *1* in the given postion (here: /j/) and *0s* everwhere else. Its transpose is naturally the *unit row*\\
+Each column of the *identity matrix* is a unit column (denoted as *e_{/j/}*). It contains a *1* in a given postion (here: /j/) and *0s* everwhere else. Its transpose is naturally called the *unit row*\\
 *Ae_{/j/}* = the /j/ column of A\\
 *e_{/i/}^{T}A* = the /i/ row of A\\
 *e_{/i/}^{T}Ae_{/j/}* = gets the [ /i/, /j/ ] element in A
@@ -596,7 +590,7 @@ Here I'm just trying out a new notation. With ~letrec~ we can hide the recursive
 #+END_QUOTE
 
 ** Addition
-To be able to easily build new matrices, we also need a way to easily add two matrices, ie. add their values one to one. Matrices that are added need to have the same size.
+As a tool in building new matrices, we need a way to easily add two matrices, ie. add their values one to one. Matrices that are added need to have the same size.
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-equal-size-p (matrix1 matrix2)
@@ -665,7 +659,19 @@ To be able to easily build new matrices, we also need a way to easily add two ma
 #+END_SRC
 
 ** Elementary Matrices
-Using the 3 tools above we can build 3 fundamental types of *elementary matrices* that when multiplied with our *linear systems* will generate *equivalent* matrices, preserve the solution and allow us to manipulate the rows of matrix (ie. make combinations of the linear equations)
+The manipulation of the rows and columns can be broken down into 3 types of *elementary matrices* that when multiplied with our *linear systems* will generate *equivalent* matrices (*E*). 
+
+/(from page 134)/
+When applied from the /left/ *EA=B* it performs a row operation and makes a *row equivalent* matrix.\\
+When applied from the /right/ *AE=B* it performs a column operation and makes a *column equivalent* matrix.\\
+
+Row/column operations are ofcourse reversible and therefore *E* is invertible and a *E^{-1}* always exists.
+
+So now, waving our hands a little, given a non-singular matrix we can restate /Gauss-Jordan elimination/ as "a bunch of row operations that turn our matrix into the identity matrix". Ie: *E_{k}..E_{2}E_{1}A=I*\\
+And thanks to each operations' invertibility we can flip it to be *A=E_{1}^{-1}E_{2}^{-1}..E_{k}^{-1}*\\
+So Gauss-Jordan elimination for non-singular matrices has given us our first decomposition of sorts! We now know that every non-singular matrix can be written as a chain of row (or column) operations.
+
+Row/Column operations come in 3 flavors
 *** Type I - Row/Column Interchange
     Interchaning rows (or columns) /i/ and /j/
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
@@ -732,8 +738,9 @@ Adding a multiple of a row (or column) /i/ to row (or column) /j/
 
 * TODOs
 Write a better example that I can expand on easily later
-Update and move tests around
+Write an algo for /Gauss-Jordan elimination/
 
+* End
 #+BEGIN_QUOTE
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
 
