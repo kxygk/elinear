@@ -686,6 +686,13 @@ Row/Column operations come in 3 flavors
      (matrix-product
       u
       (matrix-transpose u)))))
+
+  (defun matrix-elementary-interchange-inverse (rowcol1 rowcol2 rank)
+    "Make the inverse of the elementary row/column interchange matrix for ROWCOL1 and ROWCOL2 (ZERO indexed). This is identical to (matrix-elementary-interchange)"
+    (matrix-elementary-interchange
+     rowcol1
+     rowcol2
+     rank))
 #+END_SRC
 
 *** Type II - Row/Column Multiple
@@ -702,6 +709,13 @@ Multiplying row (or column) /i/ by /\alpha/
       (matrix-scalar-product
        (matrix-transpose elementary-column)
        (- 1 scalar))))))
+
+  (defun matrix-elementary-multiply-inverse (rowcol scalar rank)
+    "Make the inverseof the elementary row/column multiple matrix for a given ROWCOL (ZERO indexed)"
+    (matrix-elementary-multiply
+     rowcol
+     (/ 1 scalar)
+     rank))
 #+END_SRC
 
 *** Type III - Row/Column Addition
@@ -717,6 +731,14 @@ Adding a multiple of a row (or column) /i/ to row (or column) /j/
        (matrix-transpose
         (matrix-unit-column rowcol1 rank)))
       scalar)))
+
+  (defun matrix-elementary-addition-inverse (rowcol1 rowcol2 scalar rank)
+    "Make the inverse of the elementary row/column product addition matrix. Multiply ROWCOL1 (ZERO indexed) by SCALAR and add it to ROWCOL2 (ZERO indexed)"
+    (matrix-elementary-addition
+     rowcol1
+     rowcol2
+     (- scalar)
+     rank))
 #+END_SRC
 
 ** TESTS :noexport:
