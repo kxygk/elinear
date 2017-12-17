@@ -135,7 +135,7 @@ For debugging and looking at results we also need to be able to print out the ma
                   (matrix-rows matrix)
                   (matrix-columns matrix)
                   (matrix-data matrix))))
-  ; ex:  (message (matrix-print (matrix-from-values 2 2 '(1 2 3 4))))
+  ; ex:  (message (matrix-print (matrix-from-data-list 2 2 '(1 2 3 4))))
 #+END_SRC
 #+BEGIN_QUOTE
 ~zerop~ tests if the value is zero
@@ -155,12 +155,12 @@ Since we have two equivalent matrices that represent our linear system we need a
   (defun matrix-transpose (matrix)
     "Get the transpose of a matrix"
     (if (equal (matrix-columns matrix) 1)
-      (matrix-from-values
+      (matrix-from-data-list
        1
        (matrix-rows matrix)
        (matrix-data matrix))
       (matrix-append
-       (matrix-from-values
+       (matrix-from-data-list
         1
         (matrix-rows matrix)
         (matrix-data (matrix-get-column matrix 0)))
@@ -318,7 +318,7 @@ An additional form of matrix multiplication is between a matrix and a scalar. He
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-scalar-product (matrix scalar)
     "Multiple the matrix by a scalar. ie. multiply each value by the scalar"
-    (matrix-from-values
+    (matrix-from-data-list
      (matrix-rows matrix)
      (matrix-columns matrix)
      (mapcar
@@ -559,7 +559,7 @@ For any matrix *A*, the identity matrix *I* is such that *A*I* = *A* = *I*A*. Gi
 
   (defun matrix-identity (rank)
   "Build an identity matrix of the given size/rank"
-  (matrix-from-values rank rank (matrix-build-identity-rec rank 0 0 )))
+  (matrix-from-data-list rank rank (matrix-build-identity-rec rank 0 0 )))
 #+END_SRC
 
 ** Unit Column
@@ -587,7 +587,7 @@ Each column of the *identity matrix* is a unit column (denoted as *e_{/j/}*). It
                  (funcall matrix-unit-column-data-rec
                           (1- row)
                           (1- size))))))))
-      (matrix-from-values
+      (matrix-from-data-list
        size
        1
        (funcall matrix-unit-column-data-rec
