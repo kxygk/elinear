@@ -621,7 +621,7 @@ As a tool in building new matrices, we need a way to easily add two matrices, ie
 
   (defun matrix-add (matrix1 matrix2)
     "Add to matrices together"
-    (if (check-addition matrix1 matrix2)
+    (if (matrix-equal-size-p matrix1 matrix2)
         (matrix-from-data-list
          (matrix-rows matrix1)
          (matrix-columns matrix1)
