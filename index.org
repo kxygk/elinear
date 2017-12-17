@@ -93,6 +93,15 @@ With a couple of helper function we can get back these 3 fields. This will impro
   (defun matrix-data (matrix)
     "Get the data list from the matrix"
     (nth 2 matrix))
+  (defun matrix-get-value (matrix row column)
+    "Get the scalar value at position ROW COLUMN (ZERO indexed) from MATRIX"
+    (nth
+     (+
+      column
+      (*
+       row
+       (matrix-columns matrix)))
+      (matrix-data matrix)))
 #+END_SRC
 #+BEGIN_QUOTE
 ~nth~ gets the nth element of the list
