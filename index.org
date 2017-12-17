@@ -562,37 +562,45 @@ For any matrix *A*, the identity matrix *I* is such that *A*I* = *A* = *I*A*. Gi
   (matrix-from-data-list rank rank (matrix-build-identity-rec rank 0 0 )))
 #+END_SRC
 
-** Unit Column
+** Unit Column/Rows
 Each column of the *identity matrix* is a unit column (denoted as *e_{/j/}*). It contains a *1* in a given postion (here: /j/) and *0s* everwhere else. Its transpose is naturally called the *unit row*\\
 *Ae_{/j/}* = the /j/ column of A\\
 *e_{/i/}^{T}A* = the /i/ row of A\\
 *e_{/i/}^{T}Ae_{/j/}* = gets the [ /i/, /j/ ] element in A
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-unit-rowcol-data (index size)
+  "Create a data-list for a matrix row/column. INDEX (starts at ZERO) matches the row or column where you want a 1. SIZE is the overall size of the vector"
+  (if (zerop size)
+      '()
+    (if (zerop index)
+        (cons
+         1
+         (matrix-unit-rowcol-data
+          (1- index)
+          (1- size)))
+      (cons
+       0
+       (matrix-unit-rowcol-data
+        (1- index)
+        (1- size))))))
   (defun matrix-unit-column (row size)
-    "Build a unit column. ROW is where you want the 1 to be placed. SIZE is the overall length"
-    (letrec
-        ((matrix-unit-column-data-rec
-          (lambda (row size)
-            (if (equal size 0)
-                '()
-              (if (equal row 0)
-                  (cons
-                   1
-                   (funcall matrix-unit-column-data-rec
-                            (1- row)
-                            (1- size)))
-                (cons
-                 0
-                 (funcall matrix-unit-column-data-rec
-                          (1- row)
-                          (1- size))))))))
-      (matrix-from-data-list
-       size
-       1
-       (funcall matrix-unit-column-data-rec
-                row
-                size))))
+    "Build a unit column. ROW is where you want the 1 to be placed (ZERO indexed). SIZE is the overall length"
+        (matrix-from-data-list
+         size
+         1
+         (matrix-unit-rowcol-data
+          row
+          size)))
+  (defun matrix-unit-row (column size)
+    "Build a unit column. COLUMN is where you want the 1 to be placed (ZERO indexed). SIZE is the overall length"
+        (matrix-from-data-list
+         1
+         size
+         (matrix-unit-rowcol-data
+          column
+          size)))
+
 #+END_SRC
 #+BEGIN_QUOTE
 Here I'm just trying out a new notation. With ~letrec~ we can hide the recursive helper function inside the function that uses it.
