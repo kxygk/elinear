@@ -775,6 +775,123 @@ Adding a multiple of a row (or column) /i/ to row (or column) /j/
                '(3 3 (1 0 0 0 1 0 7 0 1))))))
 #+END_SRC
 
+* The LU Decomposition - Gaussian elimination in matrix form
+Gaussian elimination is a systematic way for taking a known linear system with a given output and solving for it's input. The method reduces our linear equations (through combining and swapping equations) such that last equation ends reading something of the form *\alpha{}z=b*. This simple equation we can easily solve for our last unknown input (*z=b/\alpha{}*) and back substitute it in to solve for the remaining input values. When we manipulate our equations to eliminate values we are combining and interchanging rows and this applies equally to the linear system, the unknown inputs, and the known outputs - however the factors we are trying to eliminate are in the linear system only
+
+So instead of dealing with the whole set of equation we can just concentrate on the linear sytem - in matrix form. Reducing the the matrix happens in exactly the same way and the resulting matrix will have in its last row all zeroes except for one value on the far right (which is equivalent to the above-mentioned *\alpha{}*). We can save all the steps and apply them to any input and outputs later so that they are mixed properly as well. The real value is that we can now represent each step with our new /elementary matrices/ 
+
+Just like in Gaussian elimination and our linear equation, on a high level the reduction of the matrix happens in two repeated steps for each column. We adjust the pivot and then reduce all the values below it to zero.
+
+/From the Example on page 141/ \\
+The process will take us from a matrix like:
+\begin{bmatrix}
+2 & 2 & 2\\
+4 & 7 & 7\\
+6 & 18 & 22\\
+\end{bmatrix}
+To an *upper triangular* matrix *U*:
+\begin{bmatrix}
+2 & 2 & 1\\
+0 & 3 & 3\\
+0 & 0 & 4\\
+\end{bmatrix}
+As you can see the last row in the final matrix represents the previously mentioned trivial equation *\alpha{}z=b* which we can use for backsubstitution. If each step of the reduction is *G_{x}* we can write the process as *G_{1}G_{2}G_{...}G_{n}A=U*. Or for the full set of equations it will go from *Ax=b* to *G_{1}G_{2}G_{...}G_{n}(Ax)=G_{1}G_{2}G_{...}G_{n}b* which we can reduce to *Ux=G_{1}G_{2}G_{...}G_{n}b*.
+
+#+BEGIN_QUOTE
+*Note:* Gaussian elimination will only produce a solution for nonsingular square matrices, so the process described only holds for this case
+#+END_QUOTE
+** Elementary Lower Triangular
+In the above example the first step was zeroing out the value below the ~2~ in the first column. We can accomplish that transformation by multiply the matrix by two ~Type III~ *elementary matrices*
+\begin{bmatrix}
+1 & 0 & 0\\
+-2 & 1 & 0\\
+0 & 0 & 1\\
+\end{bmatrix}
+and
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+-3 & 0 & 1\\
+\end{bmatrix}
+These are the /identity/ matrix with some extra values. You can visually see what the ~-2~ and ~-3~ represent - They match to a corresponding entry in the orginal matrix divided by the value of the pivot (ie: the factor that will eliminate the value) After applying these matrixes on our starting matrix from the left (*G_{1}G_{2}A*) we end up with our desired result
+\begin{bmatrix}
+2 & 2 & 1\\
+0 & 3 & 3\\
+0 & 12 & 16\\
+\end{bmatrix}
+Constructing these simple ~Type III~ is quick
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-elementary-row-elimination (matrix row column)
+    "Make a matrix that will eliminate an element at the specified ROW/COLUMN (ZERO indexed) using the diagonal element in the same column (typically the pivot)"
+    (let
+        ((pivot (matrix-get-value matrix column column))
+         (element-to-eliminate (matrix-get-value matrix row column)))
+      (matrix-elementary-addition
+       column
+       row
+       (-
+        (/
+         element-to-eliminate
+         pivot))
+       (matrix-rows matrix))))
+
+#+END_SRC
+
+Looking at the product of these 3 matrices - *G_{1}G_{2}A* - and based on what we know about composing linear systems we know that the elementary matrices can be combined into one *(G_{1}G_{2})A=G_{all}A* (where *G_{all}=G_{1}G_{2}*). If we try that here *G_{1}G_{2}* gives us:
+\begin{bmatrix}
+1 & 0 & 0\\
+-2 & 1 & 0\\
+-3 & 0 & 1\\
+\end{bmatrix}
+You can see that we didn't really need to carry out the matrix product b/c we've simply merged the factors into one matrix. Combining these row reduction ~Type III~ matrices is mechanical and gives us the *Elementary Lower-Triangular Matrix* mentioned on page 142. Each column reduction to zeroes has an equivalent elementary lower-triangular matrix (so for a rank *r* matrix we will have to have /r/ elementary low-triangular matrices)
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-elementary-lower-triangular (matrix column-to-clear)
+    "Make a matrix that will eliminate all rows in a column below the diagonal (pivot position)"
+    (matrix-elementary-lower-triangular-rec
+     matrix
+     column-to-clear
+     0
+     (matrix-rows matrix)))
+
+  (defun matrix-elementary-lower-triangular-rec (matrix column-to-clear row-to-build rank)
+    "Recursive function to build the elementary lower triangular matrix"
+      (cond
+       ((equal
+         rank
+         row-to-build) ; Done building the matrix
+        '())
+       ((<=
+        row-to-build
+        column-to-clear) ; Building the simply "identity" portion above the pivot
+        (matrix-append
+         (matrix-unit-row row-to-build rank)
+         (matrix-elementary-lower-triangular-rec
+          matrix
+          column-to-clear
+          (1+ row-to-build)
+          rank)))
+       (t ; Build the elimination portion below the pivot
+        (let
+            ((pivot (matrix-get-value matrix column-to-clear column-to-clear))
+             (element-to-eliminate (matrix-get-value matrix row-to-build column-to-clear)))
+          (let
+              ((cancellation-factor (-
+                                     (/
+                                      element-to-eliminate
+                                      pivot))))
+            (matrix-append
+             (matrix-add
+              (matrix-unit-row row-to-build rank)
+              (matrix-scalar-product
+               (matrix-unit-row column-to-clear rank)
+               cancellation-factor))
+             (matrix-elementary-lower-triangular-rec
+              matrix
+              column-to-clear
+              (1+ row-to-build)
+              rank)))))))
+
+#+END_SRC
 * TODOs
 Write a better example that I can expand on easily later
 Write an algo for /Gauss-Jordan elimination/
