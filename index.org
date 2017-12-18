@@ -270,30 +270,30 @@ Now we have all the tools we need to write down the algorithm for calculating th
 #+END_SRC
 And then we recursively apply it to construct the resulting matrix
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-product-rec (matrix1 matrix2 row column)
-    "A recursive helper function that builds the matrix multiplication's data vector"
-    (if (equal (matrix-rows matrix1) row)
-        '()
-      (if (equal (matrix-columns matrix2) column)
-          (matrix-product-rec
-           matrix1
-           matrix2
-           (1+ row)
-           0)
-        (cons
-         (matrix-product-one-value
-          matrix1
-          matrix2
-          row column)
-         (matrix-product-rec
-          matrix1
-          matrix2
-          row
-          (1+ column))))))
-
-
   (defun matrix-product (matrix1 matrix2)
     "Multiply two matrices"
+
+    (defun matrix-product-rec (matrix1 matrix2 row column)
+      "A recursive helper function that builds the matrix multiplication's data vector"
+      (if (equal (matrix-rows matrix1) row)
+          '()
+        (if (equal (matrix-columns matrix2) column)
+            (matrix-product-rec
+             matrix1
+             matrix2
+             (1+ row)
+             0)
+          (cons
+           (matrix-product-one-value
+            matrix1
+            matrix2
+            row column)
+           (matrix-product-rec
+            matrix1
+            matrix2
+            row
+            (1+ column))))))
+
     (matrix-from-data-list
      (matrix-rows matrix1)
      (matrix-columns matrix2)
@@ -534,32 +534,33 @@ Now thanks to matrix multiplication we can represent linear systems and we can c
 ** Identity Matrix
 For any matrix *A*, the identity matrix *I* is such that *A*I* = *A* = *I*A*. Given the dimensions, *I* has to be a square matrix. It will have *1*'s on the diagonal (ie. where ~row==column~) and zeroes everywhere else. We build it recursively:
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-build-identity-rec (rank row column)
-  "Helper function that build the data vector of the identity matrix"
-  (if (equal column rank) ; time to build next row
-      (if (equal row (1- rank))
-          '() ; we're done
-        (matrix-build-identity-rec 
-         rank
-         (1+ row)
-         0))
-    (if (equal row column)
-        (cons 
-         1
-         (matrix-build-identity-rec
-          rank 
-          row 
-          (1+ column)))
-      (cons 
-         0
-         (matrix-build-identity-rec
-          rank 
-          row 
-          (1+ column))))))
-
   (defun matrix-identity (rank)
-  "Build an identity matrix of the given size/rank"
-  (matrix-from-data-list rank rank (matrix-build-identity-rec rank 0 0 )))
+    "Build an identity matrix of the given size/rank"
+
+    (defun matrix-build-identity-rec (rank row column)
+      "Helper function that build the data vector of the identity matrix"
+      (if (equal column rank) ; time to build next row
+          (if (equal row (1- rank))
+              '() ; we're done
+            (matrix-build-identity-rec
+             rank
+             (1+ row)
+             0))
+        (if (equal row column)
+            (cons
+             1
+             (matrix-build-identity-rec
+              rank
+              row
+              (1+ column)))
+          (cons
+           0
+           (matrix-build-identity-rec
+            rank
+            row
+            (1+ column))))))
+    
+    (matrix-from-data-list rank rank (matrix-build-identity-rec rank 0 0 )))
 #+END_SRC
 
 ** Unit Column/Rows
@@ -847,22 +848,17 @@ You can see that we didn't really need to carry out the matrix product b/c we've
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-elementary-lower-triangular (matrix column-to-clear)
     "Make a matrix that will eliminate all rows in a column below the diagonal (pivot position)"
-    (matrix-elementary-lower-triangular-rec
-     matrix
-     column-to-clear
-     0
-     (matrix-rows matrix)))
 
-  (defun matrix-elementary-lower-triangular-rec (matrix column-to-clear row-to-build rank)
-    "Recursive function to build the elementary lower triangular matrix"
+    (defun matrix-elementary-lower-triangular-rec (matrix column-to-clear row-to-build rank)
+      "Recursive function to build the elementary lower triangular matrix"
       (cond
        ((equal
          rank
          row-to-build) ; Done building the matrix
         '())
        ((<=
-        row-to-build
-        column-to-clear) ; Building the simply "identity" portion above the pivot
+         row-to-build
+         column-to-clear) ; Building the simply "identity" portion above the pivot
         (matrix-append
          (matrix-unit-row row-to-build rank)
          (matrix-elementary-lower-triangular-rec
@@ -890,6 +886,12 @@ You can see that we didn't really need to carry out the matrix product b/c we've
               column-to-clear
               (1+ row-to-build)
               rank)))))))
+
+    (matrix-elementary-lower-triangular-rec
+     matrix
+     column-to-clear
+     0
+     (matrix-rows matrix)))
 
 #+END_SRC
 * TODOs
