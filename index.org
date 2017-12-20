@@ -894,6 +894,57 @@ You can see that we didn't really need to carry out the matrix product b/c we've
      (matrix-rows matrix)))
 
 #+END_SRC
+** Partial Pivoting
+
+The next step in Gaussian elimination is adjusting pivots. After we eliminate the values in column /n/ we may end up with a zero on the diagonal pivot position in column /n+1/. We can do a simple swap with any row below when we see a zero (page 6) but we know that if each time we swap with the maximal value in the column through *partial pivoting* we will get a better numerical solution. This is a direct application of a *Type I* elementary matrix. 
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-partial-pivot (matrix pivot-column)
+      "Adjust the pivot in the PIVOT-COLUMN to be the maximal value in that column"
+      (let ((column-below-pivot (matrix-submatrix
+                                 matrix
+                                 pivot-column
+                                 pivot-column
+                                 (matrix-rows matrix)
+                                 (1+ pivot-column))))
+        (defun find-max-index (data-list max-val max-index current-index)
+          (cond
+           ((null data-list)
+            max-index)
+           ((>
+             (car data-list)
+             max-val)
+            (find-max-index
+             (cdr data-list)
+             (car data-list)
+             current-index
+             (1+ current-index)))
+           (t
+            (find-max-index
+             (cdr data-list)
+             max-val
+             max-index
+             (1+ current-index)))))
+
+       (matrix-elementary-interchange
+        pivot-column
+        (+
+         pivot-column
+         (find-max-index
+          (matrix-data column-below-pivot)
+          0
+          0
+          0))
+        (matrix-rows matrix))))
+#+END_SRC
+
+
+
+If *G_{n}* are the /elementary lower-triangular matrices/ that clear the columns and *F_{n}* are the *Type I* pivot adjustments, then the steps compose into:  *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}A* where you can pair up each elimination and pivot steps as they complete each column *(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}A*
+
+
+
+
 * TODOs
 Write a better example that I can expand on easily later
 Write an algo for /Gauss-Jordan elimination/

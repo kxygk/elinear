@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2017-12-18 Mon 17:34 -->
+<!-- 2017-12-20 Wed 15:05 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -242,7 +242,7 @@ for the JavaScript code in this tag.
 <li><a href="#sec-6">The LU Decomposition - Gaussian elimination in matrix form</a>
 <ul>
 <li><a href="#sec-6-1">Elementary Lower Triangular</a></li>
-<li><a href="#sec-6-2">Adjusting pivots</a></li>
+<li><a href="#sec-6-2">Partial Pivoting</a></li>
 </ul>
 </li>
 <li><a href="#sec-7">TODOs</a></li>
@@ -1106,7 +1106,7 @@ As a tool in building new matrices, we need a way to easily add two matrices, ie
 
 (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-subtract</span> (matrix1 matrix2)
   <span style="color: #cc0000;">"Subtract MATRIX2 from MATRIX1"</span>
-  (<span style="color: #00af00;">if</span> (check-addition matrix1 matrix2)
+  (<span style="color: #00af00;">if</span> (matrix-equal-size-p matrix1 matrix2)
       (matrix-from-data-list
        (matrix-rows matrix1)
        (matrix-columns matrix1)
@@ -1399,14 +1399,64 @@ You can see that we didn't really need to carry out the matrix product b/c we've
 </div>
 </div>
 <div id="outline-container-sec-6-2" class="outline-3">
-<h3 id="sec-6-2">Adjusting pivots</h3>
+<h3 id="sec-6-2">Partial Pivoting</h3>
 <div class="outline-text-3" id="text-6-2">
 <p>
-The next step in Gaussian elimination is adjusting pivots - both to impove the error (through partial/complete pivoting) as well as to eliminate any zeroes that emerge on the diagonal. This is a direct application of the <b>Type I</b> elementary matrix. Because eliminating columns can change all the values below the current pivot, we need to potentially carry out a pivot adjustments before every elimination step. If <b>G</b> are the <i>elementary lower-triangular matrices</i> that clear the columns and <b>F</b> are the <b>Type I</b> pivot adjustments, then the steps compose into:  <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A</b> where you can pair up each elimination and pivot steps as they complete each column <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>A</b>
+The next step in Gaussian elimination is adjusting pivots. After we eliminate the values in column <i>n</i> we may end up with a zero on the diagonal pivot position in column <i>n+1</i>. We can do a simple swap with any row below when we see a zero (page 6) but we know that if each time we swap with the maximal value in the column through <b>partial pivoting</b> we will get a better numerical solution. This is a direct application of a <b>Type I</b> elementary matrix. 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-partial-pivot</span> (matrix pivot-column)
+    <span style="color: #cc0000;">"Adjust the pivot in the PIVOT-COLUMN to be the maximal value in that column"</span>
+    (<span style="color: #00af00;">let</span> ((column-below-pivot (matrix-submatrix
+                               matrix
+                               pivot-column
+                               pivot-column
+                               (matrix-rows matrix)
+                               (1+ pivot-column))))
+      (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">find-max-index</span> (data-list max-val max-index current-index)
+        (<span style="color: #00af00;">cond</span>
+         ((null data-list)
+          max-index)
+         ((&gt;
+           (car data-list)
+           max-val)
+          (find-max-index
+           (cdr data-list)
+           (car data-list)
+           current-index
+           (1+ current-index)))
+         (t
+          (find-max-index
+           (cdr data-list)
+           max-val
+           max-index
+           (1+ current-index)))))
+
+     (matrix-elementary-interchange
+      pivot-column
+      (+
+       pivot-column
+       (find-max-index
+        (matrix-data column-below-pivot)
+        0
+        0
+        0))
+      (matrix-rows matrix))))
+</pre>
+</div>
+
+
+
+<p>
+If <b>G<sub>n</sub></b> are the <i>elementary lower-triangular matrices</i> that clear the columns and <b>F<sub>n</sub></b> are the <b>Type I</b> pivot adjustments, then the steps compose into:  <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A</b> where you can pair up each elimination and pivot steps as they complete each column <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>A</b>
 </p>
 </div>
 </div>
 </div>
+
+
 
 
 <div id="outline-container-sec-7" class="outline-2">
@@ -1442,7 +1492,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2017-12-18 Mon 17:34</p>
+<p class="date">Created: 2017-12-20 Wed 15:05</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
