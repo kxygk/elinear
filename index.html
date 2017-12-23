@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2017-12-20 Wed 15:05 -->
+<!-- 2017-12-23 Sat 17:50 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -1408,7 +1408,7 @@ The next step in Gaussian elimination is adjusting pivots. After we eliminate th
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-partial-pivot</span> (matrix pivot-column)
-    <span style="color: #cc0000;">"Adjust the pivot in the PIVOT-COLUMN to be the maximal value in that column"</span>
+    <span style="color: #cc0000;">"Adjust the pivot in the PIVOT-COLUMN to be have the maximal magnititude in that column"</span>
     (<span style="color: #00af00;">let</span> ((column-below-pivot (matrix-submatrix
                                matrix
                                pivot-column
@@ -1420,11 +1420,11 @@ The next step in Gaussian elimination is adjusting pivots. After we eliminate th
          ((null data-list)
           max-index)
          ((&gt;
-           (car data-list)
+           (abs(car data-list))
            max-val)
           (find-max-index
            (cdr data-list)
-           (car data-list)
+           (abs(car data-list))
            current-index
            (1+ current-index)))
          (t
@@ -1450,8 +1450,36 @@ The next step in Gaussian elimination is adjusting pivots. After we eliminate th
 
 
 <p>
-If <b>G<sub>n</sub></b> are the <i>elementary lower-triangular matrices</i> that clear the columns and <b>F<sub>n</sub></b> are the <b>Type I</b> pivot adjustments, then the steps compose into:  <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A</b> where you can pair up each elimination and pivot steps as they complete each column <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>A</b>
+If <b>G<sub>n</sub></b> are the <i>elementary lower-triangular matrices</i> that clear the columns and <b>F<sub>n</sub></b> are the <b>Type I</b> pivot adjustments, then the steps compose into:  <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A</b> where you can pair up each elimination and pivot steps as they complete each column <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>A</b>. The result is the upper triangular matrix <b>U</b>
 </p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-to-upper-triangular</span> (matrix)
+  <span style="color: #cc0000;">"Take the input MATRIX and use Gaussian elimination to make the upper triangular back-substitution matrix"</span>
+  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-to-upper-triangular-rec</span> (matrix column-to-pivot-and-reduce)
+    (<span style="color: #00af00;">cond</span>
+     ((equal
+       column-to-pivot-and-reduce
+       (matrix-rows matrix))
+      matrix)
+     (t
+      (<span style="color: #00af00;">let</span> 
+          ((pivoted-matrix 
+            (matrix-product <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">pivot!</span>
+             (matrix-partial-pivot
+              matrix
+              column-to-pivot-and-reduce)
+             matrix)))
+        (matrix-to-upper-triangular-rec
+         (matrix-product <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">reduce</span>
+          (matrix-elementary-lower-triangular
+           pivoted-matrix
+           column-to-pivot-and-reduce)
+          pivoted-matrix)
+         (1+ column-to-pivot-and-reduce))))))
+  (matrix-to-upper-triangular-rec matrix 0))
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -1492,7 +1520,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2017-12-20 Wed 15:05</p>
+<p class="date">Created: 2017-12-23 Sat 17:50</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
