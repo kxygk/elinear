@@ -900,7 +900,7 @@ The next step in Gaussian elimination is adjusting pivots. After we eliminate th
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-partial-pivot (matrix pivot-column)
-      "Adjust the pivot in the PIVOT-COLUMN to be the maximal value in that column"
+      "Adjust the pivot in the PIVOT-COLUMN to be have the maximal magnititude in that column"
       (let ((column-below-pivot (matrix-submatrix
                                  matrix
                                  pivot-column
@@ -912,11 +912,11 @@ The next step in Gaussian elimination is adjusting pivots. After we eliminate th
            ((null data-list)
             max-index)
            ((>
-             (car data-list)
+             (abs(car data-list))
              max-val)
             (find-max-index
              (cdr data-list)
-             (car data-list)
+             (abs(car data-list))
              current-index
              (1+ current-index)))
            (t
