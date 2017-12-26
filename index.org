@@ -938,7 +938,7 @@ The next step in Gaussian elimination is adjusting pivots. After we eliminate th
         (matrix-rows matrix))))
 #+END_SRC
 
-
+** Gaussian Elimination
 
 If *G_{n}* are the /elementary lower-triangular matrices/ that clear the columns and *F_{n}* are the *Type I* pivot adjustments, then the steps compose into:  *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}A* where you can pair up each elimination and pivot steps as they complete each column *(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}A*. The result is the upper triangular matrix *U*
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
@@ -967,6 +967,30 @@ If *G_{n}* are the /elementary lower-triangular matrices/ that clear the columns
            (1+ column-to-pivot-and-reduce))))))
     (matrix-to-upper-triangular-rec matrix 0))
 #+END_SRC
+
+** Extracting the pivots
+
+We have now completed Gaussian elimination on *A*. We haven't yet solved for *x* given *b*, but you should already start to see there is a bit of a problem. Partial pivoting has changed the order of the rows in *A*. This means the columns remain in the same order so the inputs remain the same (so *x* stays the same) however the new rows mean the outputs have been rearranged (the elements of *b*) and we've made no mechanism for keeping track of these changes.
+
+/Page 150/ shows us how to extract the partial pivots out of the series of pivot-eliminations we just described so that instead of: *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}* We have something that looks more like  *G_{1}G_{2}..G_{r}F_{1}F_{2}..F_{r}*. The reason we've had the operations interleaved is because we do not know which rows we need to swap till the previous eliminations have been done. However if we already knew which rows to swap, then that could be done ahead of time - it would just mean the elimination steps would be a little different. What /page 150/ demonstrates is that the partial-pivot adjustment can be done first as long as all eliminations for the previous pivot-columns have their values swapped to match - ie. if you adjust some pivot /k/ then any previous eliminations that involved the row /k/ now needs to be fixed.
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-adjust-elementary-lower-triangular (elementary-lower-triangular-matrix row1 row2)
+    "Take an elementary lower triangular matrix and adjust it to match a row interchange between ROW1 and ROW2 (ZERO indexed)"
+    (let ((adjusting-matrix
+           (matrix-elementary-interchange
+            row1
+            row2
+            (matrix-rows elementary-lower-triangular-matrix))))
+      (matrix-product
+       adjusting-matrix
+       (matrix-product
+        elementary-lower-triangular-matrix
+        adjusting-matrix))))
+#+END_SRC
+#+BEGIN_QUOTE
+*Note:* This operation does 2 full matrix products to do a simple swap of 2 numbers, however this is also the simplest solution that doesn't involved tracking the elimination columns and fiddling with the data-list
+#+END_QUOTE
 
 
 

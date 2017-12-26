@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2017-12-23 Sat 17:50 -->
+<!-- 2017-12-26 Tue 21:26 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -243,6 +243,8 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#sec-6-1">Elementary Lower Triangular</a></li>
 <li><a href="#sec-6-2">Partial Pivoting</a></li>
+<li><a href="#sec-6-3">Gaussian Elimination</a></li>
+<li><a href="#sec-6-4">Extracting the pivots</a></li>
 </ul>
 </li>
 <li><a href="#sec-7">TODOs</a></li>
@@ -1446,9 +1448,12 @@ The next step in Gaussian elimination is adjusting pivots. After we eliminate th
       (matrix-rows matrix))))
 </pre>
 </div>
+</div>
+</div>
 
-
-
+<div id="outline-container-sec-6-3" class="outline-3">
+<h3 id="sec-6-3">Gaussian Elimination</h3>
+<div class="outline-text-3" id="text-6-3">
 <p>
 If <b>G<sub>n</sub></b> are the <i>elementary lower-triangular matrices</i> that clear the columns and <b>F<sub>n</sub></b> are the <b>Type I</b> pivot adjustments, then the steps compose into:  <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A</b> where you can pair up each elimination and pivot steps as they complete each column <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>A</b>. The result is the upper triangular matrix <b>U</b>
 </p>
@@ -1482,8 +1487,70 @@ If <b>G<sub>n</sub></b> are the <i>elementary lower-triangular matrices</i> that
 </div>
 </div>
 </div>
-</div>
 
+<div id="outline-container-sec-6-4" class="outline-3">
+<h3 id="sec-6-4">Extracting the pivots</h3>
+<div class="outline-text-3" id="text-6-4">
+<p>
+We have now completed Gaussian elimination on <b>A</b>. We haven't yet solved for <b>x</b> given <b>b</b>, but you should already start to see there is a bit of a problem. Partial pivoting has changed the order of the rows in <b>A</b>. This means the columns remain in the same order so the inputs remain the same (so <b>x</b> stays the same) however the new rows mean the outputs have been rearranged (the elements of <b>b</b>) and we've made no mechanism for keeping track of these changes.
+</p>
+
+<p>
+<i>Page 150</i> shows us how to extract the partial pivots out of the series of pivot-eliminations we just described so that instead of: <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub></b> We have something that looks more like  <b>G<sub>1</sub>G<sub>2</sub>..G<sub>r</sub>F<sub>1</sub>F<sub>2</sub>..F<sub>r</sub></b>. The reason we've had the operations interleaved is because we do not know which rows we need to swap till the previous eliminations have been done. However if we already knew which rows to swap, then that could be done ahead of time - it would just mean the elimination steps would be a little different. What <i>page 150</i> demonstrates is that the partial-pivot adjustment can be done first as long as all eliminations for the previous pivot-columns have their values swapped to match - ie. if you adjust some pivot <i>k</i> then any previous eliminations that involved the row <i>k</i> now needs to be fixed.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-adjust-elementary-lower-triangular</span> (elementary-lower-triangular-matrix row1 row2)
+  <span style="color: #cc0000;">"Take an elementary lower triangular matrix and adjust it to match a row interchange between ROW1 and ROW2 (ZERO indexed)"</span>
+  (<span style="color: #00af00;">let</span> ((adjusting-matrix
+         (matrix-elementary-interchange
+          row1
+          row2
+          (matrix-rows elementary-lower-triangular-matrix))))
+    (matrix-product
+     adjusting-matrix
+     (matrix-product
+      elementary-lower-triangular-matrix
+      adjusting-matrix))))
+</pre>
+</div>
+<blockquote>
+<p>
+<b>Note:</b> This operation does 2 full matrix products to do a simple swap of 2 numbers, however this is also the simplest solution that doesn't involved tracking the elimination columns and fiddling with the data-list
+</p>
+</blockquote>
+
+<p>
+This time around we won't be simply applying our eliminations and pivots as we go, but instead we will be saving them into a list. We will have a one matrix in which we accumulate our pivot adjustments, ie. multiplying up the <b>Type I</b> matrices, and another will be a list of our elimination matrices which we will update as we go along adjusting pivots
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-to-gaussian-elimination-with-partial-pivoting</span> (elementary-lower-triangular-matrix row1 row2)
+  <span style="color: #cc0000;">""</span>
+  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-adjust-elimination-matrices</span> (matrix-list row1 row2)
+    (<span style="color: #00af00;">cond</span> 
+     ((null matrix-list)
+      '())
+      (t
+       (cons
+        (matrix-adjust-elementary-lower-triangular
+         (car matrix-list)
+         row1
+         row2)
+        (matrix-adjust-elimination-matrices
+         (cdr matrix-list)
+         row1
+         row2)))))
+
+
+  )
+</pre>
+</div>
+</div>
+</div>
+</div>
 
 
 
@@ -1520,7 +1587,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2017-12-23 Sat 17:50</p>
+<p class="date">Created: 2017-12-26 Tue 21:26</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
