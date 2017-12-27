@@ -942,30 +942,39 @@ The next step in Gaussian elimination is adjusting pivots. After we eliminate th
 
 If *G_{n}* are the /elementary lower-triangular matrices/ that clear the columns and *F_{n}* are the *Type I* pivot adjustments, then the steps compose into:  *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}A* where you can pair up each elimination and pivot steps as they complete each column *(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}A*. The result is the upper triangular matrix *U*
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-to-upper-triangular (matrix)
-    "Take the input MATRIX and use Gaussian elimination to make the upper triangular back-substitution matrix"
-    (defun matrix-to-upper-triangular-rec (matrix column-to-pivot-and-reduce)
-      (cond
-       ((equal
-         column-to-pivot-and-reduce
-         (matrix-rows matrix))
-        matrix)
-       (t
-        (let 
-            ((pivoted-matrix 
-              (matrix-product ; pivot!
-               (matrix-partial-pivot
-                matrix
-                column-to-pivot-and-reduce)
-               matrix)))
+  (defun matrix-partial-pivot-and-reduce-column (matrix column-to-reduce)
+    (let*
+        ((pivot-adjusting-matrix
+          (matrix-partial-pivot
+           matrix
+           column-to-reduce) )
+         (matrix-with-partial-pivoting
+          (matrix-product ; pivot!
+           pivot-adjusting-matrix
+           matrix))
+         (column-elimination-matrix
+          (matrix-elementary-lower-triangular
+           matrix-with-partial-pivoting
+           column-to-reduce))
+         (matrix-with-reduced-column
+          (matrix-product ; reduce
+           column-elimination-matrix
+           matrix-with-partial-pivoting)))
+      (list pivot-adjusting-matrix column-elimination-matrix matrix-with-reduced-column)))
+
+    (defun matrix-to-upper-triangular (matrix)
+      "Take the input MATRIX and use Gaussian elimination to make the upper triangular back-substitution matrix"
+      (defun matrix-to-upper-triangular-rec (matrix column-to-reduce)
+        (cond
+         ((equal
+           column-to-reduce
+           (matrix-rows matrix))
+          matrix)
+         (t
           (matrix-to-upper-triangular-rec
-           (matrix-product ; reduce
-            (matrix-elementary-lower-triangular
-             pivoted-matrix
-             column-to-pivot-and-reduce)
-            pivoted-matrix)
-           (1+ column-to-pivot-and-reduce))))))
-    (matrix-to-upper-triangular-rec matrix 0))
+           (third (matrix-partial-pivot-and-reduce-column matrix column-to-reduce))
+           (1+ column-to-reduce)))))
+      (matrix-to-upper-triangular-rec matrix 0))
 #+END_SRC
 
 ** Extracting the pivots
