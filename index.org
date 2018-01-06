@@ -1104,9 +1104,51 @@ The way we go about this programmatically is building our pivot and elimination 
         elementary-lower-triangular-matrix
         type-i-interchange-matrix)))
 #+END_SRC
-#+BEGIN_QUOTE
-*Note:* This operation does 2 full matrix products to do a simple swap of 2 numbers, however this is also the simplest solution that doesn't involved tracking the elimination columns and fiddling with the data-list
-#+END_QUOTE
+As you can see here, I'm doing 2 full matrix products while updating a /Elementary Lower Triangular Matrix/ is simply a matter of swapping 2 numbers. The way it's described in the book, you can go and update each column's /Elementary Lower Triangular Matrix/. However in practice it's easier to accumulate elimination matrices into one matrix and to perform the update on the whole accumulation. A more clever solution might keep track of which column is being eliminated and swap the numbers more quickly - but for simplicity I've kept this double-product solution
+
+With our elimination and pivot adjustments separated we again can take the product of our *G*'s together to get *L^{-1}*. Taking the product of the *F*'s gives us a new /permutation matrix/ *P* so that our final equation will look like *L^{-1}PA = U*. Again moving the eliminations to the other side we get a decomposition of sorts *PA=LU*
+
+The gaussian elimination function will return a list of these three matrixes (*L^{-1}* *P* *U*). At each iteration it will pivot and eliminate a column, adjust the elimination matrix that's been built so far, and then multiply-in the new *G* and *F* that it's just built in to the elimination and permutation matrices.
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-gaussian-elimination-with-partial-pivoting (matrix)
+    "Perform Gaussian elimination with partial pivoting on MATRIX and return the list (L^-1 P U) "
+    (let
+        ((rank
+          (matrix-rows matrix)))
+      (defun matrix-gaussian-elimination-with-partial-pivoting-rec (elimination-matrix
+                                                                    permutation-matrix
+                                                                    reduced-matrix
+                                                                    column-to-reduce)
+        (cond
+         ((equal
+           column-to-reduce
+           rank)
+          (list elimination-matrix permutation-matrix reduced-matrix))
+         (t
+          (let
+              ((current-column-reduction-matrices
+                (matrix-reduce-column
+                 reduced-matrix
+                 column-to-reduce)))
+            (matrix-gaussian-elimination-with-partial-pivoting-rec
+             (matrix-product
+              (first current-column-reduction-matrices)
+              (matrix-update-elimination-matrix       ; update elimination matrices due to partial pivot
+               elimination-matrix
+               (second current-column-reduction-matrices)))
+             (matrix-product                              ; update the permutation matrix
+              (second current-column-reduction-matrices)
+              permutation-matrix)
+             (third current-column-reduction-matrices)    ; the further reduced matrix
+             (1+ column-to-reduce))))))
+
+      (matrix-gaussian-elimination-with-partial-pivoting-rec
+       (matrix-identity rank)
+       (matrix-identity rank)
+       matrix
+       0)))
+#+END_SRC
+
 
 
 
