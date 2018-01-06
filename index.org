@@ -1096,18 +1096,13 @@ On /page 150/ the book shows us how we can fix this situation by extracting the 
 The way we go about this programmatically is building our pivot and elimination matrices in the /GFGFGF/ order but each time we get a new pivot matrix *F* we adjust the elimination matrices *G* that we've got so far.
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-adjust-elementary-lower-triangular (elementary-lower-triangular-matrix row1 row2)
-    "Take an elementary lower triangular matrix and adjust it to match a row interchange between ROW1 and ROW2 (ZERO indexed)"
-    (let ((adjusting-matrix
-           (matrix-elementary-interchange
-            row1
-            row2
-            (matrix-rows elementary-lower-triangular-matrix))))
+  (defun matrix-update-elimination-matrix (elementary-lower-triangular-matrix type-i-interchange-matrix)
+    "Take an elementary lower triangular matrix and update it to match a row interchange between ROW1 and ROW2 (ZERO indexed)"
       (matrix-product
-       adjusting-matrix
+       type-i-interchange-matrix
        (matrix-product
         elementary-lower-triangular-matrix
-        adjusting-matrix))))
+        type-i-interchange-matrix)))
 #+END_SRC
 #+BEGIN_QUOTE
 *Note:* This operation does 2 full matrix products to do a simple swap of 2 numbers, however this is also the simplest solution that doesn't involved tracking the elimination columns and fiddling with the data-list
