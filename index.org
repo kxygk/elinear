@@ -1051,7 +1051,8 @@ The previous example showed us how to eliminate columns, but in general before w
 So if *G_{n}* were the /elementary lower-triangular matrices/ from the last section that performed our eliminations and *F_{n}* are the new *Type I* pivot adjustments, then our reduction need to be rewritten as *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}A=U* where each *G* *F* pair corresponds to a reduction of a column: *(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}A=U*. 
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-partial-pivot-and-reduce-column (matrix column-to-reduce)
+  (defun matrix-reduce-column (matrix column-to-reduce)
+    "Adjusts the pivot using partial pivoting and eliminates the elements in one column. Returns a list of the elimination matrix, permutation matrix and the resulting matrix with reduced column (list of 3 matrices)"
     (let*
         ((pivot-adjusting-matrix
           (matrix-partial-pivot
@@ -1069,21 +1070,21 @@ So if *G_{n}* were the /elementary lower-triangular matrices/ from the last sect
           (matrix-product ; reduce
            column-elimination-matrix
            matrix-with-partial-pivoting)))
-      (list pivot-adjusting-matrix column-elimination-matrix matrix-with-reduced-column)))
+      (list column-elimination-matrix pivot-adjusting-matrix matrix-with-reduced-column)))
 
-    (defun matrix-to-upper-triangular (matrix)
-      "Take the input MATRIX and use Gaussian elimination to make the upper triangular back-substitution matrix"
-      (defun matrix-to-upper-triangular-rec (matrix column-to-reduce)
-        (cond
-         ((equal
-           column-to-reduce
-           (matrix-rows matrix))
-          matrix)
-         (t
-          (matrix-to-upper-triangular-rec
-           (third (matrix-partial-pivot-and-reduce-column matrix column-to-reduce))
-           (1+ column-to-reduce)))))
-      (matrix-to-upper-triangular-rec matrix 0))
+  (defun matrix-to-upper-triangular (matrix)
+    "Take the input MATRIX and use Gaussian elimination to make the upper triangular back-substitution matrix"
+    (defun matrix-to-upper-triangular-rec (matrix column-to-reduce)
+      (cond
+       ((equal
+         column-to-reduce
+         (matrix-rows matrix))
+        matrix)
+       (t
+        (matrix-to-upper-triangular-rec
+         (third (matrix-partial-pivot-and-reduce-column matrix column-to-reduce))
+         (1+ column-to-reduce)))))
+    (matrix-to-upper-triangular-rec matrix 0))
 #+END_SRC
 
 ** Extracting the pivots
