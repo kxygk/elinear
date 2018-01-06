@@ -777,50 +777,59 @@ Adding a multiple of a row (or column) /i/ to row (or column) /j/
 #+END_SRC
 
 * The LU Decomposition - Gaussian elimination in matrix form
-Gaussian elimination is a systematic way for taking a known linear system with a given output and solving for it's input. The method reduces our linear equations (through combining and swapping equations) such that last equation ends reading something of the form *\alpha{}z=b*. This simple equation we can easily solve for our last unknown input (*z=b/\alpha{}*) and back substitute it in to solve for the remaining input values. When we manipulate our equations to eliminate values we are combining and interchanging rows and this applies equally to the linear system, the unknown inputs, and the known outputs - however the factors we are trying to eliminate are in the linear system only
+If linear equations at their simplest take inputs and produce some outputs, then Gaussian elimination is our method of reversing the process. It's a systematic way for taking a known linear system with a given output and solving for its input. Because we know that adding and scaling equations preserves equalities, Gaussian elimination is a scheme for combining and swapping equations so that they reduce to something simpler which can be solved directly. We do this by elimination factors in our equations such that the last one is of the form *\alpha{}x=b*. Equalities being preserved, we can use this simple equation to solve for one of the unknown inputs. Each of the remaining equation includes just one additional unknow input so that through back-substitution we can then solve for all of them one by one. 
 
-So instead of dealing with the whole set of equation we can just concentrate on the linear sytem - in matrix form. Reducing the the matrix happens in exactly the same way and the resulting matrix will have in its last row all zeroes except for one value on the far right (which is equivalent to the above-mentioned *\alpha{}*). We can save all the steps and apply them to any input and outputs later so that they are mixed properly as well. The real value is that we can now represent each step with our new /elementary matrices/ 
+So if *Ax=b* is our original system of equations in matrix form, then after Gaussian elimination we can write our simplified systm as *Ux=b_{new}*. Combining our equations has changed our output values, so the *b* does not remain the same.
 
-Just like in Gaussian elimination and our linear equation, on a high level the reduction of the matrix happens in two repeated steps for each column. We adjust the pivot and then reduce all the values below it to zero.
 
 /From the Example on page 141/ \\
-The process will take us from a matrix like:
+So if we started with an *A* that looked like this
 \begin{bmatrix}
 2 & 2 & 2\\
 4 & 7 & 7\\
 6 & 18 & 22\\
 \end{bmatrix}
-To an *upper triangular* matrix *U*:
+Gaussian elimination will give us a *U* that look like this:
 \begin{bmatrix}
-2 & 2 & 1\\
+2 & 2 & 2\\
 0 & 3 & 3\\
 0 & 0 & 4\\
 \end{bmatrix}
-As you can see the last row in the final matrix represents the previously mentioned trivial equation *\alpha{}z=b* which we can use for backsubstitution. If each step of the reduction is *G_{x}* we can write the process as *G_{1}G_{2}G_{...}G_{n}A=U*. Or for the full set of equations it will go from *Ax=b* to *G_{1}G_{2}G_{...}G_{n}(Ax)=G_{1}G_{2}G_{...}G_{n}b* which we can reduce to *Ux=G_{1}G_{2}G_{...}G_{n}b*.
+Looking at *Ux=b_{new}* we see that the last row in *U* [ 0 0 4 ] times the column [ x_{1} x_{2} x_{3} ]^{T}, given a *b_{new}*, gives us a direct solution for x_{3}. Then using *x_{3}* and the previous row/equation we could solve for *x_{2}* and so on.
+
+Combining and swapping rows is something we just learned how to do using elementary matrices- so by cleverly taking their product with our matrix *A* we will be able to generate the *U* matrix - in effect reenacting Gaussian elimination using matrix multiplication. After that if we want to get our *b_{new}* we will then just repeat those matrix-products with the output vector *b*. If each row manipulation is some elementary matrix *R_{n}* we could write out the process of Gaussian elimination as a series of products *R_{n}R_{...}R_{2}R_{1}A=U*. With the full equation *Ax=b* it's just the same - we can simply multiply by both sides by the *R* matrices *R_{n}R_{...}R_{2}R_{1}(Ax)=R_{1}R_{2}R_{...}R_{n}b*. Here the left side will equal to *Ux* and the right hand side is our *b_{new}*.
+
+On a high level the reduction of the equations happens in two repeated steps on each column: First we adjust the pivot and then we eliminate all the factors below it. In the matrix representation this is equivalent to adjusting the diagonal element and then making all the values below it equal to zero. The combination of the two *reduces the column* and make our system simpler. 
 
 #+BEGIN_QUOTE
 *Note:* Gaussian elimination will only produce a solution for nonsingular square matrices, so the process described only holds for this case
 #+END_QUOTE
 ** Elementary Lower Triangular
-In the above example the first step was zeroing out the value below the ~2~ in the first column. We can accomplish that transformation by multiply the matrix by two ~Type III~ *elementary matrices*
+The example I used above was done without adjusting any pivots. When reducing the first column we simply eliminated the values below the ~2~ (in the upper left) and we could have done that by multiply our *A* by two ~Type III~ *elementary matrices*
+\begin{equation}
 \begin{bmatrix}
 1 & 0 & 0\\
 -2 & 1 & 0\\
 0 & 0 & 1\\
 \end{bmatrix}
-and
 \begin{bmatrix}
 1 & 0 & 0\\
 0 & 1 & 0\\
 -3 & 0 & 1\\
 \end{bmatrix}
-These are the /identity/ matrix with some extra values. You can visually see what the ~-2~ and ~-3~ represent - They match to a corresponding entry in the orginal matrix divided by the value of the pivot (ie: the factor that will eliminate the value) After applying these matrixes on our starting matrix from the left (*G_{1}G_{2}A*) we end up with our desired result
 \begin{bmatrix}
-2 & 2 & 1\\
+2 & 2 & 2\\
+4 & 7 & 7\\
+6 & 18 & 22\\
+\end{bmatrix}
+\end{equation}
+The two ~Type III~ *elementary matrices* on the left side are pretty simple and you can visually see what the ~-2~ and ~-3~ represent. They match the entry in *A* at the same index (row/column), but divided by the value of the pivot (ie: the factor that will eliminate the value). If you carry out the product you will see the first column has been reduced and we are closer to our upper triangular *U*
+\begin{bmatrix}
+2 & 2 & 2\\
 0 & 3 & 3\\
 0 & 12 & 16\\
 \end{bmatrix}
-Constructing these simple ~Type III~ is quick
+Constructing these simple ~Type III~ matrices is quick and inverting them is as easy as flipping the sign on the factor (ie. if you subtract some multiple of an equation from another, to reverse the operation you'd simply add the same multiple of the equation back)
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-elementary-row-elimination (matrix row column)
     "Make a matrix that will eliminate an element at the specified ROW/COLUMN (ZERO indexed) using the diagonal element in the same column (typically the pivot)"
@@ -838,13 +847,42 @@ Constructing these simple ~Type III~ is quick
 
 #+END_SRC
 
-Looking at the product of these 3 matrices - *G_{1}G_{2}A* - and based on what we know about composing linear systems we know that the elementary matrices can be combined into one *(G_{1}G_{2})A=G_{all}A* (where *G_{all}=G_{1}G_{2}*). If we try that here *G_{1}G_{2}* gives us:
+Looking again at the product of 2 ~Type III~ matrices with our *A*, and using what we know about composing linear systems, we already know that we can take the product of the first two matrices separately. Whatever matrix comes out of that can then me multiplied times *A* to give us the same result.
+\begin{equation}
+\begin{pmatrix}
+\begin{bmatrix}
+1 & 0 & 0\\
+-2 & 1 & 0\\
+0 & 0 & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+-3 & 0 & 1\\
+\end{bmatrix}
+\end{pmatrix}
+\begin{bmatrix}
+2 & 2 & 2\\
+4 & 7 & 7\\
+6 & 18 & 22\\
+\end{bmatrix}
+\end{equation}
+
+
+\begin{equation}
 \begin{bmatrix}
 1 & 0 & 0\\
 -2 & 1 & 0\\
 -3 & 0 & 1\\
 \end{bmatrix}
-You can see that we didn't really need to carry out the matrix product b/c we've simply merged the factors into one matrix. Combining these row reduction ~Type III~ matrices is mechanical and gives us the *Elementary Lower-Triangular Matrix* mentioned on page 142. Each column reduction to zeroes has an equivalent elementary lower-triangular matrix (so for a rank *r* matrix we will have to have /r/ elementary low-triangular matrices)
+\begin{bmatrix}
+2 & 2 & 2\\
+4 & 7 & 7\\
+6 & 18 & 22\\
+\end{bmatrix}
+\end{equation}
+
+The result is surprisingly simple and we can see that we didn't really need to carry out the whole matrix product b/c we've simply merged the factors into one matrix. So we can simply build these matrices that eliminate entire columns and skip making ~Type III~ matrices entirely. The new combined matrices are called *Elementary Lower-Triangular Matrix* and are described on /page 142/.
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-elementary-lower-triangular (matrix column-to-clear)
     "Make a matrix that will eliminate all rows in a column below the diagonal (pivot position)"
@@ -894,9 +932,81 @@ You can see that we didn't really need to carry out the matrix product b/c we've
      (matrix-rows matrix)))
 
 #+END_SRC
+
+So now our product of elementary matrices *R_{n}R_{...}R_{2}R_{1}A=U* shortens to something similar *G_{r}G_{...}G_{2}G_{1}A=U*, but where each /Elementary Lower-Triangular Matrix/ *G* takes the place of several *R* matrices.  These *G* matrices also have the property that their inverse is just a matter of flipping the sign of the factors' (you can confirm this by inverting *G=R_{n}R_{...}R_{2}R_{1}* and remembering that *R^{-1}*'s also are ~Type III~ matrices). This allows us to take our equation *G_{1}G_{2}G_{...}G_{n}A=U* and trivially produce the equality *A=G^{-1}_{1}G^{-1}_{2}G^{-1}_{...}G_{n}U* without having to compute a single value. The product *G^{-1}_{1}G^{-1}_{2}G^{-1}_{...}G_{n}* is special and also combines cleanly without the need for any calculation. It combined to form a lower triangular matrix which is repsented by the letter *L*. So we can now write down *A=LU* - from which we get the name of the decomposition.
+
+If in our example we add another matrix to the left to eliminate the second column in *A* and then we were to take its product with our previous /Elementary Lower-Triangular Matrix/ the factors merge into one lower triangular matrix (see /page 143-144/ */eq 3.10.6/* )
+
+\begin{equation}
+\begin{pmatrix}
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & -4 & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 & 0\\
+-2 & 1 & 0\\
+-3 & 0 & 1\\
+\end{bmatrix}
+\end{pmatrix}
+\begin{bmatrix}
+2 & 2 & 2\\
+4 & 7 & 7\\
+6 & 18 & 22\\
+\end{bmatrix}
+\end{equation}
+
+
+\begin{equation}
+\begin{bmatrix}
+1 & 0 & 0\\
+-2 & 1 & 0\\
+-3 & -4 & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+2 & 2 & 2\\
+4 & 7 & 7\\
+6 & 18 & 22\\
+\end{bmatrix}
+\end{equation}
+
+#+BEGIN_QUOTE
+*Note* that the factor of ~-4~ was only deduced after doing the reduction of the first column which had given us:
+
+\begin{bmatrix}
+2 & 2 & 1\\
+0 & 3 & 3\\
+0 & 12 & 16\\
+\end{bmatrix}
+
+So you can't reduce the second column before you'd reduced the first!
+#+END_QUOTE
+
+Allowing us to write out *A=LU*
+\begin{equation}
+\begin{bmatrix}
+2 & 2 & 2\\
+4 & 7 & 7\\
+6 & 18 & 22\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 0 & 0\\
+2 & 1 & 0\\
+3 & 4 & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+2 & 2 & 2\\
+0 & 3 & 3\\
+0 & 0 & 4\\
+\end{bmatrix}
+\end{equation}
+
+
 ** Partial Pivoting
 
-The next step in Gaussian elimination is adjusting pivots. After we eliminate the values in column /n/ we may end up with a zero on the diagonal pivot position in column /n+1/. We can do a simple swap with any row below when we see a zero (page 6) but we know that if each time we swap with the maximal value in the column through *partial pivoting* we will get a better numerical solution. This is a direct application of a *Type I* elementary matrix. 
+The previous example showed us how to eliminate columns, but in general before we do elimination we need to adjust the pivot in that column. First we may find that after performing elimination on a previous column we are left with a zero in the current column's pivot position - which makes it impossible to eliminate the factors below it. Secondly, adjusting the pivot can improve our solution's numerical stability. The strategy we're using is called *partial pivoting* and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and can also be done directly by taking the product of our matrix with a ~Type I~ elementary matrix.
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-partial-pivot (matrix pivot-column)
@@ -938,9 +1048,8 @@ The next step in Gaussian elimination is adjusting pivots. After we eliminate th
         (matrix-rows matrix))))
 #+END_SRC
 
-** Gaussian Elimination
+So if *G_{n}* were the /elementary lower-triangular matrices/ from the last section that performed our eliminations and *F_{n}* are the new *Type I* pivot adjustments, then our reduction need to be rewritten as *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}A=U* where each *G* *F* pair corresponds to a reduction of a column: *(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}A=U*. 
 
-If *G_{n}* are the /elementary lower-triangular matrices/ that clear the columns and *F_{n}* are the *Type I* pivot adjustments, then the steps compose into:  *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}A* where you can pair up each elimination and pivot steps as they complete each column *(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}A*. The result is the upper triangular matrix *U*
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-partial-pivot-and-reduce-column (matrix column-to-reduce)
     (let*
