@@ -1164,6 +1164,18 @@ Getting our final *LU* decomposition is now fairly simple. The /elimination matr
       2)))
 #+END_SRC
 
+And a little wrapper function will give us the ( *P L U* )
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-LU-decomposition (matrix)
+    "Get the LU decomposition of a matrix. Returns a list of ( P L U )"
+    (let
+        (( gaussian-elimination-matrices (matrix-gaussian-elimination-with-partial-pivoting matrix)))
+      (list
+       (second gaussian-elimination-matrices)
+       (matrix-L-inverse (first gaussian-elimination-matrices))
+       (third gaussian-elimination-matrices))))
+#+END_SRC
 
 
 * TODOs
