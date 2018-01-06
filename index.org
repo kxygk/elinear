@@ -1149,7 +1149,20 @@ The gaussian elimination function will return a list of these three matrixes (*L
        0)))
 #+END_SRC
 
+Getting our final *LU* decomposition is now fairly simple. The /elimination matrix/ we got from Gaussian elimination is equal to *L^{-1}*. So we just need a quick helper function to invert *L* matrices by flipping the sign on all the factors.
 
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-L-inverse (matrix)
+    "Inverts an L matrix by changing the sign on all the factors below the diagonal"
+    (matrix-add
+     (matrix-scalar-product
+      matrix
+      -1)
+     (matrix-scalar-product
+      (matrix-identity
+       (matrix-rows matrix))
+      2)))
+#+END_SRC
 
 
 
