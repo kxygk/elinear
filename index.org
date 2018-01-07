@@ -183,14 +183,20 @@ Multiplying a row times a column is called an ~inner product~
 The ~inner-product~ is defined as the sum of the product of every pair of equivalent elements in the two vectors. The sum will naturally return one scalar value. This operation only makes sense if both the row and column have the same number of values.
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-inner-product (row column)
-    "Multiply a row times a column and returns a scalar"
+  (defun matrix-inner-product-data (row-data column-data)
+    "Multiply a row times a column and returns a scalar. If they're empty you will get zero"
     (reduce
      '+
      (for-each-pair
-      (matrix-data row)
-      (matrix-data column)
-      '*)))
+      row-data
+      column-data
+     '*)))
+
+  (defun matrix-inner-product (row column)
+    "Multiply a row times a column and returns a scalar. If they're empty you will get zero"
+    (matrix-inner-product-data 
+     (matrix-data row)
+     (matrix-data column)))
 #+END_SRC
 #+BEGIN_QUOTE
 ~reduce~ works down the list elements-by-element applying the operator on each cumulative result
