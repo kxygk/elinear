@@ -1183,7 +1183,87 @@ And a little wrapper function will give us the ( *P L U* )
        (third gaussian-elimination-matrices))))
 #+END_SRC
 
+** Using the LU
 
+Now that we can break a linear system *A* into two systems *L* and *U* we need to go back to where we started and solve for inputs given some outputs.We started with *Ax=b* and now we know we can do *PA=LU*. Combinding the two we can get *PAx=Pb* and then *LUx=Pb*. As mentioned before, *b_{new}=Pb*, so for simplicity *LUx=b_{new}*. The new *b* has the same output values, just reordered a bit due to pivot adjustments. Since the order of the original equations generally doesn't have a special significance this is just a minor change.
+
+Next we define a new intermediary vector *Ux=y* so that we can write *Ly=b_{new}*. This value we can solve directly by forward substitution. The first row of the lower triangular matrix gives us a simple solvable equation of the form *ax=b* and every subsequent row adds an additional unknown that we can solve for directly.
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-forward-substitution (lower-triangular-matrix output-vector)
+    "Solve for an input-vector using forward substitution. ie. solve for x in Lx=b where b is OUTPUT-VECTOR and L is the LOWER-TRIANGULAR-MATRIX"
+    (defun matrix-forward-substitution-rec (lower-triangular-matrix input-vector-data output-vector-data row)
+      (cond
+       ((null output-vector-data) ;; BASE CASE
+        input-vector-data)
+       (t                         ;; REST
+        (matrix-forward-substitution-rec
+         lower-triangular-matrix
+         (append
+          input-vector-data
+          (list
+           (/
+            (-
+             (car output-vector-data)
+             ;; on the first iteration this is the product of null vectors.. which in our implementation returns zero
+             (matrix-inner-product-data
+              (matrix-data
+               (matrix-extract-subrow
+                lower-triangular-matrix
+                row
+                0
+                row))
+              input-vector-data))
+            (matrix-get-value lower-triangular-matrix row row))))
+         (cdr output-vector-data)
+         (1+ row)))))
+
+    (matrix-from-data-list
+     (matrix-rows lower-triangular-matrix)
+     1
+     (matrix-forward-substitution-rec
+      lower-triangular-matrix
+      '()
+      (matrix-data output-vector)
+      0)))
+#+END_SRC
+
+
+
+Once we have *y* we can go to *Ux=y* and solve for *x* by back substitution
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+    (defun matrix-back-substitution (upper-triangular-matrix output-vector)
+      "Solve for an input-vector using forward substitution. ie. solve for x in Lx=b where b is OUTPUT-VECTOR and L is the LOWER-TRIANGULAR-MATRIX"
+      (matrix-from-data-list
+       (matrix-rows upper-triangular-matrix)
+       1
+       (nreverse
+        (matrix-data
+         (matrix-forward-substitution
+          (matrix-from-data-list
+           (matrix-rows upper-triangular-matrix)
+           (matrix-rows upper-triangular-matrix) ;; rows == columns
+           (nreverse (matrix-data upper-triangular-matrix)))
+          (matrix-from-data-list
+           (matrix-rows output-vector)
+           1
+           (nreverse (matrix-data output-vector))))))))
+#+END_SRC
+#+BEGIN_QUOTE
+*Not*: Here I'm using a bit of a trick to reuse the forward substitution function
+#+END_QUOTE
+
+Now glueing everything together is now just a few lines of code
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-solve-input (matrix output-vector)
+    "Solve for an input-vector using forward substitution. ie. solve for x in Lx=b where b is OUTPUT-VECTOR and L is the LOWER-TRIANGULAR-MATRIX"
+    (let* ((LU-decomposition (matrix-LU-decomposition matrix))
+           (permuted-output-vector (matrix-product (first LU-decomposition) output-vector))
+           (intermediate-y-vector (matrix-forward-substitution (second LU-decomposition) permuted-output-vector)))
+      (matrix-back-substitution (third LU-decomposition) intermediate-y-vector)))
+#+END_SRC
 * TODOs
 Write a better example that I can expand on easily later
 Write an algo for /Gauss-Jordan elimination/
