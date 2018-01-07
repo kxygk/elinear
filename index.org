@@ -782,7 +782,8 @@ Adding a multiple of a row (or column) /i/ to row (or column) /j/
                '(3 3 (1 0 0 0 1 0 7 0 1))))))
 #+END_SRC
 
-* The LU Decomposition - Gaussian elimination in matrix form
+* The LU Decomposition
+** Gaussian elimination in matrix form
 If linear equations at their simplest take inputs and produce some outputs, then Gaussian elimination is our method of reversing the process. It's a systematic way for taking a known linear system with a given output and solving for its input. Because we know that adding and scaling equations preserves equalities, Gaussian elimination is a scheme for combining and swapping equations so that they reduce to something simpler which can be solved directly. We do this by elimination factors in our equations such that the last one is of the form *\alpha{}x=b*. Equalities being preserved, we can use this simple equation to solve for one of the unknown inputs. Each of the remaining equation includes just one additional unknow input so that through back-substitution we can then solve for all of them one by one. 
 
 So if *Ax=b* is our original system of equations in matrix form, then after Gaussian elimination we can write our simplified systm as *Ux=b_{new}*. Combining our equations has changed our output values, so the *b* does not remain the same.
@@ -810,7 +811,7 @@ On a high level the reduction of the equations happens in two repeated steps on 
 #+BEGIN_QUOTE
 *Note:* Gaussian elimination will only produce a solution for nonsingular square matrices, so the process described only holds for this case
 #+END_QUOTE
-** Elementary Lower Triangular
+*** Elementary Lower Triangular
 The example I used above was done without adjusting any pivots. When reducing the first column we simply eliminated the values below the ~2~ (in the upper left) and we could have done that by multiply our *A* by two ~Type III~ *elementary matrices*
 \begin{equation}
 \begin{bmatrix}
@@ -1009,8 +1010,7 @@ Allowing us to write out *A=LU*
 \end{bmatrix}
 \end{equation}
 
-
-** Partial Pivoting
+*** Partial Pivoting
 
 The previous example showed us how to eliminate columns, but in general before we do elimination we need to adjust the pivot in that column. First we may find that after performing elimination on a previous column we are left with a zero in the current column's pivot position - which makes it impossible to eliminate the factors below it. Secondly, adjusting the pivot can improve our solution's numerical stability. The strategy we're using is called *partial pivoting* and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and can also be done directly by taking the product of our matrix with a ~Type I~ elementary matrix.
 
@@ -1095,7 +1095,7 @@ So if *G_{n}* were the /elementary lower-triangular matrices/ from the last sect
 
 Turning back to our orginal *Ax=b* we can again generate the *b_{new}*: *Ux=(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}b* -> *Ux=b_{new}*. Then again using back substitution we can get a solution for *x*. However this solution has some flaws. When looking at *(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}* we can no longer just copy together factors. The result is messy and involves a lot of products and calculations. Before we added the pivots in, we had manage to get a clean equation *A=LU*, but now building that decomposition suddenly isn't possible directly
 
-** Extracting the pivots
+*** Extracting the pivots
 
 On /page 150/ the book shows us how we can fix this situation by extracting the partial pivots out of column reductions so that instead of: *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}* we are left with something that looks more like  *G_{1}G_{2}..G_{r}F_{1}F_{2}..F_{r}*. And with the *G*'s together we'd have our *L^{-1}* back. Taking the product of the *F*'s gives us a new /permutation matrix/ *P* so that our final equation will look like *L^{-1}PA = U* or more simply *PA=LU*.Looking at how we extract the pivots from a different perspective - the reason we've had the matrices interleaved is because that's how we build them (from right to left). When looking at an arbitrary column we can't get the right value into its pivot position till we'd carried out all the eliminations in the columns before it. The previous eliminations can potentially change all the values in that column and completely change what row has the maximal value. So the /GFGFGF/ sequence for building the reduction matrices (from right to left, column by column)  needs to be observed. However once we've finished Gaussian elimination then we know the final order of the rows in *U*. And what /page 150/ demonstrates is that if we know the row interchanges, we can actually carry them out first as long as we then fix-up our eliminations matrices a bit. Specifically if you adjust some pivot /k/ by swapping it with row /k+i/ then any /previous/ eliminations that involved the row /k/ (and row /k+i/) now needs to be fixed to reflect that you'll be doing the row interchange ahead of time
 
