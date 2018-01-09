@@ -554,13 +554,13 @@ For any matrix *A*, the identity matrix *I* is such that *A*I* = *A* = *I*A*. Gi
              0))
         (if (equal row column)
             (cons
-             1
+             1.0
              (matrix-build-identity-rec
               rank
               row
               (1+ column)))
           (cons
-           0
+           0.0
            (matrix-build-identity-rec
             rank
             row
@@ -582,12 +582,12 @@ Each column of the *identity matrix* is a unit column (denoted as *e_{/j/}*). It
       '()
     (if (zerop index)
         (cons
-         1
+         1.0
          (matrix-unit-rowcol-data
           (1- index)
           (1- size)))
       (cons
-       0
+       0.0
        (matrix-unit-rowcol-data
         (1- index)
         (1- size))))))
