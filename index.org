@@ -786,8 +786,7 @@ Adding a multiple of a row (or column) /i/ to row (or column) /j/
 ** Gaussian elimination in matrix form
 If linear equations at their simplest take inputs and produce some outputs, then Gaussian elimination is our method of reversing the process. It's a systematic way for taking a known linear system with a given output and solving for its input. Because we know that adding and scaling equations preserves equalities, Gaussian elimination is a scheme for combining and swapping equations so that they reduce to something simpler which can be solved directly. We do this by elimination factors in our equations such that the last one is of the form *\alpha{}x=b*. Equalities being preserved, we can use this simple equation to solve for one of the unknown inputs. Each of the remaining equation includes just one additional unknow input so that through back-substitution we can then solve for all of them one by one. 
 
-So if *Ax=b* is our original system of equations in matrix form, then after Gaussian elimination we can write our simplified systm as *Ux=b_{new}*. Combining our equations has changed our output values, so the *b* does not remain the same.
-
+So if *Ax=b* is our original system of equations in matrix form, then after Gaussian elimination we can write our simplified systm as *Ux=b_{new}*. Combining our equations has changed our output values, so the *b* has changes as well.
 
 /From the Example on page 141/ \\
 So if we started with an *A* that looked like this
@@ -802,17 +801,17 @@ Gaussian elimination will give us a *U* that look like this:
 0 & 3 & 3\\
 0 & 0 & 4\\
 \end{bmatrix}
-Looking at *Ux=b_{new}* we see that the last row in *U* [ 0 0 4 ] times the column [ x_{1} x_{2} x_{3} ]^{T}, given a *b_{new}*, gives us a direct solution for x_{3}. Then using *x_{3}* and the previous row/equation we could solve for *x_{2}* and so on.
+Looking at the system of equations *Ux=b_{new}* and  given a *b_{new}* we can see that the last row in *U* - [ 0 0 4 ] times the column [ x_{1} x_{2} x_{3} ]^{T} gives us a direct solution for x_{3}. Then using *x_{3}* and the previous row/equation we could solve for *x_{2}* and so on.
 
-Combining and swapping rows is something we just learned how to do using elementary matrices- so by cleverly taking their product with our matrix *A* we will be able to generate the *U* matrix - in effect reenacting Gaussian elimination using matrix multiplication. After that if we want to get our *b_{new}* we will then just repeat those matrix-products with the output vector *b*. If each row manipulation is some elementary matrix *R_{n}* we could write out the process of Gaussian elimination as a series of products *R_{n}R_{...}R_{2}R_{1}A=U*. With the full equation *Ax=b* it's just the same - we can simply multiply by both sides by the *R* matrices *R_{n}R_{...}R_{2}R_{1}(Ax)=R_{1}R_{2}R_{...}R_{n}b*. Here the left side will equal to *Ux* and the right hand side is our *b_{new}*.
+Combining and swapping rows is something we just learned how to do using elementary matrices- so by cleverly taking their product with our matrix *A* we will be able to generate the *U* matrix - in effect reenacting Gaussian elimination using matrix multiplication. If each row manipulation is some elementary matrix *R_{n}* we could write out the process of Gaussian elimination as a series of products *R_{n}R_{...}R_{2}R_{1}A=U*. Looking at *Ax=b* it's just the same - we simply multiply by both sides by the *R* matrices *R_{n}R_{...}R_{2}R_{1}(Ax)=R_{1}R_{2}R_{...}R_{n}b*. As we were hoping for, the left side will be *Ux* and the right hand side is our *b_{new}*.
 
 On a high level the reduction of the equations happens in two repeated steps on each column: First we adjust the pivot and then we eliminate all the factors below it. In the matrix representation this is equivalent to adjusting the diagonal element and then making all the values below it equal to zero. The combination of the two *reduces the column* and make our system simpler. 
 
 #+BEGIN_QUOTE
 *Note:* Gaussian elimination will only produce a solution for nonsingular square matrices, so the process described only holds for this case
 #+END_QUOTE
-*** Elementary Lower Triangular
-The example I used above was done without adjusting any pivots. When reducing the first column we simply eliminated the values below the ~2~ (in the upper left) and we could have done that by multiply our *A* by two ~Type III~ *elementary matrices*
+*** Elementary Lower Triangular Matrics
+The example I used above was done without adjusting any pivots. We reducing the first column by simply eliminated the values below the ~2~ (in the upper left) and we could have done that by multiply our *A* by two ~Type III~ *elementary matrices* from the left like so:
 \begin{equation}
 \begin{bmatrix}
 1 & 0 & 0\\
@@ -829,13 +828,15 @@ The example I used above was done without adjusting any pivots. When reducing th
 4 & 7 & 7\\
 6 & 18 & 22\\
 \end{bmatrix}
-\end{equation}
-The two ~Type III~ *elementary matrices* on the left side are pretty simple and you can visually see what the ~-2~ and ~-3~ represent. They match the entry in *A* at the same index (row/column), but divided by the value of the pivot (ie: the factor that will eliminate the value). If you carry out the product you will see the first column has been reduced and we are closer to our upper triangular *U*
+=
 \begin{bmatrix}
 2 & 2 & 2\\
 0 & 3 & 3\\
 0 & 12 & 16\\
 \end{bmatrix}
+\end{equation}
+The two ~Type III~ *elementary matrices* on the left are pretty simple and you can visually see what the ~-2~ and ~-3~ represent. They match the entry in *A* at the same index (row/column), but divided by the value of the pivot (ie: the factor that will eliminate the value). The result is that the first column has been reduced and we are closer to our upper triangular *U*
+
 Constructing these simple ~Type III~ matrices is quick and inverting them is as easy as flipping the sign on the factor (ie. if you subtract some multiple of an equation from another, to reverse the operation you'd simply add the same multiple of the equation back)
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-elementary-row-elimination (matrix row column)
@@ -854,7 +855,7 @@ Constructing these simple ~Type III~ matrices is quick and inverting them is as 
 
 #+END_SRC
 
-Looking again at the product of 2 ~Type III~ matrices with our *A*, and using what we know about composing linear systems, we already know that we can take the product of the first two matrices separately. Whatever matrix comes out of that can then me multiplied times *A* to give us the same result.
+Looking again at the product of 2 ~Type III~ matrices with our *A*, and using what we know about composing linear systems, we already know that we can take the product of the first two matrices separately. Whatever matrix comes out we can then multiply times *A* to give us the same result.
 \begin{equation}
 \begin{pmatrix}
 \begin{bmatrix}
@@ -873,6 +874,12 @@ Looking again at the product of 2 ~Type III~ matrices with our *A*, and using wh
 4 & 7 & 7\\
 6 & 18 & 22\\
 \end{bmatrix}
+=
+\begin{bmatrix}
+2 & 2 & 2\\
+0 & 3 & 3\\
+0 & 12 & 16\\
+\end{bmatrix}
 \end{equation}
 
 
@@ -887,9 +894,15 @@ Looking again at the product of 2 ~Type III~ matrices with our *A*, and using wh
 4 & 7 & 7\\
 6 & 18 & 22\\
 \end{bmatrix}
+=
+\begin{bmatrix}
+2 & 2 & 2\\
+0 & 3 & 3\\
+0 & 12 & 16\\
+\end{bmatrix}
 \end{equation}
 
-The result is surprisingly simple and we can see that we didn't really need to carry out the whole matrix product b/c we've simply merged the factors into one matrix. So we can simply build these matrices that eliminate entire columns and skip making ~Type III~ matrices entirely. The new combined matrices are called *Elementary Lower-Triangular Matrix* and are described on /page 142/.
+The result is surprisingly simple and we can see that we didn't really need to carry out the whole matrix product b/c we've simply merged the factors into one matrix. So we can simply build these matrices that eliminate entire columns and skip making tons of ~Type III~ matrices entirely. The new combined matrices are called *Elementary Lower-Triangular Matrix* and are described on /page 142/.
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-elementary-lower-triangular (matrix column-to-clear)
     "Make a matrix that will eliminate all rows in a column below the diagonal (pivot position)"
@@ -940,12 +953,32 @@ The result is surprisingly simple and we can see that we didn't really need to c
 
 #+END_SRC
 
-So now our product of elementary matrices *R_{n}R_{...}R_{2}R_{1}A=U* shortens to something similar *G_{r}G_{...}G_{2}G_{1}A=U*, but where each /Elementary Lower-Triangular Matrix/ *G* takes the place of several *R* matrices.  These *G* matrices also have the property that their inverse is just a matter of flipping the sign of the factors' (you can confirm this by inverting *G=R_{n}R_{...}R_{2}R_{1}* and remembering that *R^{-1}*'s also are ~Type III~ matrices). This allows us to take our equation *G_{1}G_{2}G_{...}G_{n}A=U* and trivially produce the equality *A=G^{-1}_{1}G^{-1}_{2}G^{-1}_{...}G_{n}U* without having to compute a single value. The product *G^{-1}_{1}G^{-1}_{2}G^{-1}_{...}G_{n}* is special and also combines cleanly without the need for any calculation. It combined to form a lower triangular matrix which is repsented by the letter *L*. So we can now write down *A=LU* - from which we get the name of the decomposition.
 
-If in our example we add another matrix to the left to eliminate the second column in *A* and then we were to take its product with our previous /Elementary Lower-Triangular Matrix/ the factors merge into one lower triangular matrix (see /page 143-144/ */eq 3.10.6/* )
+*** Building the *L* Matrix
+So now our product of elementary matrices *R_{n}R_{...}R_{2}R_{1}A=U* shortens to something similar *G_{r}G_{...}G_{2}G_{1}A=U*, but where each /Elementary Lower-Triangular Matrix/ *G* takes the place of several *R* matrices. The product *G_{r}G_{...}G_{2}G_{1}* involved a lot of matrix products, but fortuntately we have a shortcut. These *G* matrices have the property that their inverse is just a matter of flipping the sign of the factors' in their column. You can confirm this by inverting our definition *G=R_{n}R_{...}R_{2}R_{1}* and remembering that the *R*'s just involve a sign flip and *R^{-1}*'s are also ~Type III~ matrices. 
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-invert-elementary-lower-triangular (matrix-elementary-lower-triangular)
+    "Inverts an L matrix by changing the sign on all the factors below the diagonal"
+    (matrix-add
+     (matrix-scalar-product
+      matrix-elementary-lower-triangular
+      -1)
+     (matrix-scalar-product
+      (matrix-identity
+       (matrix-rows matrix-elementary-lower-triangular))
+      2)))
+#+END_SRC
+#+BEGIN_QUOTE
+*TODO*: Add a function to build the inverse directly
+#+END_QUOTE
+
+
+This allows us to take our equation *G_{1}G_{2}G_{...}G_{n}A=U* and trivially produce the interesting equality *A=G^{-1}_{1}G^{-1}_{2}G^{-1}_{...}G_{n}U* without having to compute a single value; just flip the order of the product and flup the signs. Now the product *G^{-1}_{1}G^{-1}_{2}G^{-1}_{...}G_{n}* is special and /page 143/ describes how all the factors just move into one matrix without having to do any calculation. (*Note*: that the same doesn't hold for the non-inverted product!) The combined product produces the lower triangular matrix *L* and lets us write down *A=LU* - from which we get the name of the decomposition. (see /page 143-144/ */eq 3.10.6/* )
+
+To finish our example we will first add another matrix to the left to eliminate the second column in *A* so that we have the equation *G_{2}G_{1}A=U*
 
 \begin{equation}
-\begin{pmatrix}
 \begin{bmatrix}
 1 & 0 & 0\\
 0 & 1 & 0\\
@@ -956,25 +989,16 @@ If in our example we add another matrix to the left to eliminate the second colu
 -2 & 1 & 0\\
 -3 & 0 & 1\\
 \end{bmatrix}
-\end{pmatrix}
 \begin{bmatrix}
 2 & 2 & 2\\
 4 & 7 & 7\\
 6 & 18 & 22\\
 \end{bmatrix}
-\end{equation}
-
-
-\begin{equation}
-\begin{bmatrix}
-1 & 0 & 0\\
--2 & 1 & 0\\
--3 & -4 & 1\\
-\end{bmatrix}
+=
 \begin{bmatrix}
 2 & 2 & 2\\
-4 & 7 & 7\\
-6 & 18 & 22\\
+0 & 3 & 3\\
+0 & 0 & 4\\
 \end{bmatrix}
 \end{equation}
 
@@ -990,7 +1014,61 @@ If in our example we add another matrix to the left to eliminate the second colu
 So you can't reduce the second column before you'd reduced the first!
 #+END_QUOTE
 
-Allowing us to write out *A=LU*
+Next we invert our two 2 *G* matrices and bring them to other side to get *A=G_{1}^{-1}G_{2}^{-1}U* (Notice how the order of the *G*'s has changed b/c of the inversion)
+
+\begin{equation}
+\begin{bmatrix}
+2 & 2 & 2\\
+4 & 7 & 7\\
+6 & 18 & 22\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 4 & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 & 0\\
+2 & 1 & 0\\
+3 & 0 & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+2 & 2 & 2\\
+0 & 3 & 3\\
+0 & 0 & 4\\
+\end{bmatrix}
+\end{equation}
+
+Now multiplying the two inverted matrices is quick and easy b/c we just need to merge the factors into one matrix:
+
+\begin{equation}
+\begin{bmatrix}
+2 & 2 & 2\\
+4 & 7 & 7\\
+6 & 18 & 22\\
+\end{bmatrix}
+=
+\begin{pmatrix}
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 4 & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 & 0\\
+2 & 1 & 0\\
+3 & 0 & 1\\
+\end{bmatrix}
+\end{pmatrix}
+\begin{bmatrix}
+2 & 2 & 2\\
+0 & 3 & 3\\
+0 & 0 & 4\\
+\end{bmatrix}
+\end{equation}
+
+
 \begin{equation}
 \begin{bmatrix}
 2 & 2 & 2\\
@@ -1010,9 +1088,11 @@ Allowing us to write out *A=LU*
 \end{bmatrix}
 \end{equation}
 
+And we are left with *A=LU*
+
 *** Partial Pivoting
 
-The previous example showed us how to eliminate columns, but in general before we do elimination we need to adjust the pivot in that column. First we may find that after performing elimination on a previous column we are left with a zero in the current column's pivot position - which makes it impossible to eliminate the factors below it. Secondly, adjusting the pivot can improve our solution's numerical stability. The strategy we're using is called *partial pivoting* and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and can also be done directly by taking the product of our matrix with a ~Type I~ elementary matrix.
+The previous example showed us how to eliminate columns, but in general before we do elimination we need to adjust the pivot in that column. First we may find that after performing elimination on a previous column we are left with a zero in the current column's pivot position - which makes it impossible to eliminate the factors below it. Second, adjusting the pivot can improve our solution's numerical stability. The strategy we're using is called *partial pivoting* and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and can also be done pretty easily by taking the product of our matrix with a ~Type I~ elementary matrix.
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-partial-pivot (matrix pivot-column)
@@ -1054,7 +1134,7 @@ The previous example showed us how to eliminate columns, but in general before w
         (matrix-rows matrix))))
 #+END_SRC
 
-So if *G_{n}* were the /elementary lower-triangular matrices/ from the last section that performed our eliminations and *F_{n}* are the new *Type I* pivot adjustments, then our reduction need to be rewritten as *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}A=U* where each *G* *F* pair corresponds to a reduction of a column: *(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}A=U*. 
+So if *G_{n}* were the /elementary lower-triangular matrices/ from the last section that performed our eliminations and *F_{n}* are the new *Type I* pivot adjustments then if we adjust our pivot before each elimination, our reduction needs to be rewritten as *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}A=U* where each *G* *F* pair corresponds to a reduction of a column: *(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}A=U*. 
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-reduce-column (matrix column-to-reduce)
@@ -1092,17 +1172,26 @@ So if *G_{n}* were the /elementary lower-triangular matrices/ from the last sect
          (1+ column-to-reduce)))))
     (matrix-to-upper-triangular-rec matrix 0))
 #+END_SRC
+#+BEGIN_QUOTE
+*TODO*: Return *G^{-1}* instead, because it's more directly what we need later
+#+END_QUOTE
 
-Turning back to our orginal *Ax=b* we can again generate the *b_{new}*: *Ux=(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}b* -> *Ux=b_{new}*. Then again using back substitution we can get a solution for *x*. However this solution has some flaws. When looking at *(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}* we can no longer just copy together factors. The result is messy and involves a lot of products and calculations. Before we added the pivots in, we had manage to get a clean equation *A=LU*, but now building that decomposition suddenly isn't possible directly
+Turning back to our orginal *Ax=b* we can again generate the *b_{new}*: *Ux=(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}b* -> *Ux=b_{new}*. Then again using back substitution we can get a solution for *x*. However this solution has some flaws. When looking at *(G_{1}F_{1})_{col_1}(G_{2}F_{2})_{col_2}..(G_{r}F_{r})_{col_r}* we can no longer just copy together factors - even if we invert and reorder the matrices. The result is messy and involves a lot of products and calculations. Before we added the pivots in, we had manage to get a clean equation *A=LU*, and *L* was especially easy to make without carrying out a single matrix product - but now building that decomposition suddenly isn't as easy!
 
 *** Extracting the pivots
 
-On /page 150/ the book shows us how we can fix this situation by extracting the partial pivots out of column reductions so that instead of: *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}* we are left with something that looks more like  *G_{1}G_{2}..G_{r}F_{1}F_{2}..F_{r}*. And with the *G*'s together we'd have our *L^{-1}* back. Taking the product of the *F*'s gives us a new /permutation matrix/ *P* so that our final equation will look like *L^{-1}PA = U* or more simply *PA=LU*.Looking at how we extract the pivots from a different perspective - the reason we've had the matrices interleaved is because that's how we build them (from right to left). When looking at an arbitrary column we can't get the right value into its pivot position till we'd carried out all the eliminations in the columns before it. The previous eliminations can potentially change all the values in that column and completely change what row has the maximal value. So the /GFGFGF/ sequence for building the reduction matrices (from right to left, column by column)  needs to be observed. However once we've finished Gaussian elimination then we know the final order of the rows in *U*. And what /page 150/ demonstrates is that if we know the row interchanges, we can actually carry them out first as long as we then fix-up our eliminations matrices a bit. Specifically if you adjust some pivot /k/ by swapping it with row /k+i/ then any /previous/ eliminations that involved the row /k/ (and row /k+i/) now needs to be fixed to reflect that you'll be doing the row interchange ahead of time
+On /page 150/ the book shows us how we can fix this situation by extracting the partial pivots out of column reductions so that instead of: *G_{1}F_{1}G_{2}F_{2}..G_{r}F_{r}A=U* we are left with something that looks more like  *G_{1}G_{2}..G_{r}F_{1}F_{2}..F_{r}A=U*. With the *G*'s together we can move them back over to the other side to get our easily-computed *L* back. Taking the product of the *F*'s gives us a new /permutation matrix/ *P* so that our final equation will look like *PA=LU*. Looking from a different perspective, the reason we've had the matrices interleaved is because that's how we build them (from right to left). We can't go into the middle of the matrix and adjust the pivot position till we'd carried out all the eliminations in the columns before it. The previous eliminations will mix up the rows and change all the values in that column so the maximal value won't be known ahead of time. So the /GFGFGF/ sequence for building the reduction matrices (from right to left, column by column)  needs to be observed. However once we've finished Gaussian elimination then we know the final order of the rows in *U*. And what /page 150/ demonstrates is that if we know the row interchanges, we can actually carry them out first as long as we then fix-up any /preceding/ eliminations matrices a bit. Specifically if you adjust some pivot /k/ by swapping it with row /k+i/ then any /previous/ eliminations that involved the row /k/ (and row /k+i/) now needs to be fixed to reflect that you'll be doing the row interchange ahead of time.
 
-The way we go about this programmatically is building our pivot and elimination matrices in the /GFGFGF/ order but each time we get a new pivot matrix *F* we adjust the elimination matrices *G* that we've got so far.
+While the *G_{1}G_{2}..G_{r}F_{1}F_{2}..F_{r}A=U* representation is really handy, we would like to build matrices as-we-go and not have to build the interleaved mess and then have to spend time fixing it.
+
+The strategy is that as we /pivot adjust/ and /eliminate/ and /pivot/ and /eliminate/ column by column, slowly building up our *U* matrix, each time we /pivot adjust/ we build our permuation matrix *P* by accumulating the products of the *F*'s and we fix-up the preceeding eliminations some how. The way it's described in the book, they seem to update all the *G* matrices that came before - however in practice it's much easier to skip all the *G*'s and go straight to building the *L* matrix and to adjust the rows there. We cand do that by taking every *G* we get during elimination inverting it to *G^{-1}* and add it to *L* so that *L_{new} = L_{old}G^{-1}*. And then each time we adjust a pivot with a new *F* we update *L* such that *L_{new}=FL_{old}F*.
+
+#+BEGIN_QUOTE
+ To see why this is equivalent to updating all the *G*'s and then inverting at the end, rememeber that *F=F^{-1}* b/c a row exchange is it's own inverse. So *F^2=I*. So if we have are in the middle of Gaussian elimination and have *G_{3}G_{2}G_{1}A=U* and we then  do a pivot adjustment *FG_{3}G_{2}G_{1}A=U* then we can insert a identity matrix *FG_{3}G_{2}G_{1}IA=U* expand it to *FF* so that *FG_{3}G_{2}G_{1}FFA=U* then bring everything to the other side *FA=F^{-1}G_{1}^{-1}G_{2}^{-1}G_{3}^{-1}F^{-1}U* recover our easy-to-compute *L* matrix *FA=F^{-1}LF^{-1}U* simplify our *F^{-1}*'s so that *FA=FLFU* and we have our new *L* in *FA=L_{new}U*
+#+END_QUOTE
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-update-elimination-matrix (elementary-lower-triangular-matrix type-i-interchange-matrix)
+  (defun matrix-update-L-matrix (elementary-lower-triangular-matrix type-i-interchange-matrix)
     "Take an elementary lower triangular matrix and update it to match a row interchange between ROW1 and ROW2 (ZERO indexed)"
       (matrix-product
        type-i-interchange-matrix
@@ -1110,77 +1199,49 @@ The way we go about this programmatically is building our pivot and elimination 
         elementary-lower-triangular-matrix
         type-i-interchange-matrix)))
 #+END_SRC
-As you can see here, I'm doing 2 full matrix products while updating a /Elementary Lower Triangular Matrix/ is simply a matter of swapping 2 numbers. The way it's described in the book, you can go and update each column's /Elementary Lower Triangular Matrix/. However in practice it's easier to accumulate elimination matrices into one matrix and to perform the update on the whole accumulation. A more clever solution might keep track of which column is being eliminated and swap the numbers more quickly - but for simplicity I've kept this double-product solution
+#+BEGIN_QUOTE
+*TODO*: Update to not do two full matrix products. This can be do with some clever number swapping instead
+#+END_QUOTE
 
-With our elimination and pivot adjustments separated we again can take the product of our *G*'s together to get *L^{-1}*. Taking the product of the *F*'s gives us a new /permutation matrix/ *P* so that our final equation will look like *L^{-1}PA = U*. Again moving the eliminations to the other side we get a decomposition of sorts *PA=LU*
-
-The gaussian elimination function will return a list of these three matrixes (*L^{-1}* *P* *U*). At each iteration it will pivot and eliminate a column, adjust the elimination matrix that's been built so far, and then multiply-in the new *G* and *F* that it's just built in to the elimination and permutation matrices.
+So our method will still go reducing the matrix column by column and building up *U*, but in parallel we will be building *L* and *P*. So the result will be the three matrices (*L* *P* *U*).
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-gaussian-elimination-with-partial-pivoting (matrix)
-    "Perform Gaussian elimination with partial pivoting on MATRIX and return the list (L^-1 P U) "
+  (defun matrix-LU-decomposition (matrix)
+    "Perform Gaussian elimination with partial pivoting on MATRIX and return the list (L P U), representing the LU-decomposition "
     (let
         ((rank
           (matrix-rows matrix)))
-      (defun matrix-gaussian-elimination-with-partial-pivoting-rec (elimination-matrix
-                                                                    permutation-matrix
-                                                                    reduced-matrix
-                                                                    column-to-reduce)
+      (defun matrix-LU-decomposition-rec (L-matrix
+                                          P-matrix
+                                          reduced-matrix
+                                          column-to-reduce)
         (cond
          ((equal
            column-to-reduce
            rank)
-          (list elimination-matrix permutation-matrix reduced-matrix))
+          (list L-matrix P-matrix reduced-matrix))
          (t
           (let
               ((current-column-reduction-matrices
                 (matrix-reduce-column
                  reduced-matrix
                  column-to-reduce)))
-            (matrix-gaussian-elimination-with-partial-pivoting-rec
+            (matrix-LU-decomposition-rec
              (matrix-product
-              (first current-column-reduction-matrices)
-              (matrix-update-elimination-matrix       ; update elimination matrices due to partial pivot
-               elimination-matrix
-               (second current-column-reduction-matrices)))
+              (matrix-update-L-matrix       ; update elimination matrices due to partial pivot
+               L-matrix
+               (second current-column-reduction-matrices))
+              (matrix-invert-elementary-lower-triangular (first current-column-reduction-matrices)))
              (matrix-product                              ; update the permutation matrix
               (second current-column-reduction-matrices)
-              permutation-matrix)
+              P-matrix)
              (third current-column-reduction-matrices)    ; the further reduced matrix
              (1+ column-to-reduce))))))
 
-      (matrix-gaussian-elimination-with-partial-pivoting-rec
+      (matrix-LU-decomposition-rec
        (matrix-identity rank)
        (matrix-identity rank)
        matrix
        0)))
-#+END_SRC
-
-Getting our final *LU* decomposition is now fairly simple. The /elimination matrix/ we got from Gaussian elimination is equal to *L^{-1}*. So we just need a quick helper function to invert *L* matrices by flipping the sign on all the factors.
-
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-L-inverse (matrix)
-    "Inverts an L matrix by changing the sign on all the factors below the diagonal"
-    (matrix-add
-     (matrix-scalar-product
-      matrix
-      -1)
-     (matrix-scalar-product
-      (matrix-identity
-       (matrix-rows matrix))
-      2)))
-#+END_SRC
-
-And a little wrapper function will give us the ( *P L U* )
-
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-LU-decomposition (matrix)
-    "Get the LU decomposition of a matrix. Returns a list of ( P L U )"
-    (let
-        (( gaussian-elimination-matrices (matrix-gaussian-elimination-with-partial-pivoting matrix)))
-      (list
-       (second gaussian-elimination-matrices)
-       (matrix-L-inverse (first gaussian-elimination-matrices))
-       (third gaussian-elimination-matrices))))
 #+END_SRC
 
 ** Using the LU
@@ -1260,13 +1321,13 @@ Now glueing everything together is now just a few lines of code
   (defun matrix-solve-input (matrix output-vector)
     "Solve for an input-vector using forward substitution. ie. solve for x in Lx=b where b is OUTPUT-VECTOR and L is the LOWER-TRIANGULAR-MATRIX"
     (let* ((LU-decomposition (matrix-LU-decomposition matrix))
-           (permuted-output-vector (matrix-product (first LU-decomposition) output-vector))
-           (intermediate-y-vector (matrix-forward-substitution (second LU-decomposition) permuted-output-vector)))
+           (permuted-output-vector (matrix-product (second LU-decomposition) output-vector))
+           (intermediate-y-vector (matrix-forward-substitution (first LU-decomposition) permuted-output-vector)))
       (matrix-back-substitution (third LU-decomposition) intermediate-y-vector)))
 #+END_SRC
 * TODOs
 Write a better example that I can expand on easily later
-Write an algo for /Gauss-Jordan elimination/
+matrix-update-elimination-matrix could be optimized to not do any matrix products
 
 * End
 #+BEGIN_QUOTE

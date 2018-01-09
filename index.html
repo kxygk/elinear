@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-01-07 Sun 21:25 -->
+<!-- 2018-01-09 Tue 15:14 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -243,9 +243,10 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#sec-6-1">Gaussian elimination in matrix form</a>
 <ul>
-<li><a href="#sec-6-1-1">Elementary Lower Triangular</a></li>
-<li><a href="#sec-6-1-2">Partial Pivoting</a></li>
-<li><a href="#sec-6-1-3">Extracting the pivots</a></li>
+<li><a href="#sec-6-1-1">Elementary Lower Triangular Matrics</a></li>
+<li><a href="#sec-6-1-2">Building the <b>L</b> Matrix</a></li>
+<li><a href="#sec-6-1-3">Partial Pivoting</a></li>
+<li><a href="#sec-6-1-4">Extracting the pivots</a></li>
 </ul>
 </li>
 <li><a href="#sec-6-2">Using the LU</a></li>
@@ -1268,9 +1269,8 @@ If linear equations at their simplest take inputs and produce some outputs, then
 </p>
 
 <p>
-So if <b>Ax=b</b> is our original system of equations in matrix form, then after Gaussian elimination we can write our simplified systm as <b>Ux=b<sub>new</sub></b>. Combining our equations has changed our output values, so the <b>b</b> does not remain the same.
+So if <b>Ax=b</b> is our original system of equations in matrix form, then after Gaussian elimination we can write our simplified systm as <b>Ux=b<sub>new</sub></b>. Combining our equations has changed our output values, so the <b>b</b> has changes as well.
 </p>
-
 
 <p>
 <i>From the Example on page 141</i> <br  />
@@ -1290,11 +1290,11 @@ Gaussian elimination will give us a <b>U</b> that look like this:
 0 & 0 & 4\\
 \end{bmatrix}
 <p>
-Looking at <b>Ux=b<sub>new</sub></b> we see that the last row in <b>U</b> [ 0 0 4 ] times the column [ x<sub>1</sub> x<sub>2</sub> x<sub>3</sub> ]<sup>T</sup>, given a <b>b<sub>new</sub></b>, gives us a direct solution for x<sub>3</sub>. Then using <b>x<sub>3</sub></b> and the previous row/equation we could solve for <b>x<sub>2</sub></b> and so on.
+Looking at the system of equations <b>Ux=b<sub>new</sub></b> and  given a <b>b<sub>new</sub></b> we can see that the last row in <b>U</b> - [ 0 0 4 ] times the column [ x<sub>1</sub> x<sub>2</sub> x<sub>3</sub> ]<sup>T</sup> gives us a direct solution for x<sub>3</sub>. Then using <b>x<sub>3</sub></b> and the previous row/equation we could solve for <b>x<sub>2</sub></b> and so on.
 </p>
 
 <p>
-Combining and swapping rows is something we just learned how to do using elementary matrices- so by cleverly taking their product with our matrix <b>A</b> we will be able to generate the <b>U</b> matrix - in effect reenacting Gaussian elimination using matrix multiplication. After that if we want to get our <b>b<sub>new</sub></b> we will then just repeat those matrix-products with the output vector <b>b</b>. If each row manipulation is some elementary matrix <b>R<sub>n</sub></b> we could write out the process of Gaussian elimination as a series of products <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>A=U</b>. With the full equation <b>Ax=b</b> it's just the same - we can simply multiply by both sides by the <b>R</b> matrices <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>(Ax)=R<sub>1</sub>R<sub>2</sub>R<sub>&#x2026;</sub>R<sub>n</sub>b</b>. Here the left side will equal to <b>Ux</b> and the right hand side is our <b>b<sub>new</sub></b>.
+Combining and swapping rows is something we just learned how to do using elementary matrices- so by cleverly taking their product with our matrix <b>A</b> we will be able to generate the <b>U</b> matrix - in effect reenacting Gaussian elimination using matrix multiplication. If each row manipulation is some elementary matrix <b>R<sub>n</sub></b> we could write out the process of Gaussian elimination as a series of products <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>A=U</b>. Looking at <b>Ax=b</b> it's just the same - we simply multiply by both sides by the <b>R</b> matrices <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>(Ax)=R<sub>1</sub>R<sub>2</sub>R<sub>&#x2026;</sub>R<sub>n</sub>b</b>. As we were hoping for, the left side will be <b>Ux</b> and the right hand side is our <b>b<sub>new</sub></b>.
 </p>
 
 <p>
@@ -1308,10 +1308,10 @@ On a high level the reduction of the equations happens in two repeated steps on 
 </blockquote>
 </div>
 <div id="outline-container-sec-6-1-1" class="outline-4">
-<h4 id="sec-6-1-1">Elementary Lower Triangular</h4>
+<h4 id="sec-6-1-1">Elementary Lower Triangular Matrics</h4>
 <div class="outline-text-4" id="text-6-1-1">
 <p>
-The example I used above was done without adjusting any pivots. When reducing the first column we simply eliminated the values below the <code>2</code> (in the upper left) and we could have done that by multiply our <b>A</b> by two <code>Type III</code> <b>elementary matrices</b>
+The example I used above was done without adjusting any pivots. We reducing the first column by simply eliminated the values below the <code>2</code> (in the upper left) and we could have done that by multiply our <b>A</b> by two <code>Type III</code> <b>elementary matrices</b> from the left like so:
 </p>
 \begin{equation}
 \begin{bmatrix}
@@ -1329,15 +1329,17 @@ The example I used above was done without adjusting any pivots. When reducing th
 4 & 7 & 7\\
 6 & 18 & 22\\
 \end{bmatrix}
-\end{equation}
-<p>
-The two <code>Type III</code> <b>elementary matrices</b> on the left side are pretty simple and you can visually see what the <code>-2</code> and <code>-3</code> represent. They match the entry in <b>A</b> at the same index (row/column), but divided by the value of the pivot (ie: the factor that will eliminate the value). If you carry out the product you will see the first column has been reduced and we are closer to our upper triangular <b>U</b>
-</p>
+=
 \begin{bmatrix}
 2 & 2 & 2\\
 0 & 3 & 3\\
 0 & 12 & 16\\
 \end{bmatrix}
+\end{equation}
+<p>
+The two <code>Type III</code> <b>elementary matrices</b> on the left are pretty simple and you can visually see what the <code>-2</code> and <code>-3</code> represent. They match the entry in <b>A</b> at the same index (row/column), but divided by the value of the pivot (ie: the factor that will eliminate the value). The result is that the first column has been reduced and we are closer to our upper triangular <b>U</b>
+</p>
+
 <p>
 Constructing these simple <code>Type III</code> matrices is quick and inverting them is as easy as flipping the sign on the factor (ie. if you subtract some multiple of an equation from another, to reverse the operation you'd simply add the same multiple of the equation back)
 </p>
@@ -1360,7 +1362,7 @@ Constructing these simple <code>Type III</code> matrices is quick and inverting 
 </div>
 
 <p>
-Looking again at the product of 2 <code>Type III</code> matrices with our <b>A</b>, and using what we know about composing linear systems, we already know that we can take the product of the first two matrices separately. Whatever matrix comes out of that can then me multiplied times <b>A</b> to give us the same result.
+Looking again at the product of 2 <code>Type III</code> matrices with our <b>A</b>, and using what we know about composing linear systems, we already know that we can take the product of the first two matrices separately. Whatever matrix comes out we can then multiply times <b>A</b> to give us the same result.
 </p>
 \begin{equation}
 \begin{pmatrix}
@@ -1380,6 +1382,12 @@ Looking again at the product of 2 <code>Type III</code> matrices with our <b>A</
 4 & 7 & 7\\
 6 & 18 & 22\\
 \end{bmatrix}
+=
+\begin{bmatrix}
+2 & 2 & 2\\
+0 & 3 & 3\\
+0 & 12 & 16\\
+\end{bmatrix}
 \end{equation}
 
 
@@ -1394,10 +1402,16 @@ Looking again at the product of 2 <code>Type III</code> matrices with our <b>A</
 4 & 7 & 7\\
 6 & 18 & 22\\
 \end{bmatrix}
+=
+\begin{bmatrix}
+2 & 2 & 2\\
+0 & 3 & 3\\
+0 & 12 & 16\\
+\end{bmatrix}
 \end{equation}
 
 <p>
-The result is surprisingly simple and we can see that we didn't really need to carry out the whole matrix product b/c we've simply merged the factors into one matrix. So we can simply build these matrices that eliminate entire columns and skip making <code>Type III</code> matrices entirely. The new combined matrices are called <b>Elementary Lower-Triangular Matrix</b> and are described on <i>page 142</i>.
+The result is surprisingly simple and we can see that we didn't really need to carry out the whole matrix product b/c we've simply merged the factors into one matrix. So we can simply build these matrices that eliminate entire columns and skip making tons of <code>Type III</code> matrices entirely. The new combined matrices are called <b>Elementary Lower-Triangular Matrix</b> and are described on <i>page 142</i>.
 </p>
 <div class="org-src-container">
 
@@ -1449,17 +1463,22 @@ The result is surprisingly simple and we can see that we didn't really need to c
    (matrix-rows matrix)))
 </pre>
 </div>
+</div>
+</div>
 
+
+<div id="outline-container-sec-6-1-2" class="outline-4">
+<h4 id="sec-6-1-2">Building the <b>L</b> Matrix</h4>
+<div class="outline-text-4" id="text-6-1-2">
 <p>
-So now our product of elementary matrices <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>A=U</b> shortens to something similar <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub>A=U</b>, but where each <i>Elementary Lower-Triangular Matrix</i> <b>G</b> takes the place of several <b>R</b> matrices.  These <b>G</b> matrices also have the property that their inverse is just a matter of flipping the sign of the factors' (you can confirm this by inverting <b>G=R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub></b> and remembering that <b>R<sup>-1</sup></b>'s also are <code>Type III</code> matrices). This allows us to take our equation <b>G<sub>1</sub>G<sub>2</sub>G<sub>&#x2026;</sub>G<sub>n</sub>A=U</b> and trivially produce the equality <b>A=G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub>U</b> without having to compute a single value. The product <b>G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub></b> is special and also combines cleanly without the need for any calculation. It combined to form a lower triangular matrix which is repsented by the letter <b>L</b>. So we can now write down <b>A=LU</b> - from which we get the name of the decomposition.
+So now our product of elementary matrices <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>A=U</b> shortens to something similar <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub>A=U</b>, but where each <i>Elementary Lower-Triangular Matrix</i> <b>G</b> takes the place of several <b>R</b> matrices. The product <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub></b> involved a lot of matrix products, but fortuntately we have a shortcut. These <b>G</b> matrices have the property that their inverse is just a matter of flipping the sign of the factors' in their column. You can confirm this by inverting our definition <b>G=R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub></b> and remembering that the <b>R</b>'s just involve a sign flip and <b>R<sup>-1</sup></b>'s are also <code>Type III</code> matrices. This allows us to take our equation <b>G<sub>1</sub>G<sub>2</sub>G<sub>&#x2026;</sub>G<sub>n</sub>A=U</b> and trivially produce the interesting equality <b>A=G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub>U</b> without having to compute a single value; just flip the order of the product and flup the signs. Now the product <b>G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub></b> is special and <i>page 143</i> describes how all the factors just move into one matrix without having to do any calculation. (<b>Note</b>: that the same doesn't hold for the non-inverted product!) The combined product produces the lower triangular matrix <b>L</b> and lets us write down <b>A=LU</b> - from which we get the name of the decomposition. (see <i>page 143-144</i> <b><i>eq 3.10.6</i></b> )
 </p>
 
 <p>
-If in our example we add another matrix to the left to eliminate the second column in <b>A</b> and then we were to take its product with our previous <i>Elementary Lower-Triangular Matrix</i> the factors merge into one lower triangular matrix (see <i>page 143-144</i> <b><i>eq 3.10.6</i></b> )
+To finish our example we will first add another matrix to the left to eliminate the second column in <b>A</b> so that we have the equation <b>G<sub>2</sub>G<sub>1</sub>A=U</b>
 </p>
 
 \begin{equation}
-\begin{pmatrix}
 \begin{bmatrix}
 1 & 0 & 0\\
 0 & 1 & 0\\
@@ -1470,25 +1489,16 @@ If in our example we add another matrix to the left to eliminate the second colu
 -2 & 1 & 0\\
 -3 & 0 & 1\\
 \end{bmatrix}
-\end{pmatrix}
 \begin{bmatrix}
 2 & 2 & 2\\
 4 & 7 & 7\\
 6 & 18 & 22\\
 \end{bmatrix}
-\end{equation}
-
-
-\begin{equation}
-\begin{bmatrix}
-1 & 0 & 0\\
--2 & 1 & 0\\
--3 & -4 & 1\\
-\end{bmatrix}
+=
 \begin{bmatrix}
 2 & 2 & 2\\
-4 & 7 & 7\\
-6 & 18 & 22\\
+0 & 3 & 3\\
+0 & 0 & 4\\
 \end{bmatrix}
 \end{equation}
 
@@ -1509,8 +1519,64 @@ So you can't reduce the second column before you'd reduced the first!
 </blockquote>
 
 <p>
-Allowing us to write out <b>A=LU</b>
+Next we invert our two 2 <b>G</b> matrices and bring them to other side to get <b>A=G<sub>1</sub><sup>-1</sup>G<sub>2</sub><sup>-1</sup>U</b> (Notice how the order of the <b>G</b>'s has changed b/c of the inversion)
 </p>
+
+\begin{equation}
+\begin{bmatrix}
+2 & 2 & 2\\
+4 & 7 & 7\\
+6 & 18 & 22\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 4 & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 & 0\\
+2 & 1 & 0\\
+3 & 0 & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+2 & 2 & 2\\
+0 & 3 & 3\\
+0 & 0 & 4\\
+\end{bmatrix}
+\end{equation}
+
+<p>
+Now multiplying the two inverted matrices is quick and easy b/c we just need to merge the factors into one matrix:
+</p>
+
+\begin{equation}
+\begin{bmatrix}
+2 & 2 & 2\\
+4 & 7 & 7\\
+6 & 18 & 22\\
+\end{bmatrix}
+=
+\begin{pmatrix}
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 4 & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 & 0\\
+2 & 1 & 0\\
+3 & 0 & 1\\
+\end{bmatrix}
+\end{pmatrix}
+\begin{bmatrix}
+2 & 2 & 2\\
+0 & 3 & 3\\
+0 & 0 & 4\\
+\end{bmatrix}
+\end{equation}
+
+
 \begin{equation}
 \begin{bmatrix}
 2 & 2 & 2\\
@@ -1529,14 +1595,18 @@ Allowing us to write out <b>A=LU</b>
 0 & 0 & 4\\
 \end{bmatrix}
 \end{equation}
+
+<p>
+And we are left with <b>A=LU</b>
+</p>
 </div>
 </div>
 
-<div id="outline-container-sec-6-1-2" class="outline-4">
-<h4 id="sec-6-1-2">Partial Pivoting</h4>
-<div class="outline-text-4" id="text-6-1-2">
+<div id="outline-container-sec-6-1-3" class="outline-4">
+<h4 id="sec-6-1-3">Partial Pivoting</h4>
+<div class="outline-text-4" id="text-6-1-3">
 <p>
-The previous example showed us how to eliminate columns, but in general before we do elimination we need to adjust the pivot in that column. First we may find that after performing elimination on a previous column we are left with a zero in the current column's pivot position - which makes it impossible to eliminate the factors below it. Secondly, adjusting the pivot can improve our solution's numerical stability. The strategy we're using is called <b>partial pivoting</b> and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and can also be done directly by taking the product of our matrix with a <code>Type I</code> elementary matrix.
+The previous example showed us how to eliminate columns, but in general before we do elimination we need to adjust the pivot in that column. First we may find that after performing elimination on a previous column we are left with a zero in the current column's pivot position - which makes it impossible to eliminate the factors below it. Second, adjusting the pivot can improve our solution's numerical stability. The strategy we're using is called <b>partial pivoting</b> and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and can also be done pretty easily by taking the product of our matrix with a <code>Type I</code> elementary matrix.
 </p>
 
 <div class="org-src-container">
@@ -1582,7 +1652,7 @@ The previous example showed us how to eliminate columns, but in general before w
 </div>
 
 <p>
-So if <b>G<sub>n</sub></b> were the <i>elementary lower-triangular matrices</i> from the last section that performed our eliminations and <b>F<sub>n</sub></b> are the new <b>Type I</b> pivot adjustments, then our reduction need to be rewritten as <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A=U</b> where each <b>G</b> <b>F</b> pair corresponds to a reduction of a column: <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>A=U</b>. 
+So if <b>G<sub>n</sub></b> were the <i>elementary lower-triangular matrices</i> from the last section that performed our eliminations and <b>F<sub>n</sub></b> are the new <b>Type I</b> pivot adjustments then if we adjust our pivot before each elimination, our reduction needs to be rewritten as <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A=U</b> where each <b>G</b> <b>F</b> pair corresponds to a reduction of a column: <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>A=U</b>. 
 </p>
 
 <div class="org-src-container">
@@ -1625,20 +1695,45 @@ So if <b>G<sub>n</sub></b> were the <i>elementary lower-triangular matrices</i> 
 </div>
 
 <p>
-Turning back to our orginal <b>Ax=b</b> we can again generate the <b>b<sub>new</sub></b>: <b>Ux=(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>b</b> -&gt; <b>Ux=b<sub>new</sub></b>. Then again using back substitution we can get a solution for <b>x</b>. However this solution has some flaws. When looking at <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub></b> we can no longer just copy together factors. The result is messy and involves a lot of products and calculations. Before we added the pivots in, we had manage to get a clean equation <b>A=LU</b>, but now building that decomposition suddenly isn't possible directly
+Turning back to our orginal <b>Ax=b</b> we can again generate the <b>b<sub>new</sub></b>: <b>Ux=(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>b</b> -&gt; <b>Ux=b<sub>new</sub></b>. Then again using back substitution we can get a solution for <b>x</b>. However this solution has some flaws. When looking at <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub></b> we can no longer just copy together factors - even if we invert and reorder the matrices. The result is messy and involves a lot of products and calculations. Before we added the pivots in, we had manage to get a clean equation <b>A=LU</b>, and <b>L</b> was especially easy to make without carrying out a single matrix product - but now building that decomposition suddenly isn't as easy!
 </p>
 </div>
 </div>
 
-<div id="outline-container-sec-6-1-3" class="outline-4">
-<h4 id="sec-6-1-3">Extracting the pivots</h4>
-<div class="outline-text-4" id="text-6-1-3">
+<div id="outline-container-sec-6-1-4" class="outline-4">
+<h4 id="sec-6-1-4">Extracting the pivots</h4>
+<div class="outline-text-4" id="text-6-1-4">
 <p>
-On <i>page 150</i> the book shows us how we can fix this situation by extracting the partial pivots out of column reductions so that instead of: <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub></b> we are left with something that looks more like  <b>G<sub>1</sub>G<sub>2</sub>..G<sub>r</sub>F<sub>1</sub>F<sub>2</sub>..F<sub>r</sub></b>. And with the <b>G</b>'s together we'd have our <b>L<sup>-1</sup></b> back. Taking the product of the <b>F</b>'s gives us a new <i>permutation matrix</i> <b>P</b> so that our final equation will look like <b>L<sup>-1</sup>PA = U</b> or more simply <b>PA=LU</b>.Looking at how we extract the pivots from a different perspective - the reason we've had the matrices interleaved is because that's how we build them (from right to left). When looking at an arbitrary column we can't get the right value into its pivot position till we'd carried out all the eliminations in the columns before it. The previous eliminations can potentially change all the values in that column and completely change what row has the maximal value. So the <i>GFGFGF</i> sequence for building the reduction matrices (from right to left, column by column)  needs to be observed. However once we've finished Gaussian elimination then we know the final order of the rows in <b>U</b>. And what <i>page 150</i> demonstrates is that if we know the row interchanges, we can actually carry them out first as long as we then fix-up our eliminations matrices a bit. Specifically if you adjust some pivot <i>k</i> by swapping it with row <i>k+i</i> then any <i>previous</i> eliminations that involved the row <i>k</i> (and row <i>k+i</i>) now needs to be fixed to reflect that you'll be doing the row interchange ahead of time
+On <i>page 150</i> the book shows us how we can fix this situation by extracting the partial pivots out of column reductions so that instead of: <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A=U</b> we are left with something that looks more like  <b>G<sub>1</sub>G<sub>2</sub>..G<sub>r</sub>F<sub>1</sub>F<sub>2</sub>..F<sub>r</sub>A=U</b>. With the <b>G</b>'s together we can move them back over to the other side to get our easily-computed <b>L</b> back. Taking the product of the <b>F</b>'s gives us a new <i>permutation matrix</i> <b>P</b> so that our final equation will look like <b>PA=LU</b>. Looking from a different perspective, the reason we've had the matrices interleaved is because that's how we build them (from right to left). We can't go into the middle of the matrix and adjust the pivot position till we'd carried out all the eliminations in the columns before it. The previous eliminations will mix up the rows and change all the values in that column so the maximal value won't be known ahead of time. So the <i>GFGFGF</i> sequence for building the reduction matrices (from right to left, column by column)  needs to be observed. However once we've finished Gaussian elimination then we know the final order of the rows in <b>U</b>. And what <i>page 150</i> demonstrates is that if we know the row interchanges, we can actually carry them out first as long as we then fix-up any <i>preceding</i> eliminations matrices a bit. Specifically if you adjust some pivot <i>k</i> by swapping it with row <i>k+i</i> then any <i>previous</i> eliminations that involved the row <i>k</i> (and row <i>k+i</i>) now needs to be fixed to reflect that you'll be doing the row interchange ahead of time.
 </p>
 
 <p>
-The way we go about this programmatically is building our pivot and elimination matrices in the <i>GFGFGF</i> order but each time we get a new pivot matrix <b>F</b> we adjust the elimination matrices <b>G</b> that we've got so far.
+So as we <i>pivot adjust</i> and <i>eliminate</i> and <i>pivot</i> and <i>eliminate</i> column by column, slowly building up our <b>U</b> matrix, each time we <i>pivot adjust</i> we fix-up the preceeding eliminations and move the pivot adjustment to be done first. The way it's described in the book, they seem to update all the <b>G</b> matrices that came before - however in practice it's much easier to skip to building the <b>L</b> matrix separately and just adjust the rows there. Each time we eliminate, we take the <b>G</b> matrix, invert it to <b>G<sup>-1</sup></b> and add it to <b>L</b> so that <b>L<sub>new</sub> = L<sub>old</sub>G<sup>-1</sup></b>. And each time we adjust a pivot with a new <b>F</b> we update <b>L</b> such that <b>L<sub>new</sub>=FL<sub>old</sub>F</b>.
+</p>
+
+<blockquote>
+<p>
+For a simple proof, rememerbe that <b>F=F<sup>-1</sup></b> b/c a row exchange is it's own inverse. So <b>F<sup>2</sup>=I</b>. If we have <b>G<sub>3</sub>G<sub>2</sub>G<sub>1</sub>A=U</b> and now we now do a pivot adjustment <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>A=U</b> -&gt; <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>IA=U</b> -&gt; <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>FFA=U</b> -&gt; <b>FA=F<sup>-1</sup>G<sub>1</sub><sup>-1</sup>G<sub>2</sub><sup>-1</sup>G<sub>3</sub><sup>-1</sup>F<sup>-1</sup>U</b> -&gt; <b>FA=F<sup>-1</sup>LF<sup>-1</sup>U</b> -&gt; <b>FA=FLFU</b> -&gt; <b>FA=L<sub>new</sub>U</b>
+</p>
+</blockquote>
+
+
+<p>
+we can at the same time factor out the pivot adjustments <b>F</b>. With our elimination and pivot adjustments separated we take our <b>G</b>'s as we create them, invert them and build our <b>L</b> matrix. Taking the product of the <b>F</b>'s gives us a new <i>permutation matrix</i> <b>P</b> so that our final equation will look like <b>L<sup>-1</sup>PA = U</b>. Again moving the eliminations to the other side we get a decomposition of sorts <b>PA=LU</b>
+</p>
+
+
+
+<p>
+The way it's described in the book, they seem to update each column's elimination <b>G</b> matrix one at a time. However in practice it's easier to just build the <b>L</b> matrix immediately and swap the rows in <b>L</b> (as sort-of described on <i>page 151</i>). <b>Note</b>: That here I'm doing two matrix products here, while a more clever solution might keep track of which column is being eliminated and swap the numbers more quickly - but for simplicity I've kept this double-product solution for now
+</p>
+
+
+
+
+
+<p>
+So as we go about building our pivot and elimination matrices in the <i>GFGFGF</i> order, each time we get a new pivot matrix <b>F</b> we adjust the elimination matrices <b>G</b> that we've got so far so that we can treat the <b>F</b>'s as if they are multiplied times A first
 </p>
 
 <div class="org-src-container">
@@ -1652,13 +1747,7 @@ The way we go about this programmatically is building our pivot and elimination 
       type-i-interchange-matrix)))
 </pre>
 </div>
-<p>
-As you can see here, I'm doing 2 full matrix products while updating a <i>Elementary Lower Triangular Matrix</i> is simply a matter of swapping 2 numbers. The way it's described in the book, you can go and update each column's <i>Elementary Lower Triangular Matrix</i>. However in practice it's easier to accumulate elimination matrices into one matrix and to perform the update on the whole accumulation. A more clever solution might keep track of which column is being eliminated and swap the numbers more quickly - but for simplicity I've kept this double-product solution
-</p>
 
-<p>
-With our elimination and pivot adjustments separated we again can take the product of our <b>G</b>'s together to get <b>L<sup>-1</sup></b>. Taking the product of the <b>F</b>'s gives us a new <i>permutation matrix</i> <b>P</b> so that our final equation will look like <b>L<sup>-1</sup>PA = U</b>. Again moving the eliminations to the other side we get a decomposition of sorts <b>PA=LU</b>
-</p>
 
 <p>
 The gaussian elimination function will return a list of these three matrixes (<b>L<sup>-1</sup></b> <b>P</b> <b>U</b>). At each iteration it will pivot and eliminate a column, adjust the elimination matrix that's been built so far, and then multiply-in the new <b>G</b> and <b>F</b> that it's just built in to the elimination and permutation matrices.
@@ -1850,7 +1939,7 @@ Now glueing everything together is now just a few lines of code
 <div class="outline-text-2" id="text-7">
 <p>
 Write a better example that I can expand on easily later
-Write an algo for <i>Gauss-Jordan elimination</i>
+matrix-update-elimination-matrix could be optimized to not do any matrix products
 </p>
 </div>
 </div>
@@ -1878,7 +1967,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-01-07 Sun 21:25</p>
+<p class="date">Created: 2018-01-09 Tue 15:14</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
