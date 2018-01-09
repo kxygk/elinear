@@ -1203,22 +1203,22 @@ The strategy is that as we /pivot adjust/ and /eliminate/ and /pivot/ and /elimi
 *TODO*: Update to not do two full matrix products. This can be do with some clever number swapping instead
 #+END_QUOTE
 
-So our method will still go reducing the matrix column by column and building up *U*, but in parallel we will be building *L* and *P*. So the result will be the three matrices (*L* *P* *U*).
+So our method will still go reducing the matrix column by column and building up *U*, but in parallel we will be building *L* and *P*. So the result will be the three matrices (*P* *L* *U*).
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-LU-decomposition (matrix)
-    "Perform Gaussian elimination with partial pivoting on MATRIX and return the list (L P U), representing the LU-decomposition "
+    "Perform Gaussian elimination with partial pivoting on MATRIX and return the list (P L U), representing the LU-decomposition "
     (let
         ((rank
           (matrix-rows matrix)))
-      (defun matrix-LU-decomposition-rec (L-matrix
-                                          P-matrix
+      (defun matrix-LU-decomposition-rec (P-matrix
+                                          L-matrix
                                           reduced-matrix
                                           column-to-reduce)
         (cond
          ((equal
            column-to-reduce
            rank)
-          (list L-matrix P-matrix reduced-matrix))
+          (list P-matrix L-matrix  reduced-matrix))
          (t
           (let
               ((current-column-reduction-matrices
@@ -1226,17 +1226,17 @@ So our method will still go reducing the matrix column by column and building up
                  reduced-matrix
                  column-to-reduce)))
             (matrix-LU-decomposition-rec
+             (matrix-product                              ; update the permutation matrix
+              (second current-column-reduction-matrices)
+              P-matrix)
              (matrix-product
               (matrix-update-L-matrix       ; update elimination matrices due to partial pivot
                L-matrix
                (second current-column-reduction-matrices))
               (matrix-invert-elementary-lower-triangular (first current-column-reduction-matrices)))
-             (matrix-product                              ; update the permutation matrix
-              (second current-column-reduction-matrices)
-              P-matrix)
              (third current-column-reduction-matrices)    ; the further reduced matrix
              (1+ column-to-reduce))))))
-
+      
       (matrix-LU-decomposition-rec
        (matrix-identity rank)
        (matrix-identity rank)
@@ -1321,8 +1321,8 @@ Now glueing everything together is now just a few lines of code
   (defun matrix-solve-input (matrix output-vector)
     "Solve for an input-vector using forward substitution. ie. solve for x in Lx=b where b is OUTPUT-VECTOR and L is the LOWER-TRIANGULAR-MATRIX"
     (let* ((LU-decomposition (matrix-LU-decomposition matrix))
-           (permuted-output-vector (matrix-product (second LU-decomposition) output-vector))
-           (intermediate-y-vector (matrix-forward-substitution (first LU-decomposition) permuted-output-vector)))
+           (permuted-output-vector (matrix-product (first LU-decomposition) output-vector))
+           (intermediate-y-vector (matrix-forward-substitution (second LU-decomposition) permuted-output-vector)))
       (matrix-back-substitution (third LU-decomposition) intermediate-y-vector)))
 #+END_SRC
 * TODOs

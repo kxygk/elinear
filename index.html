@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-01-09 Tue 15:14 -->
+<!-- 2018-01-09 Tue 20:12 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -1009,13 +1009,13 @@ For any matrix <b>A</b>, the identity matrix <b>I</b> is such that <b>A*I</b> = 
            0))
       (<span style="color: #00af00;">if</span> (equal row column)
           (cons
-           1
+           1.0
            (matrix-build-identity-rec
             rank
             row
             (1+ column)))
         (cons
-         0
+         0.0
          (matrix-build-identity-rec
           rank
           row
@@ -1045,12 +1045,12 @@ Each column of the <b>identity matrix</b> is a unit column (denoted as <b>e<sub>
     '()
   (<span style="color: #00af00;">if</span> (zerop index)
       (cons
-       1
+       1.0
        (matrix-unit-rowcol-data
         (1- index)
         (1- size)))
     (cons
-     0
+     0.0
      (matrix-unit-rowcol-data
       (1- index)
       (1- size))))))
@@ -1471,7 +1471,32 @@ The result is surprisingly simple and we can see that we didn't really need to c
 <h4 id="sec-6-1-2">Building the <b>L</b> Matrix</h4>
 <div class="outline-text-4" id="text-6-1-2">
 <p>
-So now our product of elementary matrices <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>A=U</b> shortens to something similar <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub>A=U</b>, but where each <i>Elementary Lower-Triangular Matrix</i> <b>G</b> takes the place of several <b>R</b> matrices. The product <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub></b> involved a lot of matrix products, but fortuntately we have a shortcut. These <b>G</b> matrices have the property that their inverse is just a matter of flipping the sign of the factors' in their column. You can confirm this by inverting our definition <b>G=R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub></b> and remembering that the <b>R</b>'s just involve a sign flip and <b>R<sup>-1</sup></b>'s are also <code>Type III</code> matrices. This allows us to take our equation <b>G<sub>1</sub>G<sub>2</sub>G<sub>&#x2026;</sub>G<sub>n</sub>A=U</b> and trivially produce the interesting equality <b>A=G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub>U</b> without having to compute a single value; just flip the order of the product and flup the signs. Now the product <b>G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub></b> is special and <i>page 143</i> describes how all the factors just move into one matrix without having to do any calculation. (<b>Note</b>: that the same doesn't hold for the non-inverted product!) The combined product produces the lower triangular matrix <b>L</b> and lets us write down <b>A=LU</b> - from which we get the name of the decomposition. (see <i>page 143-144</i> <b><i>eq 3.10.6</i></b> )
+So now our product of elementary matrices <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>A=U</b> shortens to something similar <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub>A=U</b>, but where each <i>Elementary Lower-Triangular Matrix</i> <b>G</b> takes the place of several <b>R</b> matrices. The product <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub></b> involved a lot of matrix products, but fortuntately we have a shortcut. These <b>G</b> matrices have the property that their inverse is just a matter of flipping the sign of the factors' in their column. You can confirm this by inverting our definition <b>G=R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub></b> and remembering that the <b>R</b>'s just involve a sign flip and <b>R<sup>-1</sup></b>'s are also <code>Type III</code> matrices. 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-invert-elementary-lower-triangular</span> (matrix-elementary-lower-triangular)
+  <span style="color: #cc0000;">"Inverts an L matrix by changing the sign on all the factors below the diagonal"</span>
+  (matrix-add
+   (matrix-scalar-product
+    matrix-elementary-lower-triangular
+    -1)
+   (matrix-scalar-product
+    (matrix-identity
+     (matrix-rows matrix-elementary-lower-triangular))
+    2)))
+</pre>
+</div>
+<blockquote>
+<p>
+<b>TODO</b>: Add a function to build the inverse directly
+</p>
+</blockquote>
+
+
+<p>
+This allows us to take our equation <b>G<sub>1</sub>G<sub>2</sub>G<sub>&#x2026;</sub>G<sub>n</sub>A=U</b> and trivially produce the interesting equality <b>A=G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub>U</b> without having to compute a single value; just flip the order of the product and flup the signs. Now the product <b>G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub></b> is special and <i>page 143</i> describes how all the factors just move into one matrix without having to do any calculation. (<b>Note</b>: that the same doesn't hold for the non-inverted product!) The combined product produces the lower triangular matrix <b>L</b> and lets us write down <b>A=LU</b> - from which we get the name of the decomposition. (see <i>page 143-144</i> <b><i>eq 3.10.6</i></b> )
 </p>
 
 <p>
@@ -1693,6 +1718,11 @@ So if <b>G<sub>n</sub></b> were the <i>elementary lower-triangular matrices</i> 
   (matrix-to-upper-triangular-rec matrix 0))
 </pre>
 </div>
+<blockquote>
+<p>
+<b>TODO</b>: Return <b>G<sup>-1</sup></b> instead, because it's more directly what we need later
+</p>
+</blockquote>
 
 <p>
 Turning back to our orginal <b>Ax=b</b> we can again generate the <b>b<sub>new</sub></b>: <b>Ux=(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>b</b> -&gt; <b>Ux=b<sub>new</sub></b>. Then again using back substitution we can get a solution for <b>x</b>. However this solution has some flaws. When looking at <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub></b> we can no longer just copy together factors - even if we invert and reorder the matrices. The result is messy and involves a lot of products and calculations. Before we added the pivots in, we had manage to get a clean equation <b>A=LU</b>, and <b>L</b> was especially easy to make without carrying out a single matrix product - but now building that decomposition suddenly isn't as easy!
@@ -1708,37 +1738,22 @@ On <i>page 150</i> the book shows us how we can fix this situation by extracting
 </p>
 
 <p>
-So as we <i>pivot adjust</i> and <i>eliminate</i> and <i>pivot</i> and <i>eliminate</i> column by column, slowly building up our <b>U</b> matrix, each time we <i>pivot adjust</i> we fix-up the preceeding eliminations and move the pivot adjustment to be done first. The way it's described in the book, they seem to update all the <b>G</b> matrices that came before - however in practice it's much easier to skip to building the <b>L</b> matrix separately and just adjust the rows there. Each time we eliminate, we take the <b>G</b> matrix, invert it to <b>G<sup>-1</sup></b> and add it to <b>L</b> so that <b>L<sub>new</sub> = L<sub>old</sub>G<sup>-1</sup></b>. And each time we adjust a pivot with a new <b>F</b> we update <b>L</b> such that <b>L<sub>new</sub>=FL<sub>old</sub>F</b>.
+While the <b>G<sub>1</sub>G<sub>2</sub>..G<sub>r</sub>F<sub>1</sub>F<sub>2</sub>..F<sub>r</sub>A=U</b> representation is really handy, we would like to build matrices as-we-go and not have to build the interleaved mess and then have to spend time fixing it.
+</p>
+
+<p>
+The strategy is that as we <i>pivot adjust</i> and <i>eliminate</i> and <i>pivot</i> and <i>eliminate</i> column by column, slowly building up our <b>U</b> matrix, each time we <i>pivot adjust</i> we build our permuation matrix <b>P</b> by accumulating the products of the <b>F</b>'s and we fix-up the preceeding eliminations some how. The way it's described in the book, they seem to update all the <b>G</b> matrices that came before - however in practice it's much easier to skip all the <b>G</b>'s and go straight to building the <b>L</b> matrix and to adjust the rows there. We cand do that by taking every <b>G</b> we get during elimination inverting it to <b>G<sup>-1</sup></b> and add it to <b>L</b> so that <b>L<sub>new</sub> = L<sub>old</sub>G<sup>-1</sup></b>. And then each time we adjust a pivot with a new <b>F</b> we update <b>L</b> such that <b>L<sub>new</sub>=FL<sub>old</sub>F</b>.
 </p>
 
 <blockquote>
 <p>
-For a simple proof, rememerbe that <b>F=F<sup>-1</sup></b> b/c a row exchange is it's own inverse. So <b>F<sup>2</sup>=I</b>. If we have <b>G<sub>3</sub>G<sub>2</sub>G<sub>1</sub>A=U</b> and now we now do a pivot adjustment <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>A=U</b> -&gt; <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>IA=U</b> -&gt; <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>FFA=U</b> -&gt; <b>FA=F<sup>-1</sup>G<sub>1</sub><sup>-1</sup>G<sub>2</sub><sup>-1</sup>G<sub>3</sub><sup>-1</sup>F<sup>-1</sup>U</b> -&gt; <b>FA=F<sup>-1</sup>LF<sup>-1</sup>U</b> -&gt; <b>FA=FLFU</b> -&gt; <b>FA=L<sub>new</sub>U</b>
+To see why this is equivalent to updating all the <b>G</b>'s and then inverting at the end, rememeber that <b>F=F<sup>-1</sup></b> b/c a row exchange is it's own inverse. So <b>F<sup>2</sup>=I</b>. So if we have are in the middle of Gaussian elimination and have <b>G<sub>3</sub>G<sub>2</sub>G<sub>1</sub>A=U</b> and we then  do a pivot adjustment <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>A=U</b> then we can insert a identity matrix <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>IA=U</b> expand it to <b>FF</b> so that <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>FFA=U</b> then bring everything to the other side <b>FA=F<sup>-1</sup>G<sub>1</sub><sup>-1</sup>G<sub>2</sub><sup>-1</sup>G<sub>3</sub><sup>-1</sup>F<sup>-1</sup>U</b> recover our easy-to-compute <b>L</b> matrix <b>FA=F<sup>-1</sup>LF<sup>-1</sup>U</b> simplify our <b>F<sup>-1</sup></b>'s so that <b>FA=FLFU</b> and we have our new <b>L</b> in <b>FA=L<sub>new</sub>U</b>
 </p>
 </blockquote>
 
-
-<p>
-we can at the same time factor out the pivot adjustments <b>F</b>. With our elimination and pivot adjustments separated we take our <b>G</b>'s as we create them, invert them and build our <b>L</b> matrix. Taking the product of the <b>F</b>'s gives us a new <i>permutation matrix</i> <b>P</b> so that our final equation will look like <b>L<sup>-1</sup>PA = U</b>. Again moving the eliminations to the other side we get a decomposition of sorts <b>PA=LU</b>
-</p>
-
-
-
-<p>
-The way it's described in the book, they seem to update each column's elimination <b>G</b> matrix one at a time. However in practice it's easier to just build the <b>L</b> matrix immediately and swap the rows in <b>L</b> (as sort-of described on <i>page 151</i>). <b>Note</b>: That here I'm doing two matrix products here, while a more clever solution might keep track of which column is being eliminated and swap the numbers more quickly - but for simplicity I've kept this double-product solution for now
-</p>
-
-
-
-
-
-<p>
-So as we go about building our pivot and elimination matrices in the <i>GFGFGF</i> order, each time we get a new pivot matrix <b>F</b> we adjust the elimination matrices <b>G</b> that we've got so far so that we can treat the <b>F</b>'s as if they are multiplied times A first
-</p>
-
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-update-elimination-matrix</span> (elementary-lower-triangular-matrix type-i-interchange-matrix)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-update-L-matrix</span> (elementary-lower-triangular-matrix type-i-interchange-matrix)
   <span style="color: #cc0000;">"Take an elementary lower triangular matrix and update it to match a row interchange between ROW1 and ROW2 (ZERO indexed)"</span>
     (matrix-product
      type-i-interchange-matrix
@@ -1747,86 +1762,54 @@ So as we go about building our pivot and elimination matrices in the <i>GFGFGF</
       type-i-interchange-matrix)))
 </pre>
 </div>
-
+<blockquote>
+<p>
+<b>TODO</b>: Update to not do two full matrix products. This can be do with some clever number swapping instead
+</p>
+</blockquote>
 
 <p>
-The gaussian elimination function will return a list of these three matrixes (<b>L<sup>-1</sup></b> <b>P</b> <b>U</b>). At each iteration it will pivot and eliminate a column, adjust the elimination matrix that's been built so far, and then multiply-in the new <b>G</b> and <b>F</b> that it's just built in to the elimination and permutation matrices.
+So our method will still go reducing the matrix column by column and building up <b>U</b>, but in parallel we will be building <b>L</b> and <b>P</b>. So the result will be the three matrices (<b>P</b> <b>L</b> <b>U</b>).
 </p>
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-gaussian-elimination-with-partial-pivoting</span> (matrix)
-  <span style="color: #cc0000;">"Perform Gaussian elimination with partial pivoting on MATRIX and return the list (L^-1 P U) "</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-LU-decomposition</span> (matrix)
+  <span style="color: #cc0000;">"Perform Gaussian elimination with partial pivoting on MATRIX and return the list (P L U), representing the LU-decomposition "</span>
   (<span style="color: #00af00;">let</span>
       ((rank
         (matrix-rows matrix)))
-    (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-gaussian-elimination-with-partial-pivoting-rec</span> (elimination-matrix
-                                                                  permutation-matrix
-                                                                  reduced-matrix
-                                                                  column-to-reduce)
+    (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-LU-decomposition-rec</span> (P-matrix
+                                        L-matrix
+                                        reduced-matrix
+                                        column-to-reduce)
       (<span style="color: #00af00;">cond</span>
        ((equal
          column-to-reduce
          rank)
-        (list elimination-matrix permutation-matrix reduced-matrix))
+        (list P-matrix L-matrix  reduced-matrix))
        (t
         (<span style="color: #00af00;">let</span>
             ((current-column-reduction-matrices
               (matrix-reduce-column
                reduced-matrix
                column-to-reduce)))
-          (matrix-gaussian-elimination-with-partial-pivoting-rec
-           (matrix-product
-            (first current-column-reduction-matrices)
-            (matrix-update-elimination-matrix       <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">update elimination matrices due to partial pivot</span>
-             elimination-matrix
-             (second current-column-reduction-matrices)))
+          (matrix-LU-decomposition-rec
            (matrix-product                              <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">update the permutation matrix</span>
             (second current-column-reduction-matrices)
-            permutation-matrix)
+            P-matrix)
+           (matrix-product
+            (matrix-update-L-matrix       <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">update elimination matrices due to partial pivot</span>
+             L-matrix
+             (second current-column-reduction-matrices))
+            (matrix-invert-elementary-lower-triangular (first current-column-reduction-matrices)))
            (third current-column-reduction-matrices)    <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">the further reduced matrix</span>
            (1+ column-to-reduce))))))
 
-    (matrix-gaussian-elimination-with-partial-pivoting-rec
+    (matrix-LU-decomposition-rec
      (matrix-identity rank)
      (matrix-identity rank)
      matrix
      0)))
-</pre>
-</div>
-
-<p>
-Getting our final <b>LU</b> decomposition is now fairly simple. The <i>elimination matrix</i> we got from Gaussian elimination is equal to <b>L<sup>-1</sup></b>. So we just need a quick helper function to invert <b>L</b> matrices by flipping the sign on all the factors.
-</p>
-
-<div class="org-src-container">
-
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-L-inverse</span> (matrix)
-  <span style="color: #cc0000;">"Inverts an L matrix by changing the sign on all the factors below the diagonal"</span>
-  (matrix-add
-   (matrix-scalar-product
-    matrix
-    -1)
-   (matrix-scalar-product
-    (matrix-identity
-     (matrix-rows matrix))
-    2)))
-</pre>
-</div>
-
-<p>
-And a little wrapper function will give us the ( <b>P L U</b> )
-</p>
-
-<div class="org-src-container">
-
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-LU-decomposition</span> (matrix)
-  <span style="color: #cc0000;">"Get the LU decomposition of a matrix. Returns a list of ( P L U )"</span>
-  (<span style="color: #00af00;">let</span>
-      (( gaussian-elimination-matrices (matrix-gaussian-elimination-with-partial-pivoting matrix)))
-    (list
-     (second gaussian-elimination-matrices)
-     (matrix-L-inverse (first gaussian-elimination-matrices))
-     (third gaussian-elimination-matrices))))
 </pre>
 </div>
 </div>
@@ -1967,7 +1950,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-01-09 Tue 15:14</p>
+<p class="date">Created: 2018-01-09 Tue 20:12</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
