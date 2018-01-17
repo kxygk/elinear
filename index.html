@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-01-09 Tue 20:12 -->
+<!-- 2018-01-17 Wed 15:12 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -250,6 +250,7 @@ for the JavaScript code in this tag.
 </ul>
 </li>
 <li><a href="#sec-6-2">Using the LU</a></li>
+<li><a href="#sec-6-3">Notes on getting good numerical solution</a></li>
 </ul>
 </li>
 <li><a href="#sec-7">TODOs</a></li>
@@ -1916,7 +1917,24 @@ Now glueing everything together is now just a few lines of code
 </div>
 </div>
 </div>
+<div id="outline-container-sec-6-3" class="outline-3">
+<h3 id="sec-6-3">Notes on getting good numerical solution</h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+<i>Section 1.5</i> goes into a good amount of detail of why floating point arithmetic will introduce errors and how to mitigate the problem. Partial pivoting will provide a bit of help, however it's also suggested to use <b>row-scaling</b> and <b>column-scaling</b>.
+</p>
+
+<p>
+<b>Row-scaling</b> will alter the magnitude of the output value of your linear system, while <b>column scaling</b> will alter the scale of your inputs. Don't hesitate to have the inputs and outputs use different units. <i>page 28</i> suggests scaling the rows such that the maximum magnitude of each row is equal to <b>1</b> (ie. divide the row by the largest coefficient)
+</p>
+
+<p>
+The topic of <i>residuals</i>, <i>sensitivity</i> and <i>coditioning</i> will be revisited later
+</p>
 </div>
+</div>
+</div>
+
 <div id="outline-container-sec-7" class="outline-2">
 <h2 id="sec-7">TODOs</h2>
 <div class="outline-text-2" id="text-7">
@@ -1950,7 +1968,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-01-09 Tue 20:12</p>
+<p class="date">Created: 2018-01-17 Wed 15:12</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

@@ -1325,6 +1325,14 @@ Now glueing everything together is now just a few lines of code
            (intermediate-y-vector (matrix-forward-substitution (second LU-decomposition) permuted-output-vector)))
       (matrix-back-substitution (third LU-decomposition) intermediate-y-vector)))
 #+END_SRC
+** Notes on getting good numerical solution
+
+/Section 1.5/ goes into a good amount of detail of why floating point arithmetic will introduce errors and how to mitigate the problem. Partial pivoting will provide a bit of help, however it's also suggested to use *row-scaling* and *column-scaling*.
+
+*Row-scaling* will alter the magnitude of the output value of your linear system, while *column scaling* will alter the scale of your inputs. Don't hesitate to have the inputs and outputs use different units. /page 28/ suggests scaling the rows such that the maximum magnitude of each row is equal to *1* (ie. divide the row by the largest coefficient)
+
+The topic of /residuals/, /sensitivity/ and /coditioning/ will be revisited later
+
 * TODOs
 Write a better example that I can expand on easily later
 matrix-update-elimination-matrix could be optimized to not do any matrix products
