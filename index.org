@@ -1334,8 +1334,14 @@ Now glueing everything together is now just a few lines of code
 The topic of /residuals/, /sensitivity/ and /coditioning/ will be revisited later
 
 * TODOs
-Write a better example that I can expand on easily later
-matrix-update-elimination-matrix could be optimized to not do any matrix products
+- Write a better example that I can expand on easily later
+- matrix-update-elimination-matrix could be optimized to not do any matrix products
+- The LU Decomp can all be done with no matrix-products.. :/
+- Compute *A^{-1}* using the *LU* decomp (see page 148)
+- Implement the Sherman-Morrison update formula
+- Sensitivity/Condition numbers needs to be revisited and expanded on (page 126-128)
+- Do exercise 3.8.8
+
 
 * End
 #+BEGIN_QUOTE
