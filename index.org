@@ -1245,13 +1245,17 @@ So our method will still go reducing the matrix column by column and building up
 #+END_SRC
 
 * Using the LU
-*** Notes on getting good numerical solution
+#+BEGIN_QUOTE
+*/Notes on getting a good numerical solution:/*
 
 /Section 1.5/ goes into a good amount of detail of why floating point arithmetic will introduce errors and how to mitigate the problem. Partial pivoting will provide a bit of help, however it's also suggested to use *row-scaling* and *column-scaling*.
 
 *Row-scaling* will alter the magnitude of the output value of your linear system, while *column scaling* will alter the scale of your inputs. Don't hesitate to have the inputs and outputs use different units. /page 28/ suggests scaling the rows such that the maximum magnitude of each row is equal to *1* (ie. divide the row by the largest coefficient)
 
 The topic of /residuals/, /sensitivity/ and /coditioning/ will be revisited later
+
+#+END_QUOTE
+
 
 ** Solving for x in Ax=b
 Now that we can break a linear system *A* into two systems *L* and *U* we need to go back to where we started and solve for inputs given some outputs.We started with *Ax=b* and now we know we can do *PA=LU*. Combinding the two we can get *PAx=Pb* and then *LUx=Pb*. As mentioned before, *b_{new}=Pb*, so for simplicity *LUx=b_{new}*. The new *b* has the same output values, just reordered a bit due to pivot adjustments. Since the order of the original equations generally doesn't have a special significance this is just a minor change.
