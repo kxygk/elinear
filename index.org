@@ -1244,8 +1244,16 @@ So our method will still go reducing the matrix column by column and building up
        0)))
 #+END_SRC
 
-** Using the LU
+* Using the LU
+*** Notes on getting good numerical solution
 
+/Section 1.5/ goes into a good amount of detail of why floating point arithmetic will introduce errors and how to mitigate the problem. Partial pivoting will provide a bit of help, however it's also suggested to use *row-scaling* and *column-scaling*.
+
+*Row-scaling* will alter the magnitude of the output value of your linear system, while *column scaling* will alter the scale of your inputs. Don't hesitate to have the inputs and outputs use different units. /page 28/ suggests scaling the rows such that the maximum magnitude of each row is equal to *1* (ie. divide the row by the largest coefficient)
+
+The topic of /residuals/, /sensitivity/ and /coditioning/ will be revisited later
+
+** Solving for x in Ax=b
 Now that we can break a linear system *A* into two systems *L* and *U* we need to go back to where we started and solve for inputs given some outputs.We started with *Ax=b* and now we know we can do *PA=LU*. Combinding the two we can get *PAx=Pb* and then *LUx=Pb*. As mentioned before, *b_{new}=Pb*, so for simplicity *LUx=b_{new}*. The new *b* has the same output values, just reordered a bit due to pivot adjustments. Since the order of the original equations generally doesn't have a special significance this is just a minor change.
 
 Next we define a new intermediary vector *Ux=y* so that we can write *Ly=b_{new}*. This value we can solve directly by forward substitution. The first row of the lower triangular matrix gives us a simple solvable equation of the form *ax=b* and every subsequent row adds an additional unknown that we can solve for directly.
@@ -1325,13 +1333,19 @@ Now glueing everything together is now just a few lines of code
            (intermediate-y-vector (matrix-forward-substitution (second LU-decomposition) permuted-output-vector)))
       (matrix-back-substitution (third LU-decomposition) intermediate-y-vector)))
 #+END_SRC
-** Notes on getting good numerical solution
 
-/Section 1.5/ goes into a good amount of detail of why floating point arithmetic will introduce errors and how to mitigate the problem. Partial pivoting will provide a bit of help, however it's also suggested to use *row-scaling* and *column-scaling*.
-
-*Row-scaling* will alter the magnitude of the output value of your linear system, while *column scaling* will alter the scale of your inputs. Don't hesitate to have the inputs and outputs use different units. /page 28/ suggests scaling the rows such that the maximum magnitude of each row is equal to *1* (ie. divide the row by the largest coefficient)
-
-The topic of /residuals/, /sensitivity/ and /coditioning/ will be revisited later
+** The LDU Decomposition
+#+BEGIN_QUOTE
+*TODO* : page 154
+#+END_QUOTE
+** The Cholesky Decomposition
+#+BEGIN_QUOTE
+*TODO* :page 154-155
+#+END_QUOTE
+** Solving for A^{-1}
+#+BEGIN_QUOTE
+*TODO* : page 148
+#+END_QUOTE
 
 * TODOs
 - Write a better example that I can expand on easily later
