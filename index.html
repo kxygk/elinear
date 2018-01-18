@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-01-18 Thu 16:03 -->
+<!-- 2018-01-18 Thu 18:47 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -253,11 +253,6 @@ for the JavaScript code in this tag.
 </li>
 <li><a href="#sec-7">Using the LU</a>
 <ul>
-<li>
-<ul>
-<li><a href="#sec-7-0-1">Notes on getting good numerical solution</a></li>
-</ul>
-</li>
 <li><a href="#sec-7-1">Solving for x in Ax=b</a></li>
 <li><a href="#sec-7-2">The LDU Decomposition</a></li>
 <li><a href="#sec-7-3">The Cholesky Decomposition</a></li>
@@ -1832,9 +1827,11 @@ So our method will still go reducing the matrix column by column and building up
 <div id="outline-container-sec-7" class="outline-2">
 <h2 id="sec-7">Using the LU</h2>
 <div class="outline-text-2" id="text-7">
-</div><div id="outline-container-sec-7-0-1" class="outline-4">
-<h4 id="sec-7-0-1">Notes on getting good numerical solution</h4>
-<div class="outline-text-4" id="text-7-0-1">
+<blockquote>
+<p>
+<b><i>Notes on getting a good numerical solution:</i></b>
+</p>
+
 <p>
 <i>Section 1.5</i> goes into a good amount of detail of why floating point arithmetic will introduce errors and how to mitigate the problem. Partial pivoting will provide a bit of help, however it's also suggested to use <b>row-scaling</b> and <b>column-scaling</b>.
 </p>
@@ -1846,8 +1843,9 @@ So our method will still go reducing the matrix column by column and building up
 <p>
 The topic of <i>residuals</i>, <i>sensitivity</i> and <i>coditioning</i> will be revisited later
 </p>
+</blockquote>
 </div>
-</div>
+
 
 <div id="outline-container-sec-7-1" class="outline-3">
 <h3 id="sec-7-1">Solving for x in Ax=b</h3>
@@ -1953,21 +1951,76 @@ Now glueing everything together is now just a few lines of code
 <div id="outline-container-sec-7-2" class="outline-3">
 <h3 id="sec-7-2">The LDU Decomposition</h3>
 <div class="outline-text-3" id="text-7-2">
-<blockquote>
 <p>
-<b>TODO</b> : page 154
+As mention on <i>page 154</i>, the <b>LU</b> can be further broken down into <b>LDU</b> - where both <b>L</b> and <b>U</b> have <b>1</b>'s on the diagonal and <b>D</b> is a diagonal matrix with all the pivots. This has the nice property of being more symmetric.
 </p>
-</blockquote>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-LDU-decomposition</span> (matrix)
+  <span style="color: #cc0000;">"Take the LU decomposition and extract the diagonal coefficients into a diagonal D matrix. Returns ( P L D U ) "</span>
+  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-extract-D-from-U</span> (matrix)
+    <span style="color: #cc0000;">"Extract the diagonal coefficients from an upper triangular matrix into a separate diagonal matrix. Returns ( D U ). D is diagonal and U is upper triangular with 1's on the diagonal"</span>
+    (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-build-D-U-data</span> (matrix row D-data U-data)
+      (<span style="color: #00af00;">let</span> ((rank (matrix-rows matrix))
+            (pivot (matrix-get-value matrix row row)))
+        (<span style="color: #00af00;">cond</span> ((equal row rank)
+               (list D-data U-data) )
+              (t
+               (matrix-build-D-U-data
+                matrix
+                (1+ row)
+                (nconc
+                 D-data
+                 (matrix-data
+                  (matrix-scalar-product
+                   (matrix-unit-row row rank)
+                   pivot)))
+                (nconc
+                 U-data
+                 (matrix-unit-rowcol-data row (1+ row))
+                 (matrix-data
+                  (matrix-scalar-product
+                   (matrix-extract-subrow matrix row (1+ row) rank)
+                   (/ 1 pivot)))))))))
+
+    (<span style="color: #00af00;">let</span> ((rank (matrix-rows matrix))
+          (D-U-data (matrix-build-D-U-data matrix 0 '() '())))
+      (list
+       (matrix-from-data-list rank rank (first D-U-data))
+       (matrix-from-data-list rank rank (second D-U-data)))))
+
+  (<span style="color: #00af00;">let</span> ((LU-decomposition (matrix-LU-decomposition matrix)))
+    (nconc
+     (list
+      (first LU-decomposition)
+      (second LU-decomposition))
+     (matrix-extract-D-from-U
+      (third LU-decomposition)))))
+</pre>
+</div>
+<p>
+An extra nicety is that if <b>A</b> is symmetric then <b>A=A<sup>T</sup></b> and therefore <b>LDU=(LDU)<sup>T</sup>=U<sup>T</sup>D<sup>T</sup>L<sup>T</sup></b>. Since <b>D==D<sup>T</sup></b> and the <b>LU</b> factorization is unique then <b>L</b> must equal <b>U<sup>T</sup></b> and <b>U</b> is equal to <b>L<sup>T</sup></b> - so we can write <b>A=LDL<sup>T</sup></b>
+</p>
 </div>
 </div>
 <div id="outline-container-sec-7-3" class="outline-3">
 <h3 id="sec-7-3">The Cholesky Decomposition</h3>
 <div class="outline-text-3" id="text-7-3">
-<blockquote>
 <p>
-<b>TODO</b> :page 154-155
+Going one step further - if we have a symmetric matrix (so <b>A=LDL<sup>T</sup></b>) and all the pivots are positive, then we can break up the <b>D</b>  into 2 further matrices <b>D<sub>split</sub></b>. The <b>D<sub>split</sub></b> matrix will be like <b>D</b>, but instead each element on the diagonal (the pivots from the original <b>U</b> matrix) will be replaced by its square root - so that <b>D<sub>split</sub>D<sub>split</sub>=D</b>. This is taking advantage of the fact that a unit diagonal multiplied with itself simply squares the diagonal elements. Note here that if any of the diagonal elements are negative, then you can't really take the square root here b/c you'd get complex numbers.
 </p>
-</blockquote>
+
+<p>
+But if the pivots are positive, then we change <b>A=LDL<sup>T</sup></b> to <b>A=LD<sub>split</sub>D<sub>split</sub>L<sup>T</sup></b>. Notice that both halfs of the equation are similar. Remember that just like with <b>D</b>, <b>D<sub>split</sub>=D<sub>split</sub><sup>T</sup></b>. So we can rewrite <b>A=LD<sub>split</sub>D<sub>split</sub>L<sup>T</sup></b> as <b>A=LD<sub>split</sub>D<sub>split</sub><sup>T</sup>L<sup>T</sup></b>. Assigning a new matrix <b>R</b> to be equal to the product <b>LD<sub>split</sub></b> we can write down <b>A=RR<sup>T</sup></b>. This <b>R</b> will have the square root elements on the diagonal b/c <b>L</b> has <b>1</b>'s on its central diagonal. The text then demonstates that since <b>R=LD<sub>split</sub></b> is reversible and unique, that given <b>A=RR<sup>T</sup></b> where <b>R</b> has positive diagonal elements, you can reconstruct the <b>LDU</b> decomposition and see that the pivots are positive (the squares of the diagonal elements in your <b>R</b>).
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-cholesky-decomposition</span> (matrix)
+<span style="color: #cc0000;">"cholesky"</span>
+)
+</pre>
+</div>
 </div>
 </div>
 <div id="outline-container-sec-7-4" class="outline-3">
@@ -2028,7 +2081,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-01-18 Thu 16:03</p>
+<p class="date">Created: 2018-01-18 Thu 18:47</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

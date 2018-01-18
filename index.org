@@ -1339,9 +1339,51 @@ Now glueing everything together is now just a few lines of code
 #+END_SRC
 
 ** The LDU Decomposition
-#+BEGIN_QUOTE
-*TODO* : page 154
-#+END_QUOTE
+As mention on /page 154/, the *LU* can be further broken down into *LDU* - where both *L* and *U* have *1*'s on the diagonal and *D* is a diagonal matrix with all the pivots. This has the nice property of being more symmetric.
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-LDU-decomposition (matrix)
+    "Take the LU decomposition and extract the diagonal coefficients into a diagonal D matrix. Returns ( P L D U ) "
+    (defun matrix-extract-D-from-U (matrix)
+      "Extract the diagonal coefficients from an upper triangular matrix into a separate diagonal matrix. Returns ( D U ). D is diagonal and U is upper triangular with 1's on the diagonal"
+      (defun matrix-build-D-U-data (matrix row D-data U-data)
+        (let ((rank (matrix-rows matrix))
+              (pivot (matrix-get-value matrix row row)))
+          (cond ((equal row rank)
+                 (list D-data U-data) )
+                (t
+                 (matrix-build-D-U-data
+                  matrix
+                  (1+ row)
+                  (nconc
+                   D-data
+                   (matrix-data
+                    (matrix-scalar-product
+                     (matrix-unit-row row rank)
+                     pivot)))
+                  (nconc
+                   U-data
+                   (matrix-unit-rowcol-data row (1+ row))
+                   (matrix-data
+                    (matrix-scalar-product
+                     (matrix-extract-subrow matrix row (1+ row) rank)
+                     (/ 1 pivot)))))))))
+
+      (let ((rank (matrix-rows matrix))
+            (D-U-data (matrix-build-D-U-data matrix 0 '() '())))
+        (list
+         (matrix-from-data-list rank rank (first D-U-data))
+         (matrix-from-data-list rank rank (second D-U-data)))))
+
+    (let ((LU-decomposition (matrix-LU-decomposition matrix)))
+      (nconc
+       (list
+        (first LU-decomposition)
+        (second LU-decomposition))
+       (matrix-extract-D-from-U
+        (third LU-decomposition)))))
+
+#+END_SRC
+An extra nicety is that if *A* is symmetric then *A=A^{T}* and therefore *LDU=(LDU)^{T}=U^{T}D^{T}L^{T}*. Since *D==D^{T}* and the *LU* factorization is unique then *L* must equal *U^{T}* and *U* is equal to *L^{T}* - so we can write *A=LDL^{T}*
 ** The Cholesky Decomposition
 #+BEGIN_QUOTE
 *TODO* :page 154-155
