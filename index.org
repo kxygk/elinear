@@ -1384,6 +1384,15 @@ As mention on /page 154/, the *LU* can be further broken down into *LDU* - where
 
 #+END_SRC
 An extra nicety is that if *A* is symmetric then *A=A^{T}* and therefore *LDU=(LDU)^{T}=U^{T}D^{T}L^{T}*. Since *D==D^{T}* and the *LU* factorization is unique then *L* must equal *U^{T}* and *U* is equal to *L^{T}* - so we can write *A=LDL^{T}*
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+    (defun matrix-is-symmetric (matrix)
+      "Test if the matrix is symmetric"
+      (let ((transpose (matrix-transpose matrix)))
+        (let ((A-data (matrix-data matrix))
+              (A-transpose-data (matrix-data transpose)))
+          (equal A-data A-transpose-data))))
+
+#+END_SRC
 ** The Cholesky Decomposition
 #+BEGIN_QUOTE
 *TODO* :page 154-155
