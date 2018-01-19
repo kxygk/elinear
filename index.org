@@ -1410,7 +1410,14 @@ An extra nicety is that if *A* is symmetric then *A=A^{T}* and therefore *LDU=(L
 - Implement the Sherman-Morrison update formula
 - Sensitivity/Condition numbers needs to be revisited and expanded on (page 126-128)
 - Do exercise 3.8.8
-
+- Add some kind of mechanism to bail-out when the input matrix isn't singular in the LU
+- It's unclear if Cholesky works with partial pivoting
+* SRC_Block template
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-template (matrix)
+"template"
+)
+#+END_SRC
 
 * End
 #+BEGIN_QUOTE
