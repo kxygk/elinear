@@ -1393,9 +1393,48 @@ An extra nicety is that if *A* is symmetric then *A=A^{T}* and therefore *LDU=(L
           (equal A-data A-transpose-data))))
 
 #+END_SRC
+
 ** The Cholesky Decomposition
+Going one step further - if we have a symmetric matrix (so *A=LDL^{T}*) and all the pivots are positive, then we can break up the *D*  into 2 further matrices *D_{split}*. The *D_{split}* matrix will be like *D*, but instead each element on the diagonal (the pivots from the original *U* matrix) will be replaced by its square root - so that *D_{split}D_{split}=D*. This is taking advantage of the fact that a unit diagonal multiplied with itself simply squares the diagonal elements. Note here that if any of the diagonal elements are negative, then you can't really take the square root here b/c you'd get complex numbers.
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-is-positive-definite (matrix)
+    "Test if the matrix is symmetric"
+    (defun is-no-data-negative (data)
+      (cond ((null data) t)
+            ((< (car data) 0) nil)
+            (t (is-no-data-negative (cdr data)))))
+
+    (let* ((PLDU (matrix-LDU-decomposition matrix))
+           (D (third PLDU)))
+      (and (matrix-is-symmetric matrix) (is-no-data-negative (matrix-data D)))))
+
+#+END_SRC
+
+But if the pivots are positive, then we change *A=LDL^{T}* to *A=LD_{split}D_{split}L^{T}*. Notice that both halfs of the equation are similar. Remember that just like with *D*, *D_{split}=D_{split}^{T}*. So we can rewrite *A=LD_{split}D_{split}L^{T}* as *A=LD_{split}D_{split}^{T}L^{T}*. Assigning a new matrix *R* to be equal to the product *LD_{split}* we can write down *A=RR^T*. This *R* will have the square root elements on the diagonal b/c *L* has *1*'s on its central diagonal. The text then demonstates that since *R=LD_{split}* is reversible and unique, that given *A=RR^T* where *R* has positive diagonal elements, you can reconstruct the *LDU* decomposition and see that the pivots are positive (the squares of the diagonal elements in your *R*).
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+    (defun matrix-cholesky-decomposition (matrix)
+      "Take the output of the LDU-decomposition and generatethe Cholesky decomposition matrices"
+      (defun sqrt-data-elements (data)
+        "Takes a data vector and squares every element and returns the list"
+        (cond ((null data) '())
+              (t
+               (cons
+                (sqrt (car data))
+                (cdr data)))))
+
+      (let* ((PLDU (matrix-LDU-decomposition matrix))
+             (L (second PLDU))
+             (D (third PLDU))
+             (D_sqrt (matrix-from-data-list
+                      (matrix-rows D)
+                      (matrix-rows D)
+                      (sqrt-data-elements (matrix-data D)))))
+        (matrix-product L D_sqrt)))
+
+#+END_SRC
 #+BEGIN_QUOTE
-*TODO* :page 154-155
+*TODO:* This (and the /positive-definite/ check above) need some fixing. You can't do partial pivoting b/c *PA* is no longer symmetric so everything falls apart. This needs a version of ~matrix-LDU-decomposition~ and ~matrix-LU-decomposition~ that does not pivoting ... or I need to find a work around that uses the *P* matrix.
 #+END_QUOTE
 ** Solving for A^{-1}
 #+BEGIN_QUOTE

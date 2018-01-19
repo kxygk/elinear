@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-01-18 Thu 18:47 -->
+<!-- 2018-01-19 Fri 16:31 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -260,7 +260,8 @@ for the JavaScript code in this tag.
 </ul>
 </li>
 <li><a href="#sec-8">TODOs</a></li>
-<li><a href="#sec-9">End</a></li>
+<li><a href="#sec-9">SRC<sub>Block</sub> template</a></li>
+<li><a href="#sec-10">End</a></li>
 </ul>
 </div>
 </div>
@@ -2001,14 +2002,39 @@ As mention on <i>page 154</i>, the <b>LU</b> can be further broken down into <b>
 <p>
 An extra nicety is that if <b>A</b> is symmetric then <b>A=A<sup>T</sup></b> and therefore <b>LDU=(LDU)<sup>T</sup>=U<sup>T</sup>D<sup>T</sup>L<sup>T</sup></b>. Since <b>D==D<sup>T</sup></b> and the <b>LU</b> factorization is unique then <b>L</b> must equal <b>U<sup>T</sup></b> and <b>U</b> is equal to <b>L<sup>T</sup></b> - so we can write <b>A=LDL<sup>T</sup></b>
 </p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-is-symmetric</span> (matrix)
+  <span style="color: #cc0000;">"Test if the matrix is symmetric"</span>
+  (<span style="color: #00af00;">let</span> ((transpose (matrix-transpose matrix)))
+    (<span style="color: #00af00;">let</span> ((A-data (matrix-data matrix))
+          (A-transpose-data (matrix-data transpose)))
+      (equal A-data A-transpose-data))))
+</pre>
 </div>
 </div>
+</div>
+
 <div id="outline-container-sec-7-3" class="outline-3">
 <h3 id="sec-7-3">The Cholesky Decomposition</h3>
 <div class="outline-text-3" id="text-7-3">
 <p>
 Going one step further - if we have a symmetric matrix (so <b>A=LDL<sup>T</sup></b>) and all the pivots are positive, then we can break up the <b>D</b>  into 2 further matrices <b>D<sub>split</sub></b>. The <b>D<sub>split</sub></b> matrix will be like <b>D</b>, but instead each element on the diagonal (the pivots from the original <b>U</b> matrix) will be replaced by its square root - so that <b>D<sub>split</sub>D<sub>split</sub>=D</b>. This is taking advantage of the fact that a unit diagonal multiplied with itself simply squares the diagonal elements. Note here that if any of the diagonal elements are negative, then you can't really take the square root here b/c you'd get complex numbers.
 </p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-is-positive-definite</span> (matrix)
+  <span style="color: #cc0000;">"Test if the matrix is symmetric"</span>
+  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">is-no-data-negative</span> (data)
+    (<span style="color: #00af00;">cond</span> ((null data) t)
+          ((&lt; (car data) 0) nil)
+          (t (is-no-data-negative (cdr data)))))
+
+  (<span style="color: #00af00;">let*</span> ((PLDU (matrix-LDU-decomposition matrix))
+         (D (third PLDU)))
+    (<span style="color: #00af00;">and</span> (matrix-is-symmetric matrix) (is-no-data-negative (matrix-data D)))))
+</pre>
+</div>
 
 <p>
 But if the pivots are positive, then we change <b>A=LDL<sup>T</sup></b> to <b>A=LD<sub>split</sub>D<sub>split</sub>L<sup>T</sup></b>. Notice that both halfs of the equation are similar. Remember that just like with <b>D</b>, <b>D<sub>split</sub>=D<sub>split</sub><sup>T</sup></b>. So we can rewrite <b>A=LD<sub>split</sub>D<sub>split</sub>L<sup>T</sup></b> as <b>A=LD<sub>split</sub>D<sub>split</sub><sup>T</sup>L<sup>T</sup></b>. Assigning a new matrix <b>R</b> to be equal to the product <b>LD<sub>split</sub></b> we can write down <b>A=RR<sup>T</sup></b>. This <b>R</b> will have the square root elements on the diagonal b/c <b>L</b> has <b>1</b>'s on its central diagonal. The text then demonstates that since <b>R=LD<sub>split</sub></b> is reversible and unique, that given <b>A=RR<sup>T</sup></b> where <b>R</b> has positive diagonal elements, you can reconstruct the <b>LDU</b> decomposition and see that the pivots are positive (the squares of the diagonal elements in your <b>R</b>).
@@ -2016,11 +2042,31 @@ But if the pivots are positive, then we change <b>A=LDL<sup>T</sup></b> to <b>A=
 
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-cholesky-decomposition</span> (matrix)
-<span style="color: #cc0000;">"cholesky"</span>
-)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-cholesky-decomposition</span> (matrix)
+  <span style="color: #cc0000;">"Take the output of the LDU-decomposition and generatethe Cholesky decomposition matrices"</span>
+  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">sqrt-data-elements</span> (data)
+    <span style="color: #cc0000;">"Takes a data vector and squares every element and returns the list"</span>
+    (<span style="color: #00af00;">cond</span> ((null data) '())
+          (t
+           (cons
+            (sqrt (car data))
+            (cdr data)))))
+
+  (<span style="color: #00af00;">let*</span> ((PLDU (matrix-LDU-decomposition matrix))
+         (L (second PLDU))
+         (D (third PLDU))
+         (D_sqrt (matrix-from-data-list
+                  (matrix-rows D)
+                  (matrix-rows D)
+                  (sqrt-data-elements (matrix-data D)))))
+    (matrix-product L D_sqrt)))
 </pre>
 </div>
+<blockquote>
+<p>
+<b>TODO:</b> This (and the <i>positive-definite</i> check above) need some fixing. You can't do partial pivoting b/c <b>PA</b> is no longer symmetric so everything falls apart. This needs a version of <code>matrix-LDU-decomposition</code> and <code>matrix-LU-decomposition</code> that does not pivoting &#x2026; or I need to find a work around that uses the <b>P</b> matrix.
+</p>
+</blockquote>
 </div>
 </div>
 <div id="outline-container-sec-7-4" class="outline-3">
@@ -2053,14 +2099,29 @@ But if the pivots are positive, then we change <b>A=LDL<sup>T</sup></b> to <b>A=
 </li>
 <li>Do exercise 3.8.8
 </li>
+<li>Add some kind of mechanism to bail-out when the input matrix isn't singular in the LU
+</li>
+<li>It's unclear if Cholesky works with partial pivoting
+</li>
 </ul>
 </div>
 </div>
-
-
 <div id="outline-container-sec-9" class="outline-2">
-<h2 id="sec-9">End</h2>
+<h2 id="sec-9">SRC<sub>Block</sub> template</h2>
 <div class="outline-text-2" id="text-9">
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-template</span> (matrix)
+<span style="color: #cc0000;">"template"</span>
+)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10">End</h2>
+<div class="outline-text-2" id="text-10">
 <blockquote>
 <p>
 This webpage is generated from an org-document (at <code>./index.org</code>) that also generates all the files described. 
@@ -2081,7 +2142,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-01-18 Thu 18:47</p>
+<p class="date">Created: 2018-01-19 Fri 16:31</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
