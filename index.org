@@ -955,7 +955,7 @@ The result is surprisingly simple and we can see that we didn't really need to c
 
 
 *** Building the *L* Matrix
-So now our product of elementary matrices *R_{n}R_{...}R_{2}R_{1}A=U* shortens to something similar *G_{r}G_{...}G_{2}G_{1}A=U*, but where each /Elementary Lower-Triangular Matrix/ *G* takes the place of several *R* matrices. The product *G_{r}G_{...}G_{2}G_{1}* involved a lot of matrix products, but fortuntately we have a shortcut. These *G* matrices have the property that their inverse is just a matter of flipping the sign of the factors' in their column. You can confirm this by inverting our definition *G=R_{n}R_{...}R_{2}R_{1}* and remembering that the *R*'s just involve a sign flip and *R^{-1}*'s are also ~Type III~ matrices. 
+So now our product of elementary matrices *R_{n}R_{...}R_{2}R_{1}A=U* shortens to something similar *G_{r}G_{...}G_{2}G_{1}A=U*, but where each /Elementary Lower-Triangular Matrix/ *G* takes the place of several *R* matrices. The product *G_{r}G_{...}G_{2}G_{1}* involved a lot of matrix products, but fortunately we have a shortcut. These *G* matrices have the property that their inverse is just a matter of flipping the sign of the factors' in their column. You can confirm this by inverting our definition *G=R_{n}R_{...}R_{2}R_{1}* and remembering that the *R*'s just involve a sign flip and *R^{-1}*'s are also ~Type III~ matrices. 
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-invert-elementary-lower-triangular (matrix-elementary-lower-triangular)
@@ -974,7 +974,7 @@ So now our product of elementary matrices *R_{n}R_{...}R_{2}R_{1}A=U* shortens t
 #+END_QUOTE
 
 
-This allows us to take our equation *G_{1}G_{2}G_{...}G_{n}A=U* and trivially produce the interesting equality *A=G^{-1}_{1}G^{-1}_{2}G^{-1}_{...}G_{n}U* without having to compute a single value; just flip the order of the product and flup the signs. Now the product *G^{-1}_{1}G^{-1}_{2}G^{-1}_{...}G_{n}* is special and /page 143/ describes how all the factors just move into one matrix without having to do any calculation. (*Note*: that the same doesn't hold for the non-inverted product!) The combined product produces the lower triangular matrix *L* and lets us write down *A=LU* - from which we get the name of the decomposition. (see /page 143-144/ */eq 3.10.6/* )
+This allows us to take our equation *G_{1}G_{2}G_{...}G_{n}A=U* and trivially produce the interesting equality *A=G^{-1}_{1}G^{-1}_{2}G^{-1}_{...}G_{n}U* without having to compute a single value; just flip the order of the product and flup the signs. Now the product *G^{-1}_{1}G^{-1}_{2}G^{-1}_{...}G_{n}* is special and /page 143/ describes how all the factors just move into one matrix without having to do any calculation. (*Note*: that the same doesn't hold for the non-inverted product of the *G*'s!) The combined product produces the lower triangular matrix *L* and lets us write down *A=LU* - from which we get the name of the decomposition. (see /page 143-144/ */eq 3.10.6/* )
 
 To finish our example we will first add another matrix to the left to eliminate the second column in *A* so that we have the equation *G_{2}G_{1}A=U*
 
