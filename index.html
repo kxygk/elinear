@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-01-21 Sun 20:59 -->
+<!-- 2018-01-21 Sun 21:35 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -1634,7 +1634,7 @@ And we are left with <b>A=LU</b>
 </p>
 
 <p>
-When we do this is code we immediately invert the <b>G</b>'s and build up their product. So as we eliminate <b>A</b> column after column and turn it into the upper triangular <b>U</b> we are in parallel accumulating the inverse of the elimination matrices into <b>L</b>.
+When we do this is code we immediately invert the <b>G</b>'s and build up their product. So as we eliminate <b>A</b> column after column and turn it into the upper triangular <b>U</b> we are in parallel accumulating the inverse of the elimination matrices into <b>L</b>. The function will return us two matrices, <b>L</b> and <b>U</b>
 </p>
 <div class="org-src-container">
 
@@ -1677,7 +1677,11 @@ When we do this is code we immediately invert the <b>G</b>'s and build up their 
 </div>
 <blockquote>
 <p>
-<b>TODO:</b> I'm updating <b>L</b> by doing a a product here.. but the whole point is that <b>L</b> is that it can be updated without a product. I need a helper function that will build my <b>L</b>'s
+<b>TODO:</b> I'm updating <b>L</b> by doing a a product here (ie. <b>L<sub>new</sub> = G<sup>-1</sup>L<sub>old</sub></b>).. but the whole point is that <b>L</b> can be updated without a product. This could use a helper function that would build/update <b>L</b>'s
+</p>
+
+<p>
+Updating <b>U</b> could also be done without doing a whole matrix product and just looking at the lower submatrix
 </p>
 </blockquote>
 </div>
@@ -1687,7 +1691,7 @@ When we do this is code we immediately invert the <b>G</b>'s and build up their 
 <h4 id="sec-6-1-3">Partial Pivoting</h4>
 <div class="outline-text-4" id="text-6-1-3">
 <p>
-Now while in previous section we managed to get decompose <b>A</b> into two matrices <b>L</b> and <b>U</b>, you may have noticed there is an error condition our code. The issue is that we may find that after performing elimination on a previous column we are left with a zero in the current column's pivot position. This makes it impossible to eliminate the factors below it. The solution we have from <i>Gaussian Elimination</i> is to swap in a row from below so that the pivot is non-zero. We are going to take advantage of this and use the strategy called <b>partial pivoting</b> and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and like any row-swap can be done pretty easily with a <code>Type I</code> elementary matrix.
+Now while in previous section we managed to decompose <b>A</b> into two matrices <b>L</b> and <b>U</b>, you may have noticed there is an error condition our code. The issue is that we may find that after performing elimination on a column we are left with a zero in the next column's pivot position. This makes it impossible to eliminate the factors below it. The solution we have from <i>Gaussian Elimination</i> is to swap in a row from below so that the pivot is non-zero. We are going to take advantage of this and use the strategy called <b>partial pivoting</b> and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and like any row-swap can be done pretty easily with a <code>Type I</code> elementary matrix.
 </p>
 
 <div class="org-src-container">
@@ -1767,7 +1771,7 @@ So if <b>G<sub>n</sub></b> were the <i>elementary lower-triangular matrices</i> 
 </blockquote>
 
 <p>
-Turning back to our orginal <b>Ax=b</b> we can again generate the <b>b<sub>new</sub></b>: <b>Ux=(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>b</b> -&gt; <b>Ux=b<sub>new</sub></b>. Then again using back substitution we can get a solution for <b>x</b>. However this solution has some flaws. When looking at <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub></b> we can no longer just copy together factors - even if we invert and reorder the matrices. The result is messy and involves a lot of products and calculations. Before we added the pivots in, we had manage to get a clean equation <b>A=LU</b>, and <b>L</b> was especially easy to make without carrying out a single matrix product - but now building that decomposition suddenly isn't as easy!
+Turning back to our orginal <b>Ax=b</b> we can again generate the <b>b<sub>new</sub></b>: <b>Ux=(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub>b</b>  -&gt;  <b>Ux=b<sub>new</sub></b>. Then again using back substitution we can get a solution for <b>x</b>&#x2026;.  However this solution has some serious flaws. Looking at <b>(G<sub>1</sub>F<sub>1</sub>)<sub>col<sub>1</sub></sub>(G<sub>2</sub>F<sub>2</sub>)<sub>col<sub>2</sub></sub>..(G<sub>r</sub>F<sub>r</sub>)<sub>col<sub>r</sub></sub></b> we can no longer use the inversion trick to copy factors together. We seem to be foreced to carry out a whole lot of matrix products. Before we added the pivots in, we had manage to get a clean equation <b>A=LU</b>, and <b>L</b> was especially easy to make without carrying out a single matrix product - but now building that decomposition suddenly isn't as easy!
 </p>
 </div>
 </div>
@@ -1776,7 +1780,7 @@ Turning back to our orginal <b>Ax=b</b> we can again generate the <b>b<sub>new</
 <h4 id="sec-6-1-4">Extracting the pivots</h4>
 <div class="outline-text-4" id="text-6-1-4">
 <p>
-On <i>page 150</i> the book shows us how we can fix this situation by extracting the partial pivots out of column reductions so that instead of: <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A=U</b> we are left with something that looks more like  <b>G<sub>1</sub>G<sub>2</sub>..G<sub>r</sub>F<sub>1</sub>F<sub>2</sub>..F<sub>r</sub>A=U</b>. With the <b>G</b>'s together we can move them back over to the other side to get our easily-computed <b>L</b> back. Taking the product of the <b>F</b>'s gives us a new <i>permutation matrix</i> <b>P</b> so that our final equation will look like <b>PA=LU</b>. Looking from a different perspective, the reason we've had the matrices interleaved is because that's how we build them (from right to left). We can't go into the middle of the matrix and adjust the pivot position till we'd carried out all the eliminations in the columns before it. The previous eliminations will mix up the rows and change all the values in that column so the maximal value won't be known ahead of time. So the <i>GFGFGF</i> sequence for building the reduction matrices (from right to left, column by column)  needs to be observed. However once we've finished Gaussian elimination then we know the final order of the rows in <b>U</b>. And what <i>page 150</i> demonstrates is that if we know the row interchanges, we can actually carry them out first as long as we then fix-up any <i>preceding</i> eliminations matrices a bit. Specifically if you adjust some pivot <i>k</i> by swapping it with row <i>k+i</i> then any <i>previous</i> eliminations that involved the row <i>k</i> (and row <i>k+i</i>) now needs to be fixed to reflect that you'll be doing the row interchange ahead of time.
+On <i>page 150</i> the book shows us how we can fix this situation by extracting the partial pivots out of column reductions so that instead of: <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A=U</b> we are left with something that looks more like  <b>G<sub>1</sub>G<sub>2</sub>..G<sub>r</sub>F<sub>1</sub>F<sub>2</sub>..F<sub>r</sub>A=U</b>. With the <b>G</b>'s together we can use our inversion trick to get our easily-computed <b>L</b> back. Then taking the product of the <b>F</b>'s gives us a new <i>permutation matrix</i> <b>P</b> so that our final equation will look like <b>PA=LU</b>. Looking at the book's solution from a different perspective, the reason we've had the matrices interleaved is because that's how we build them (from right to left). We can't go into the middle of the matrix and adjust the pivot position till we'd carried out all the eliminations in the columns before it. The previous eliminations will mix up the rows and change all the values in that column so the maximal value won't be known ahead of time. So the <i>GFGFGF</i> sequence for building the reduction matrices (from right to left, column by column)  needs to be observed. The trick is that once we've finished Gaussian elimination then we know the final order of the rows in <b>U</b> and what <i>page 150</i> demonstrates is that if we know the row interchanges, we can actually carry them out first as long as we then fix-up any <i>preceding</i> eliminations matrices a bit. Specifically if you adjust some pivot <i>k</i> by swapping it with row <i>k+i</i> then any <i>previous</i> eliminations that involved the row <i>k</i> (and row <i>k+i</i>) now needs to be fixed to reflect that you'll be doing the row interchange ahead of time.
 </p>
 
 <p>
@@ -1784,12 +1788,12 @@ While the <b>G<sub>1</sub>G<sub>2</sub>..G<sub>r</sub>F<sub>1</sub>F<sub>2</sub>
 </p>
 
 <p>
-The strategy is that as we <i>pivot adjust</i> and <i>eliminate</i> and <i>pivot</i> and <i>eliminate</i> column by column, slowly building up our <b>U</b> matrix, each time we <i>pivot adjust</i> we build our permuation matrix <b>P</b> by accumulating the products of the <b>F</b>'s and we fix-up the preceeding eliminations some how. The way it's described in the book, they seem to update all the <b>G</b> matrices that came before - however in practice it's much easier to skip all the <b>G</b>'s and go straight to building the <b>L</b> matrix and to adjust the rows there. We cand do that by taking every <b>G</b> we get during elimination inverting it to <b>G<sup>-1</sup></b> and add it to <b>L</b> so that <b>L<sub>new</sub> = L<sub>old</sub>G<sup>-1</sup></b>. And then each time we adjust a pivot with a new <b>F</b> we update <b>L</b> such that <b>L<sub>new</sub>=FL<sub>old</sub>F</b>.
+The strategy is that as we <i>pivot-adjust</i> and <i>eliminate</i> and <i>pivot-adjust</i> and <i>eliminate</i> column by column, slowly building up our <b>U</b> matrix, each time we <i>pivot-adjust</i> we build our permuation matrix <b>P</b> by accumulating the products of the <b>F</b>'s and we fix-up the preceeding eliminations. The way it's described in the book, they seem to update all the <b>G</b> matrices that came before - however my shortcut is to skip all the <b>G</b>'s and go straight to building the <b>L</b> matrix and to adjust the rows there. Just as before with the plain LU decompostion, every <b>G</b> we get during elimination is inverting it to <b>G<sup>-1</sup></b>, and then added it to <b>L</b> so that <b>L<sub>new</sub> = L<sub>old</sub>G<sup>-1</sup></b>. The extra step is that now each time we adjust a pivot with a new <b>F</b> we update <b>L</b> such that <b>L<sub>new</sub>=FL<sub>old</sub>F</b>.
 </p>
 
 <blockquote>
 <p>
-To see why this is equivalent to updating all the <b>G</b>'s and then inverting at the end, rememeber that <b>F=F<sup>-1</sup></b> b/c a row exchange is it's own inverse. So <b>F<sup>2</sup>=I</b>. So if we have are in the middle of Gaussian elimination and have <b>G<sub>3</sub>G<sub>2</sub>G<sub>1</sub>A=U</b> and we then  do a pivot adjustment <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>A=U</b> then we can insert a identity matrix <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>IA=U</b> expand it to <b>FF</b> so that <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>FFA=U</b> then bring everything to the other side <b>FA=F<sup>-1</sup>G<sub>1</sub><sup>-1</sup>G<sub>2</sub><sup>-1</sup>G<sub>3</sub><sup>-1</sup>F<sup>-1</sup>U</b> recover our easy-to-compute <b>L</b> matrix <b>FA=F<sup>-1</sup>LF<sup>-1</sup>U</b> simplify our <b>F<sup>-1</sup></b>'s so that <b>FA=FLFU</b> and we have our new <b>L</b> in <b>FA=L<sub>new</sub>U</b>
+To see why this is equivalent to updating all the <b>G</b>'s and then inverting at the end, rememeber that <b>F=F<sup>-1</sup></b> b/c a row exchange is it's own inverse. So <b>F<sup>2</sup>=I</b>. So if we have are in the middle of Gaussian elimination and have <b>G<sub>3</sub>G<sub>2</sub>G<sub>1</sub>A=U</b> and we then  do a pivot adjustment <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>A=U</b> then we can insert a identity matrix <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>IA=U</b> expand it to <b>FF</b> so that <b>FG<sub>3</sub>G<sub>2</sub>G<sub>1</sub>FFA=U</b> then bring everything to the other side <b>FA=F<sup>-1</sup>G<sub>1</sub><sup>-1</sup>G<sub>2</sub><sup>-1</sup>G<sub>3</sub><sup>-1</sup>F<sup>-1</sup>U</b> recover our easy-to-compute <b>L</b> matrix <b>FA=F<sup>-1</sup>LF<sup>-1</sup>U</b> simplify our <b>F<sup>-1</sup></b>'s so that <b>FA=FLFU</b> and we have our new <b>L</b> in <b>FA=L<sub>new</sub>U</b> ie. <b>L<sub>new</sub>=FL<sub>old</sub>F</b>
 </p>
 </blockquote>
 
@@ -2183,7 +2187,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-01-21 Sun 20:59</p>
+<p class="date">Created: 2018-01-21 Sun 21:35</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
