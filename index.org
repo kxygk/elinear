@@ -1199,20 +1199,6 @@ So if *G_{n}* were the /elementary lower-triangular matrices/ from the last sect
            column-elimination-matrix
            matrix-with-partial-pivoting)))
       (list column-elimination-matrix pivot-adjusting-matrix matrix-with-reduced-column)))
-
-  (defun matrix-to-upper-triangular (matrix)
-    "Take the input MATRIX and use Gaussian elimination to make the upper triangular back-substitution matrix"
-    (defun matrix-to-upper-triangular-rec (matrix column-to-reduce)
-      (cond
-       ((equal
-         column-to-reduce
-         (matrix-rows matrix))
-        matrix)
-       (t
-        (matrix-to-upper-triangular-rec
-         (third (matrix-partial-pivot-and-reduce-column matrix column-to-reduce))
-         (1+ column-to-reduce)))))
-    (matrix-to-upper-triangular-rec matrix 0))
 #+END_SRC
 #+BEGIN_QUOTE
 *TODO*: Return *G^{-1}* instead, because it's more directly what we need later
@@ -1342,8 +1328,6 @@ Next we define a new intermediary vector *Ux=y* so that we can write *Ly=b_{new}
       (matrix-data output-vector)
       0)))
 #+END_SRC
-
-
 
 Once we have *y* we can go to *Ux=y* and solve for *x* by back substitution
 
