@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-01-19 Fri 16:31 -->
+<!-- 2018-01-21 Sun 20:59 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -1479,7 +1479,7 @@ The result is surprisingly simple and we can see that we didn't really need to c
 <h4 id="sec-6-1-2">Building the <b>L</b> Matrix</h4>
 <div class="outline-text-4" id="text-6-1-2">
 <p>
-So now our product of elementary matrices <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>A=U</b> shortens to something similar <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub>A=U</b>, but where each <i>Elementary Lower-Triangular Matrix</i> <b>G</b> takes the place of several <b>R</b> matrices. The product <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub></b> involved a lot of matrix products, but fortuntately we have a shortcut. These <b>G</b> matrices have the property that their inverse is just a matter of flipping the sign of the factors' in their column. You can confirm this by inverting our definition <b>G=R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub></b> and remembering that the <b>R</b>'s just involve a sign flip and <b>R<sup>-1</sup></b>'s are also <code>Type III</code> matrices. 
+So now our product of elementary matrices <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>A=U</b> shortens to something similar <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub>A=U</b>, but where each <i>Elementary Lower-Triangular Matrix</i> <b>G</b> takes the place of several <b>R</b> matrices. The product <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub></b> involved a lot of matrix products, but fortunately we have a shortcut. These <b>G</b> matrices have the property that their inverse is just a matter of flipping the sign of the factors' in their column. You can confirm this by inverting our definition <b>G=R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub></b> and remembering that the <b>R</b>'s just involve a sign flip and <b>R<sup>-1</sup></b>'s are also <code>Type III</code> matrices. 
 </p>
 
 <div class="org-src-container">
@@ -1504,7 +1504,7 @@ So now our product of elementary matrices <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<
 
 
 <p>
-This allows us to take our equation <b>G<sub>1</sub>G<sub>2</sub>G<sub>&#x2026;</sub>G<sub>n</sub>A=U</b> and trivially produce the interesting equality <b>A=G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub>U</b> without having to compute a single value; just flip the order of the product and flup the signs. Now the product <b>G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub></b> is special and <i>page 143</i> describes how all the factors just move into one matrix without having to do any calculation. (<b>Note</b>: that the same doesn't hold for the non-inverted product!) The combined product produces the lower triangular matrix <b>L</b> and lets us write down <b>A=LU</b> - from which we get the name of the decomposition. (see <i>page 143-144</i> <b><i>eq 3.10.6</i></b> )
+This allows us to take our equation <b>G<sub>1</sub>G<sub>2</sub>G<sub>&#x2026;</sub>G<sub>n</sub>A=U</b> and trivially produce the interesting equality <b>A=G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub>U</b> without having to compute a single value; just flip the order of the product and flup the signs. Now the product <b>G<sup>-1</sup><sub>1</sub>G<sup>-1</sup><sub>2</sub>G<sup>-1</sup><sub>&#x2026;</sub>G<sub>n</sub></b> is special and <i>page 143</i> describes how all the factors just move into one matrix without having to do any calculation. (<b>Note</b>: that the same doesn't hold for the non-inverted product of the <b>G</b>'s!) The combined product produces the lower triangular matrix <b>L</b> and lets us write down <b>A=LU</b> - from which we get the name of the decomposition. (see <i>page 143-144</i> <b><i>eq 3.10.6</i></b> )
 </p>
 
 <p>
@@ -1632,6 +1632,54 @@ Now multiplying the two inverted matrices is quick and easy b/c we just need to 
 <p>
 And we are left with <b>A=LU</b>
 </p>
+
+<p>
+When we do this is code we immediately invert the <b>G</b>'s and build up their product. So as we eliminate <b>A</b> column after column and turn it into the upper triangular <b>U</b> we are in parallel accumulating the inverse of the elimination matrices into <b>L</b>.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-LU-decomposition</span> (matrix)
+  <span style="color: #cc0000;">"Perform Gaussian elimination on MATRIX and return the list (L U), representing the LU-decomposition. If a zero pivot is hit, we terminate and return a string indicating that"</span>
+  (<span style="color: #00af00;">let</span>
+      ((rank
+        (matrix-rows matrix)))
+    (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-LU-decomposition-rec</span> (L-matrix
+                                        reduced-matrix
+                                        column-to-eliminate)
+      (<span style="color: #00af00;">cond</span>
+       ((equal column-to-eliminate rank)
+        (list L-matrix reduced-matrix))
+       ((zerop
+         (matrix-get-value
+          reduced-matrix
+          column-to-eliminate
+          column-to-eliminate))
+        <span style="color: #ff1f8b;">"ERROR: LU decomposition terminated due to hitting a zero pivot. Consider using the PLU"</span>)
+       (t
+        (<span style="color: #00af00;">let</span> ((column-elimination-matrix (matrix-elementary-lower-triangular
+                                          reduced-matrix
+                                          column-to-eliminate)))
+          (matrix-LU-decomposition-rec
+           (matrix-product
+            (matrix-invert-elementary-lower-triangular
+             column-elimination-matrix)
+            L-matrix)
+           (matrix-product
+            column-elimination-matrix
+            reduced-matrix)
+           (1+ column-to-eliminate))))))
+
+    (matrix-LU-decomposition-rec
+     (matrix-identity rank)
+     matrix
+     0)))
+</pre>
+</div>
+<blockquote>
+<p>
+<b>TODO:</b> I'm updating <b>L</b> by doing a a product here.. but the whole point is that <b>L</b> is that it can be updated without a product. I need a helper function that will build my <b>L</b>'s
+</p>
+</blockquote>
 </div>
 </div>
 
@@ -1639,13 +1687,13 @@ And we are left with <b>A=LU</b>
 <h4 id="sec-6-1-3">Partial Pivoting</h4>
 <div class="outline-text-4" id="text-6-1-3">
 <p>
-The previous example showed us how to eliminate columns, but in general before we do elimination we need to adjust the pivot in that column. First we may find that after performing elimination on a previous column we are left with a zero in the current column's pivot position - which makes it impossible to eliminate the factors below it. Second, adjusting the pivot can improve our solution's numerical stability. The strategy we're using is called <b>partial pivoting</b> and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and can also be done pretty easily by taking the product of our matrix with a <code>Type I</code> elementary matrix.
+Now while in previous section we managed to get decompose <b>A</b> into two matrices <b>L</b> and <b>U</b>, you may have noticed there is an error condition our code. The issue is that we may find that after performing elimination on a previous column we are left with a zero in the current column's pivot position. This makes it impossible to eliminate the factors below it. The solution we have from <i>Gaussian Elimination</i> is to swap in a row from below so that the pivot is non-zero. We are going to take advantage of this and use the strategy called <b>partial pivoting</b> and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and like any row-swap can be done pretty easily with a <code>Type I</code> elementary matrix.
 </p>
 
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-partial-pivot</span> (matrix pivot-column)
-    <span style="color: #cc0000;">"Adjust the pivot in the PIVOT-COLUMN to be have the maximal magnititude in that column"</span>
+    <span style="color: #cc0000;">"Returns a Type-I matrix that will swap in the row under the pivot that has maximal magnititude"</span>
     (<span style="color: #00af00;">let</span> ((column-below-pivot (matrix-submatrix
                                matrix
                                pivot-column
@@ -1710,20 +1758,6 @@ So if <b>G<sub>n</sub></b> were the <i>elementary lower-triangular matrices</i> 
          column-elimination-matrix
          matrix-with-partial-pivoting)))
     (list column-elimination-matrix pivot-adjusting-matrix matrix-with-reduced-column)))
-
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-to-upper-triangular</span> (matrix)
-  <span style="color: #cc0000;">"Take the input MATRIX and use Gaussian elimination to make the upper triangular back-substitution matrix"</span>
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-to-upper-triangular-rec</span> (matrix column-to-reduce)
-    (<span style="color: #00af00;">cond</span>
-     ((equal
-       column-to-reduce
-       (matrix-rows matrix))
-      matrix)
-     (t
-      (matrix-to-upper-triangular-rec
-       (third (matrix-partial-pivot-and-reduce-column matrix column-to-reduce))
-       (1+ column-to-reduce)))))
-  (matrix-to-upper-triangular-rec matrix 0))
 </pre>
 </div>
 <blockquote>
@@ -1781,12 +1815,12 @@ So our method will still go reducing the matrix column by column and building up
 </p>
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-LU-decomposition</span> (matrix)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-PLU-decomposition</span> (matrix)
   <span style="color: #cc0000;">"Perform Gaussian elimination with partial pivoting on MATRIX and return the list (P L U), representing the LU-decomposition "</span>
   (<span style="color: #00af00;">let</span>
       ((rank
         (matrix-rows matrix)))
-    (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-LU-decomposition-rec</span> (P-matrix
+    (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-PLU-decomposition-rec</span> (P-matrix
                                         L-matrix
                                         reduced-matrix
                                         column-to-reduce)
@@ -1801,7 +1835,7 @@ So our method will still go reducing the matrix column by column and building up
               (matrix-reduce-column
                reduced-matrix
                column-to-reduce)))
-          (matrix-LU-decomposition-rec
+          (matrix-PLU-decomposition-rec
            (matrix-product                              <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">update the permutation matrix</span>
             (second current-column-reduction-matrices)
             P-matrix)
@@ -1813,7 +1847,7 @@ So our method will still go reducing the matrix column by column and building up
            (third current-column-reduction-matrices)    <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">the further reduced matrix</span>
            (1+ column-to-reduce))))))
 
-    (matrix-LU-decomposition-rec
+    (matrix-PLU-decomposition-rec
      (matrix-identity rank)
      (matrix-identity rank)
      matrix
@@ -1900,8 +1934,6 @@ Next we define a new intermediary vector <b>Ux=y</b> so that we can write <b>Ly=
 </pre>
 </div>
 
-
-
 <p>
 Once we have <b>y</b> we can go to <b>Ux=y</b> and solve for <b>x</b> by back substitution
 </p>
@@ -1940,10 +1972,10 @@ Now glueing everything together is now just a few lines of code
 
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-solve-input</span> (matrix output-vector)
   <span style="color: #cc0000;">"Solve for an input-vector using forward substitution. ie. solve for x in Lx=b where b is OUTPUT-VECTOR and L is the LOWER-TRIANGULAR-MATRIX"</span>
-  (<span style="color: #00af00;">let*</span> ((LU-decomposition (matrix-LU-decomposition matrix))
-         (permuted-output-vector (matrix-product (first LU-decomposition) output-vector))
-         (intermediate-y-vector (matrix-forward-substitution (second LU-decomposition) permuted-output-vector)))
-    (matrix-back-substitution (third LU-decomposition) intermediate-y-vector)))
+  (<span style="color: #00af00;">let*</span> ((PLU-decomposition (matrix-PLU-decomposition matrix))
+         (permuted-output-vector (matrix-product (first PLU-decomposition) output-vector))
+         (intermediate-y-vector (matrix-forward-substitution (second PLU-decomposition) permuted-output-vector)))
+    (matrix-back-substitution (third PLU-decomposition) intermediate-y-vector)))
 </pre>
 </div>
 </div>
@@ -2072,11 +2104,20 @@ But if the pivots are positive, then we change <b>A=LDL<sup>T</sup></b> to <b>A=
 <div id="outline-container-sec-7-4" class="outline-3">
 <h3 id="sec-7-4">Solving for A<sup>-1</sup></h3>
 <div class="outline-text-3" id="text-7-4">
-<blockquote>
 <p>
-<b>TODO</b> : page 148
+On <i>page 148</i> we get a simple algorithm for efficiently contructing <b>A<sup>-1</sup></b>. Basically we are taking the equation <b>AA<sup>-1</sup>=I</b>, where <b>A<sup>-1</sup></b> is unknown, and solving it column by column. Treating each column of <b>A<sup>-1</sup></b> as <b>x</b> and each column of <b>I</b> and <b>b</b> we are reusing <b>Ax=b</b> and writing it as <b>AA<sup>-1</sup><sub>*j</sub>=e<sub>j</sub></b>. Once we solve each column we put them all together and rebuild <b>A<sup>-1</sup></b>.
 </p>
-</blockquote>
+
+<p>
+Because our data is arranged row-by-row, it'll be easier for me to just build <b>(A<sup>-1</sup>)<sup>T</sup>)</b> and then transpose it back to <b>A<sup>-1</sup></b> at the end.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-inverse</span> (matrix)
+<span style="color: #cc0000;">"template"</span>
+)
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -2085,7 +2126,7 @@ But if the pivots are positive, then we change <b>A=LDL<sup>T</sup></b> to <b>A=
 <h2 id="sec-8">TODOs</h2>
 <div class="outline-text-2" id="text-8">
 <ul class="org-ul">
-<li>Write a better example that I can expand on easily later
+<li>Write a better example that I can expand on easily latre
 </li>
 <li>matrix-update-elimination-matrix could be optimized to not do any matrix products
 </li>
@@ -2142,7 +2183,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-01-19 Fri 16:31</p>
+<p class="date">Created: 2018-01-21 Sun 20:59</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
