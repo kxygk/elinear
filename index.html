@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-01-21 Sun 21:35 -->
+<!-- 2018-01-24 Wed 17:02 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -1661,9 +1661,9 @@ When we do this is code we immediately invert the <b>G</b>'s and build up their 
                                           column-to-eliminate)))
           (matrix-LU-decomposition-rec
            (matrix-product
+            L-matrix
             (matrix-invert-elementary-lower-triangular
-             column-elimination-matrix)
-            L-matrix)
+             column-elimination-matrix))
            (matrix-product
             column-elimination-matrix
             reduced-matrix)
@@ -2018,7 +2018,7 @@ As mention on <i>page 154</i>, the <b>LU</b> can be further broken down into <b>
                  (matrix-data
                   (matrix-scalar-product
                    (matrix-extract-subrow matrix row (1+ row) rank)
-                   (/ 1 pivot)))))))))
+                   (/ 1.0 pivot)))))))))
 
     (<span style="color: #00af00;">let</span> ((rank (matrix-rows matrix))
           (D-U-data (matrix-build-D-U-data matrix 0 '() '())))
@@ -2029,10 +2029,9 @@ As mention on <i>page 154</i>, the <b>LU</b> can be further broken down into <b>
   (<span style="color: #00af00;">let</span> ((LU-decomposition (matrix-LU-decomposition matrix)))
     (nconc
      (list
-      (first LU-decomposition)
-      (second LU-decomposition))
+      (first LU-decomposition))
      (matrix-extract-D-from-U
-      (third LU-decomposition)))))
+      (second LU-decomposition)))))
 </pre>
 </div>
 <p>
@@ -2066,31 +2065,31 @@ Going one step further - if we have a symmetric matrix (so <b>A=LDL<sup>T</sup><
           ((&lt; (car data) 0) nil)
           (t (is-no-data-negative (cdr data)))))
 
-  (<span style="color: #00af00;">let*</span> ((PLDU (matrix-LDU-decomposition matrix))
+  (<span style="color: #00af00;">let*</span> ((LDU (matrix-DU-decomposition matrix))
          (D (third PLDU)))
     (<span style="color: #00af00;">and</span> (matrix-is-symmetric matrix) (is-no-data-negative (matrix-data D)))))
 </pre>
 </div>
 
 <p>
-But if the pivots are positive, then we change <b>A=LDL<sup>T</sup></b> to <b>A=LD<sub>split</sub>D<sub>split</sub>L<sup>T</sup></b>. Notice that both halfs of the equation are similar. Remember that just like with <b>D</b>, <b>D<sub>split</sub>=D<sub>split</sub><sup>T</sup></b>. So we can rewrite <b>A=LD<sub>split</sub>D<sub>split</sub>L<sup>T</sup></b> as <b>A=LD<sub>split</sub>D<sub>split</sub><sup>T</sup>L<sup>T</sup></b>. Assigning a new matrix <b>R</b> to be equal to the product <b>LD<sub>split</sub></b> we can write down <b>A=RR<sup>T</sup></b>. This <b>R</b> will have the square root elements on the diagonal b/c <b>L</b> has <b>1</b>'s on its central diagonal. The text then demonstates that since <b>R=LD<sub>split</sub></b> is reversible and unique, that given <b>A=RR<sup>T</sup></b> where <b>R</b> has positive diagonal elements, you can reconstruct the <b>LDU</b> decomposition and see that the pivots are positive (the squares of the diagonal elements in your <b>R</b>).
+But if the pivots are positive, then we change <b>A=LDL<sup>T</sup></b> to <b>A=LD<sub>split</sub>D<sub>split</sub>L<sup>T</sup></b>. Notice that both halfs of the equation are similar. Remember that just like with <b>D</b>, <b>D<sub>split</sub>=D<sub>split</sub><sup>T</sup></b>. So we can rewrite <b>A=LD<sub>split</sub>D<sub>split</sub>L<sup>T</sup></b> as <b>A=LD<sub>split</sub>D<sub>split</sub><sup>T</sup>L<sup>T</sup></b>. Assigning a new matrix <b>R</b> to be equal to the product <b>LD<sub>split</sub></b> we can write down <b>A=RR<sup>T</sup></b>. This <b>R</b> will have the square-root coefficients on the diagonal b/c <b>L</b> has <b>1</b>'s on its own central diagonal. The text then demonstates that since turning <b>R</b> into the two matrices <b>LD<sub>split</sub></b> is unique, then given an decomposition <b>A=RR<sup>T</sup></b> where <b>R</b> has positive diagonal elements, you can reconstruct the <b>LDU</b> decomposition and see that the pivots are positive (the squares of the diagonal elements in your <b>R</b>). So can conclude that iff some matrix <b>A</b> is <b>positive definite</b> it has a <b>Cholesky decomposition</b>.
 </p>
 
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-cholesky-decomposition</span> (matrix)
-  <span style="color: #cc0000;">"Take the output of the LDU-decomposition and generatethe Cholesky decomposition matrices"</span>
+  <span style="color: #cc0000;">"Take the output of the LU-decomposition and generate the Cholesky decomposition matrices"</span>
   (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">sqrt-data-elements</span> (data)
     <span style="color: #cc0000;">"Takes a data vector and squares every element and returns the list"</span>
     (<span style="color: #00af00;">cond</span> ((null data) '())
           (t
            (cons
             (sqrt (car data))
-            (cdr data)))))
+            (sqrt-data-elements (cdr data))))))
 
-  (<span style="color: #00af00;">let*</span> ((PLDU (matrix-LDU-decomposition matrix))
-         (L (second PLDU))
-         (D (third PLDU))
+  (<span style="color: #00af00;">let*</span> ((LDU (matrix-LDU-decomposition matrix))
+         (L (first LDU))
+         (D (second LDU))
          (D_sqrt (matrix-from-data-list
                   (matrix-rows D)
                   (matrix-rows D)
@@ -2100,7 +2099,11 @@ But if the pivots are positive, then we change <b>A=LDL<sup>T</sup></b> to <b>A=
 </div>
 <blockquote>
 <p>
-<b>TODO:</b> This (and the <i>positive-definite</i> check above) need some fixing. You can't do partial pivoting b/c <b>PA</b> is no longer symmetric so everything falls apart. This needs a version of <code>matrix-LDU-decomposition</code> and <code>matrix-LU-decomposition</code> that does not pivoting &#x2026; or I need to find a work around that uses the <b>P</b> matrix.
+<b>TODO:</b> The permutation matrix <b>P</b> has disappeared from my proof and from the textbook! You can't do partial pivoting b/c <b>PA</b> is no longer symmetric so everything falls apart. (Still <b>A = A<sup>T</sup></b> ,but when you transpose <b>PA=PLDU</b> you can <b>A<sup>T</sup>P<sup>T</sup>=U<sup>T</sup>DL<sup>T</sup>P<sup>T</sup></b> and there is no equality to proceeed with) You could however do <b>PAP</b>, but if you do it manually you'll see that the pivot position doesn't move and in any case <b>P&ne;P<sup>T</sup></b> so you have the same problem again. I don't understand why we can be sure <b>A</b> needs no pivot adjustments. My searches have confirmed that positive definite matrices do not need permutation matrices to be decomposed - but I don't have a clean explanation
+</p>
+
+<p>
+see: <a href="https://math.stackexchange.com/questions/621045/why-does-cholesky-decomposition-exist">https://math.stackexchange.com/questions/621045/why-does-cholesky-decomposition-exist</a>#
 </p>
 </blockquote>
 </div>
@@ -2130,11 +2133,9 @@ Because our data is arranged row-by-row, it'll be easier for me to just build <b
 <h2 id="sec-8">TODOs</h2>
 <div class="outline-text-2" id="text-8">
 <ul class="org-ul">
-<li>Write a better example that I can expand on easily latre
+<li>Write a better example that I can expand on easily later
 </li>
-<li>matrix-update-elimination-matrix could be optimized to not do any matrix products
-</li>
-<li>The LU Decomp can all be done with no matrix-products.. :/
+<li>Fix the Cholesky to use the plain LU
 </li>
 <li>Compute <b>A<sup>-1</sup></b> using the <b>LU</b> decomp (see page 148)
 </li>
@@ -2145,8 +2146,6 @@ Because our data is arranged row-by-row, it'll be easier for me to just build <b
 <li>Do exercise 3.8.8
 </li>
 <li>Add some kind of mechanism to bail-out when the input matrix isn't singular in the LU
-</li>
-<li>It's unclear if Cholesky works with partial pivoting
 </li>
 </ul>
 </div>
@@ -2187,7 +2186,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-01-21 Sun 21:35</p>
+<p class="date">Created: 2018-01-24 Wed 17:02</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
