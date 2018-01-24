@@ -1092,41 +1092,41 @@ And we are left with *A=LU*
 
 When we do this is code we immediately invert the *G*'s and build up their product. So as we eliminate *A* column after column and turn it into the upper triangular *U* we are in parallel accumulating the inverse of the elimination matrices into *L*. The function will return us two matrices, *L* and *U*
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-LU-decomposition (matrix)
-    "Perform Gaussian elimination on MATRIX and return the list (L U), representing the LU-decomposition. If a zero pivot is hit, we terminate and return a string indicating that"
-    (let
-        ((rank
-          (matrix-rows matrix)))
-      (defun matrix-LU-decomposition-rec (L-matrix
-                                          reduced-matrix
-                                          column-to-eliminate)
-        (cond
-         ((equal column-to-eliminate rank)
-          (list L-matrix reduced-matrix))
-         ((zerop
-           (matrix-get-value
-            reduced-matrix
-            column-to-eliminate
-            column-to-eliminate))
-          "ERROR: LU decomposition terminated due to hitting a zero pivot. Consider using the PLU")
-         (t
-          (let ((column-elimination-matrix (matrix-elementary-lower-triangular
+    (defun matrix-LU-decomposition (matrix)
+      "Perform Gaussian elimination on MATRIX and return the list (L U), representing the LU-decomposition. If a zero pivot is hit, we terminate and return a string indicating that"
+      (let
+          ((rank
+            (matrix-rows matrix)))
+        (defun matrix-LU-decomposition-rec (L-matrix
                                             reduced-matrix
-                                            column-to-eliminate)))
-            (matrix-LU-decomposition-rec
-             (matrix-product
-              (matrix-invert-elementary-lower-triangular
-               column-elimination-matrix)
-              L-matrix)
-             (matrix-product
-              column-elimination-matrix
-              reduced-matrix)
-             (1+ column-to-eliminate))))))
+                                            column-to-eliminate)
+          (cond
+           ((equal column-to-eliminate rank)
+            (list L-matrix reduced-matrix))
+           ((zerop
+             (matrix-get-value
+              reduced-matrix
+              column-to-eliminate
+              column-to-eliminate))
+            "ERROR: LU decomposition terminated due to hitting a zero pivot. Consider using the PLU")
+           (t
+            (let ((column-elimination-matrix (matrix-elementary-lower-triangular
+                                              reduced-matrix
+                                              column-to-eliminate)))
+              (matrix-LU-decomposition-rec
+               (matrix-product
+                L-matrix
+                (matrix-invert-elementary-lower-triangular
+                 column-elimination-matrix))
+               (matrix-product
+                column-elimination-matrix
+                reduced-matrix)
+               (1+ column-to-eliminate))))))
 
-      (matrix-LU-decomposition-rec
-       (matrix-identity rank)
-       matrix
-       0)))
+        (matrix-LU-decomposition-rec
+         (matrix-identity rank)
+         matrix
+         0)))
 #+END_SRC
 #+BEGIN_QUOTE
 *TODO:* I'm updating *L* by doing a a product here (ie. *L_{new} = G^{-1}L_{old}*).. but the whole point is that *L* can be updated without a product. This could use a helper function that would build/update *L*'s
