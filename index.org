@@ -1394,7 +1394,7 @@ As mention on /page 154/, the *LU* can be further broken down into *LDU* - where
                    (matrix-data
                     (matrix-scalar-product
                      (matrix-extract-subrow matrix row (1+ row) rank)
-                     (/ 1 pivot)))))))))
+                     (/ 1.0 pivot)))))))))
 
       (let ((rank (matrix-rows matrix))
             (D-U-data (matrix-build-D-U-data matrix 0 '() '())))
@@ -1405,10 +1405,9 @@ As mention on /page 154/, the *LU* can be further broken down into *LDU* - where
     (let ((LU-decomposition (matrix-LU-decomposition matrix)))
       (nconc
        (list
-        (first LU-decomposition)
-        (second LU-decomposition))
+        (first LU-decomposition))
        (matrix-extract-D-from-U
-        (third LU-decomposition)))))
+        (second LU-decomposition)))))
 
 #+END_SRC
 An extra nicety is that if *A* is symmetric then *A=A^{T}* and therefore *LDU=(LDU)^{T}=U^{T}D^{T}L^{T}*. Since *D==D^{T}* and the *LU* factorization is unique then *L* must equal *U^{T}* and *U* is equal to *L^{T}* - so we can write *A=LDL^{T}*
