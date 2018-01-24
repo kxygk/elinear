@@ -1358,14 +1358,15 @@ Once we have *y* we can go to *Ux=y* and solve for *x* by back substitution
 Now glueing everything together is now just a few lines of code
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-solve-input (matrix output-vector)
-    "Solve for an input-vector using forward substitution. ie. solve for x in Lx=b where b is OUTPUT-VECTOR and L is the LOWER-TRIANGULAR-MATRIX"
-    (let* ((PLU-decomposition (matrix-PLU-decomposition matrix))
-           (permuted-output-vector (matrix-product (first PLU-decomposition) output-vector))
-           (intermediate-y-vector (matrix-forward-substitution (second PLU-decomposition) permuted-output-vector)))
-      (matrix-back-substitution (third PLU-decomposition) intermediate-y-vector)))
+  (defun matrix-solve-for-input (PLU output-vector)
+    "Solve for x in Ax=b where b is OUTPUT-VECTOR and A is given factorized into PLU"
+    (let* ((permuted-output-vector (matrix-product (first PLU) output-vector))
+           (intermediate-y-vector (matrix-forward-substitution (second PLU) permuted-output-vector)))
+      (matrix-back-substitution (third PLU) intermediate-y-vector)))
 #+END_SRC
-
+#+BEGIN_QUOTE
+*Note:* I have /PLU/ as the input as opposed to *A* b/c we often want to solve *Ax=b* over and over for different values of *b* and we don't want to recompute /PLU/
+#+END_QUOTE
 ** The LDU Decomposition
 As mention on /page 154/, the *LU* can be further broken down into *LDU* - where both *L* and *U* have *1*'s on the diagonal and *D* is a diagonal matrix with all the pivots. This has the nice property of being more symmetric.
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
