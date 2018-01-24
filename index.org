@@ -1466,20 +1466,23 @@ But if the pivots are positive, then we change *A=LDL^{T}* to *A=LD_{split}D_{sp
 see: https://math.stackexchange.com/questions/621045/why-does-cholesky-decomposition-exist#
 #+END_QUOTE
 ** Solving for A^{-1}
-#+BEGIN_QUOTE
-*TODO* : page 148
-#+END_QUOTE
+On /page 148/ we get a simple algorithm for efficiently contructing *A^{-1}*. Basically we are taking the equation *AA^{-1}=I*, where *A^{-1}* is unknown, and solving it column by column. Treating each column of *A^{-1}* as *x* and each column of *I* and *b* we are reusing *Ax=b* and writing it as *AA^{-1}_{*j}=e_{j}*. Once we solve each column we put them all together and rebuild *A^{-1}*.
+
+Because our data is arranged row-by-row, it'll be easier for me to just build *(A^{-1})^{T})* and then transpose it back to *A^{-1}* at the end.
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-inverse (matrix)
+"template"
+)
+#+END_SRC
 
 * TODOs
 - Write a better example that I can expand on easily later
-- matrix-update-elimination-matrix could be optimized to not do any matrix products
-- The LU Decomp can all be done with no matrix-products.. :/
+- Fix the Cholesky to use the plain LU
 - Compute *A^{-1}* using the *LU* decomp (see page 148)
 - Implement the Sherman-Morrison update formula
 - Sensitivity/Condition numbers needs to be revisited and expanded on (page 126-128)
 - Do exercise 3.8.8
 - Add some kind of mechanism to bail-out when the input matrix isn't singular in the LU
-- It's unclear if Cholesky works with partial pivoting
 * SRC_Block template
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-template (matrix)
