@@ -1339,17 +1339,17 @@ Once we have *y* we can go to *Ux=y* and solve for *x* by back substitution
       (matrix-from-data-list
        (matrix-rows upper-triangular-matrix)
        1
-       (nreverse
+       (reverse
         (matrix-data
          (matrix-forward-substitution
           (matrix-from-data-list
            (matrix-rows upper-triangular-matrix)
            (matrix-rows upper-triangular-matrix) ;; rows == columns
-           (nreverse (matrix-data upper-triangular-matrix)))
+           (reverse (matrix-data upper-triangular-matrix)))
           (matrix-from-data-list
            (matrix-rows output-vector)
            1
-           (nreverse (matrix-data output-vector))))))))
+           (reverse (matrix-data output-vector))))))))
 #+END_SRC
 #+BEGIN_QUOTE
 *Not*: Here I'm using a bit of a trick to reuse the forward substitution function
