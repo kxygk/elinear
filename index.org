@@ -1367,6 +1367,88 @@ Now glueing everything together is now just a few lines of code
 #+BEGIN_QUOTE
 *Note:* I have /PLU/ as the input as opposed to *A* b/c we often want to solve *Ax=b* over and over for different values of *b* and we don't want to recompute /PLU/
 #+END_QUOTE
+
+** EXAMPLE: Vandermonde matrices
+~pages 185-186~ introduces the Vandermonde matix which provides us with a way to solve for polynomials that fit a set of given points. Polynomials are equations of the form:
+\begin{equation}
+y=a_{1}+a_{2}x+a_{3}x^{2}+a_{4}x^{3}+...
+\end{equation}
+So given some ~(x,y)~ points we can try to solve for these *a_{n}* factors. And we can choose the number of terms in the polynomial to insure we have a nonsingular matrix that's solvable (see bottom of ~page 185~)
+
+The Vandermonde matrix is built from a list of ~x~'s and their exponents
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-vandermonde (list-of-xs number-of-points)
+    "Build a Vandermonde matrix of the appropriate rank from a LIST-OF-Xs"
+    (defun matrix-build-polynomial-list (x degree)
+      "Build a list of (X,X^2,X^3,..,X^DEGREE)"
+      (cond
+       ((zerop degree)
+        '(1))
+       (t
+        (cons
+         (expt x degree)
+         (matrix-build-polynomial-list x (1- degree))
+         ))))
+    (defun matrix-vandermonde-data (list-of-xs degree)
+      "Builds the data vector of the Vandermonde matrix"
+      (cond
+       ((null list-of-xs)
+        '())
+       (t
+        (append
+         (reverse
+          (matrix-build-polynomial-list
+           (car list-of-xs)
+           degree))
+         (matrix-vandermonde-data
+          (cdr list-of-xs)
+          degree)))))
+    (matrix-from-data-list
+     number-of-points
+     number-of-points
+     (matrix-vandermonde-data
+      list-of-xs
+      (1- number-of-points))))
+
+#+END_SRC
+Then given a set of points, we can fit a polynomial to them by using our input solver to solve for the polynomial factors.
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-fit-polynomial (x-coordinates y-coordinates)
+  "Given a list of x and y coordinates, solve for a polynomial that fits them using a Vandermonde matrixs. The result is a vector of factors 'a' that should be used in the standard order: a_1+a_2*x+a_3*x^2+a_4*x^3+... etc"
+  (let* ((number-of-points (length x-coordinates))
+         (vandermonde-matrix
+          (matrix-vandermonde x-coordinates number-of-points))
+         (PLU (matrix-PLU-decomposition vandermonde-matrix)))
+
+    (matrix-solve-for-input
+     PLU
+     (matrix-from-data-list
+      number-of-points
+      1
+      y-coordinates))))
+#+END_SRC
+To see it work we can try feeding in some random points and see what kind of polynomial we get
+#+NAME: edata
+#+BEGIN_SRC emacs-lisp :exports both :session
+  (matrix-data
+   (matrix-fit-polynomial
+    '(1.0 2.0 3.0 4.0 5.0)
+    '(1.9 2.5 1.8 2.8 4.2)))
+#+END_SRC
+
+#+RESULTS: edata
+| -7.299999999999994 | 17.008333333333322 | -9.920833333333327 | 2.2916666666666656 | -0.17916666666666659 |
+Then we take these factors and stick them into gnuplot to get a quick plot
+#+BEGIN_SRC gnuplot :exports both :file polynomial-fit.png :var data=edata
+f(x) = -7.299 + 17.00833*x + -9.920833*x**2 + 2.29166*x**3 + -0.179166*x**4
+set xrange[0:6]
+set yrange[-1:5]
+plot f(x)
+#+END_SRC
+
+#+RESULTS:
+[[file:polynomial-fit.png]]
+
 ** The LDU Decomposition
 As mention on /page 154/, the *LU* can be further broken down into *LDU* - where both *L* and *U* have *1*'s on the diagonal and *D* is a diagonal matrix with all the pivots. This has the nice property of being more symmetric.
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
