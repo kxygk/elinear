@@ -1495,6 +1495,7 @@ Because our data is arranged row-by-row, it'll be easier for me to just build *(
 - Implement the Sherman-Morrison update formula
 - Sensitivity/Condition numbers needs to be revisited and expanded on (page 126-128)
 - Do exercise 3.8.8
+- Tridiagonal matrices - 3.10.6
 * SRC_Block template
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-template (matrix)
