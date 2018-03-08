@@ -1509,4 +1509,6 @@ This webpage is generated from an org-document (at ~./index.org~) that also gene
 Once opened in Emacs:\\
 - ~C-c C-e h h~ generates the webpage  \\
 - ~C-c C-v C-t~ exports the code blocks into the appropriate files\\
+- ~C-c C-c~     org-babel-execute-src-block
+- ~C-c C-v C-b~ org-babel-execute-buffer
 #+END_QUOTE
