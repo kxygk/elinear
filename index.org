@@ -1596,7 +1596,7 @@ b\\
 
 If you multiply out the block matrices you will get two equation and you will see that *x_{2}* is equal to the least squares solution. (/Note:/ crucially the second equation tells you that *x_{1}* is in the *N(A^{T})*)
 
-This was tested in a little demo program written in Clojure. Fitting a high order polynomial over some random points the *A^{T}Ax=A^{T}b* solution (light blue) gives a broken solution much quicker than the stable solution (dark blue)
+This was tested in a [[../asparapiss/][little demo program]] written in Clojure. Fitting a high order polynomial over some random points the *A^{T}Ax=A^{T}b* solution (light blue) gives a broken solution much quicker than the stable solution (dark blue)
 
 file:stable-least-squares.png
 
