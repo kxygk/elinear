@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-03-08 Thu 14:47 -->
+<!-- 2018-06-26 Tue 21:32 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -88,7 +88,7 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="https://geokon-gh.github.io/static/worg.css" />
+<link rel="stylesheet" type="text/css" href="../static/worg.css" />
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -260,9 +260,14 @@ for the JavaScript code in this tag.
 <li><a href="#sec-7-5">Solving for A<sup>-1</sup></a></li>
 </ul>
 </li>
-<li><a href="#sec-8">TODOs</a></li>
-<li><a href="#sec-9">SRC<sub>Block</sub> template</a></li>
-<li><a href="#sec-10">End</a></li>
+<li><a href="#sec-8">Least Squares</a>
+<ul>
+<li><a href="#sec-8-1">Numerically stable solution</a></li>
+</ul>
+</li>
+<li><a href="#sec-9">TODOs</a></li>
+<li><a href="#sec-10">SRC<sub>Block</sub> template</a></li>
+<li><a href="#sec-11">End</a></li>
 </ul>
 </div>
 </div>
@@ -2279,8 +2284,56 @@ Because our data is arranged row-by-row, it'll be easier for me to just build <b
 </div>
 </div>
 <div id="outline-container-sec-8" class="outline-2">
-<h2 id="sec-8">TODOs</h2>
+<h2 id="sec-8">Least Squares</h2>
 <div class="outline-text-2" id="text-8">
+<p>
+Now we have a mechanism to solve square linear systems we need to extend <b>Ax=b</b> to the overdefined case where we have more linear equations than parameters (ie. a skinny matrix). If each equation is thought of as representing a "measurement" then in other words when we have more measurements than function paramters to solve for. In the general case (with the addition of noise) no explicit solution will exist for <b>A<sub>skinny</sub>x=b</b> so we need to find the next-best-thing. Here there is a bit confusion in terminology b/c we think of our measurements as being an "input" and "output", but here the thing we are solving for (ie. what I've been calling an input) are the parameters of the function. So given a function <b>f(x)</b> we have measurements that say we passed in certain values <b>a</b> and got out values <b>b</b> and then we want to solve for the function parameters <b>p</b>. In matrix form (as for the Vandermonde case) we would write that out as <b>A<sub>f(a)</sub>p=b</b>. But since there are too many measurements no exact solution will exist where <b>f(a<sub>i</sub>)=b<sub>i</sub></b> will always hold true. Instead we will get close-by values <b>f(a)=b<sub>estimate</sub></b>. Our goal is to solve for parameters <b>p</b> that will get us as close as possible. Ie <b>f(a)-b=b<sub>estimate</sub>-b</b> or <b>A<sub>f(a)</sub>p-b</b> should be as small as possible. To make the situation easier numerically we take the square of the difference (so all values are positive) <b>(f(a)-b)<sup>2</sup>=(b<sub>estimate</sub>-b)<sup>2</sup></b> or <b>(A<sub>f(a)</sub>p-b)<sup>2</sup></b> . Minimizing a function is done by take the derivative and setting it equal to zero and then solving for the parameters. What <i>page 226</i> shows is that the derivative of <b>(A<sub>f(a)</sub>p-b)<sup>2</sup></b>  will give us the matrix form <b>A<sup>T</sup>Ax=A<sup>T</sup>b</b> which is smaller, square and has a solution. This amazingly holds for all linear equations.
+</p>
+</div>
+
+<div id="outline-container-sec-8-1" class="outline-3">
+<h3 id="sec-8-1">Numerically stable solution</h3>
+<div class="outline-text-3" id="text-8-1">
+<p>
+Unfortunately this solution involves multiplcation so it has some numerical issues. A better solution is presented in <b>Exercise 4.6.9</b> with the equations
+</p>
+
+\begin{equation}
+\begin{bmatrix}
+I_{m*m} & A\\
+A^T & 0_{n*n}\\
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+b\\
+0\\
+\end{bmatrix}
+\end{equation}
+
+<p>
+If you multiply out the block matrices you will get two equation and you will see that <b>x<sub>2</sub></b> is equal to the least squares solution. (<i>Note:</i> crucially the second equation tells you that <b>x<sub>1</sub></b> is in the <b>N(A<sup>T</sup>)</b>)
+</p>
+
+<p>
+This was tested in a little demo program written in Clojure. Fitting a high order polynomial over some random points the <b>A<sup>T</sup>Ax=A<sup>T</sup>b</b> solution (light blue) gives a broken solution much quicker than the stable solution (dark blue)
+</p>
+
+
+<div class="figure">
+<p><img src="stable-least-squares.png" alt="stable-least-squares.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9">TODOs</h2>
+<div class="outline-text-2" id="text-9">
 <ul class="org-ul">
 <li>Write a better example that I can expand on easily later
 </li>
@@ -2295,9 +2348,9 @@ Because our data is arranged row-by-row, it'll be easier for me to just build <b
 </ul>
 </div>
 </div>
-<div id="outline-container-sec-9" class="outline-2">
-<h2 id="sec-9">SRC<sub>Block</sub> template</h2>
-<div class="outline-text-2" id="text-9">
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10">SRC<sub>Block</sub> template</h2>
+<div class="outline-text-2" id="text-10">
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-template</span> (matrix)
@@ -2308,9 +2361,9 @@ Because our data is arranged row-by-row, it'll be easier for me to just build <b
 </div>
 </div>
 
-<div id="outline-container-sec-10" class="outline-2">
-<h2 id="sec-10">End</h2>
-<div class="outline-text-2" id="text-10">
+<div id="outline-container-sec-11" class="outline-2">
+<h2 id="sec-11">End</h2>
+<div class="outline-text-2" id="text-11">
 <blockquote>
 <p>
 This webpage is generated from an org-document (at <code>./index.org</code>) that also generates all the files described. 
@@ -2335,7 +2388,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-03-08 Thu 14:47</p>
+<p class="date">Created: 2018-06-26 Tue 21:32</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

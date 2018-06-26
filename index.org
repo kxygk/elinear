@@ -1,5 +1,5 @@
 #+TITLE: Linear Systems in Lisp
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://geokon-gh.github.io/static/worg.css" />
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../static/worg.css" />
 #+options: num:nil
 # This will export a README.org file for Github, so that people that land in my repo know where to find the relevant webpage
 #+HTML_MATHJAX: path: "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"
@@ -1572,6 +1572,34 @@ Because our data is arranged row-by-row, it'll be easier for me to just build *(
 #+BEGIN_QUOTE
 *TODO:* This could be rewritten to be tail recursive
 #+END_QUOTE
+* Least Squares
+Now we have a mechanism to solve square linear systems we need to extend *Ax=b* to the overdefined case where we have more linear equations than parameters (ie. a skinny matrix). If each equation is thought of as representing a "measurement" then in other words when we have more measurements than function paramters to solve for. In the general case (with the addition of noise) no explicit solution will exist for *A_{skinny}x=b* so we need to find the next-best-thing. Here there is a bit confusion in terminology b/c we think of our measurements as being an "input" and "output", but here the thing we are solving for (ie. what I've been calling an input) are the parameters of the function. So given a function *f(x)* we have measurements that say we passed in certain values *a* and got out values *b* and then we want to solve for the function parameters *p*. In matrix form (as for the Vandermonde case) we would write that out as *A_{f(a)}p=b*. But since there are too many measurements no exact solution will exist where *f(a_{i})=b_{i}* will always hold true. Instead we will get close-by values *f(a)=b_{estimate}*. Our goal is to solve for parameters *p* that will get us as close as possible. Ie *f(a)-b=b_{estimate}-b* or *A_{f(a)}p-b* should be as small as possible. To make the situation easier numerically we take the square of the difference (so all values are positive) *(f(a)-b)^{2}=(b_{estimate}-b)^{2}* or *(A_{f(a)}p-b)^{2}* . Minimizing a function is done by take the derivative and setting it equal to zero and then solving for the parameters. What /page 226/ shows is that the derivative of *(A_{f(a)}p-b)^{2}*  will give us the matrix form *A^{T}Ax=A^{T}b* which is smaller, square and has a solution. This amazingly holds for all linear equations.
+
+** Numerically stable solution
+Unfortunately this solution involves multiplcation so it has some numerical issues. A better solution is presented in *Exercise 4.6.9* with the equations
+
+\begin{equation}
+\begin{bmatrix}
+I_{m*m} & A\\
+A^T & 0_{n*n}\\
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+b\\
+0\\
+\end{bmatrix}
+\end{equation}
+
+If you multiply out the block matrices you will get two equation and you will see that *x_{2}* is equal to the least squares solution. (/Note:/ crucially the second equation tells you that *x_{1}* is in the *N(A^{T})*)
+
+This was tested in a little demo program written in Clojure. Fitting a high order polynomial over some random points the *A^{T}Ax=A^{T}b* solution (light blue) gives a broken solution much quicker than the stable solution (dark blue)
+
+file:stable-least-squares.png
+
 * TODOs
 - Write a better example that I can expand on easily later
 - Implement the Sherman-Morrison update formula
