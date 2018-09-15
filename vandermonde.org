@@ -13,14 +13,18 @@ Polynomials are equations of the form:
 \begin{equation}
 y=a_{1}+a_{2}x+a_{3}x^{2}+a_{4}x^{3}+...
 \end{equation}
-If we have a problem that gives us many ~(x,y)~ points we can use this formula to generate many polynomial equation
+It's a typial function of the form *y=f(x)* that takes inputs =x= and returns outputs =y= and it's immediately apparant that this is non linear. Given a polynomial (ie. given it's *a_{n}* factors) and given a value for =y= there can be multiple solutions for =x=. At first blush this doesn't seem related to the problems we're tackling with matrices. 
+
+The critical insight that we need to understand how to use Vandermonde matrices is that it's linear in terms of it's own polynomial factors. We are ultimately interested in finding a polynomial /that fits/, so what we want to do is actually solve for the =a_{n}= polynomial factors. In other words we aren't taking *y=f(x)* and solving for *x*. We are taking a corresponding *y=f(a)* and solving for the polynomial factors *a_{n}*. The *x*'s are baked into the *f()*.
+
+To see how this is built up we simply take the polynomial function and a series of points/measurements =[ (x_1,y_1) (x_2,y_2) (x_3,y_3) ... ]= and write out the polynomial equations out.
 \begin{equation}
 y_1=a_{1}+a_{2}x_1+a_{3}x_{1}^{2}+a_{4}x_{1}^{3}+...\\
 y_2=a_{1}+a_{2}x_2+a_{3}x_{2}^{2}+a_{4}x_{2}^{3}+...\\
 y_3=a_{1}+a_{2}x_3+a_{3}x_{3}^{2}+a_{4}x_{3}^{3}+...\\
 ...
 \end{equation}
-This is now a standard matrix problem with the =a='s being the unknown
+This is now a standard matrix problem with the =a='s being the unknown. The =x='s look nonlinear, but they're actually known values and not something we are solving for. Writen out in matrix form we get
 
 \begin{equation}
 \begin{bmatrix}
@@ -45,13 +49,17 @@ y_3\\
 \end{bmatrix}
 \end{equation}
 
-The trick here is now we can adjust he number of terms in the polynomial (ie. the number of *a_{n}*'s) so that the matrix is always square and in the general case non-singular. Now that we know how to solve *Ax=b* using the *LU decomposition* we can solve for all the polynomial factors *a_{n}* and we can end up with the original equation
+Where all the values of the x-matrix are known. (the x-matrix is the actual /Vandermonde matrix/ - *V*)
+
+Th next trick is that we can adjust he number of terms in the polynomial (the number of exponents of x and the the number of *a_{n}*'s) so that the matrix is always square - and in the general case non-singular. Now since we know how to solve *Ax=b* using the *LU decomposition* we can solve for all the polynomial factors *a_{n}* in this equivalent system *Va=y* - where the *V* is the matrix of exponents of =x=.
+
+Once we solve for the *a_{n}*'s we can then reconstruct the non-linear polynomial equation we started looking at in the beginning
 
 \begin{equation}
 y=a_{1}+a_{2}x+a_{3}x^{2}+a_{4}x^{3}+...
 \end{equation}
 
-Which will not hold true for all our =(x,y)= points but also for all other values of =x= we want to test - so we will have in the end fit a polynomial curve through all our points.
+It will not only hold true for all our =(x,y)= points but also for all other values of =x= we want to test - so we will have in the end fit a polynomial curve through all our points.
 
 * Setup
 To start we import ELisp linear algebra function we've developed
@@ -134,4 +142,4 @@ plot f(x)
 
 
 
-I don't have the original points plotted here, but by visual inspection you can see that the curve passes through all of our points
+I don't have the original points plotted here, but by visual inspection you can see that the curve passes through all of the points we started with.

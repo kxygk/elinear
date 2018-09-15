@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Vandermonde matrices</title>
-<!-- 2018-09-15 Sat 14:20 -->
+<!-- 2018-09-15 Sat 15:41 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -210,7 +210,15 @@ Polynomials are equations of the form:
 y=a_{1}+a_{2}x+a_{3}x^{2}+a_{4}x^{3}+...
 \end{equation}
 <p>
-If we have a problem that gives us many <code>(x,y)</code> points we can use this formula to generate many polynomial equation
+It's a typial function of the form <b>y=f(x)</b> that takes inputs <code>x</code> and returns outputs <code>y</code> and it's immediately apparant that this is non linear. Given a polynomial (ie. given it's <b>a<sub>n</sub></b> factors) and given a value for <code>y</code> there can be multiple solutions for <code>x</code>. At first blush this doesn't seem related to the problems we're tackling with matrices. 
+</p>
+
+<p>
+The critical insight that we need to understand how to use Vandermonde matrices is that it's linear in terms of it's own polynomial factors. We are ultimately interested in finding a polynomial <i>that fits</i>, so what we want to do is actually solve for the <code>a_{n}</code> polynomial factors. In other words we aren't taking <b>y=f(x)</b> and solving for <b>x</b>. We are taking a corresponding <b>y=f(a)</b> and solving for the polynomial factors <b>a<sub>n</sub></b>. The <b>x</b>'s are baked into the <b>f()</b>.
+</p>
+
+<p>
+To see how this is built up we simply take the polynomial function and a series of points/measurements <code>[ (x_1,y_1) (x_2,y_2) (x_3,y_3) ... ]</code> and write out the polynomial equations out.
 </p>
 \begin{equation}
 y_1=a_{1}+a_{2}x_1+a_{3}x_{1}^{2}+a_{4}x_{1}^{3}+...\\
@@ -219,7 +227,7 @@ y_3=a_{1}+a_{2}x_3+a_{3}x_{3}^{2}+a_{4}x_{3}^{3}+...\\
 ...
 \end{equation}
 <p>
-This is now a standard matrix problem with the <code>a</code>'s being the unknown
+This is now a standard matrix problem with the <code>a</code>'s being the unknown. The <code>x</code>'s look nonlinear, but they're actually known values and not something we are solving for. Writen out in matrix form we get
 </p>
 
 \begin{equation}
@@ -246,7 +254,15 @@ y_3\\
 \end{equation}
 
 <p>
-The trick here is now we can adjust he number of terms in the polynomial (ie. the number of <b>a<sub>n</sub></b>'s) so that the matrix is always square and in the general case non-singular. Now that we know how to solve <b>Ax=b</b> using the <b>LU decomposition</b> we can solve for all the polynomial factors <b>a<sub>n</sub></b> and we can end up with the original equation
+Where all the values of the x-matrix are known. (the x-matrix is the actual <i>Vandermonde matrix</i> - <b>V</b>)
+</p>
+
+<p>
+Th next trick is that we can adjust he number of terms in the polynomial (the number of exponents of x and the the number of <b>a<sub>n</sub></b>'s) so that the matrix is always square - and in the general case non-singular. Now since we know how to solve <b>Ax=b</b> using the <b>LU decomposition</b> we can solve for all the polynomial factors <b>a<sub>n</sub></b> in this equivalent system <b>Va=y</b> - where the <b>V</b> is the matrix of exponents of <code>x</code>.
+</p>
+
+<p>
+Once we solve for the <b>a<sub>n</sub></b>'s we can then reconstruct the non-linear polynomial equation we started looking at in the beginning
 </p>
 
 \begin{equation}
@@ -254,7 +270,7 @@ y=a_{1}+a_{2}x+a_{3}x^{2}+a_{4}x^{3}+...
 \end{equation}
 
 <p>
-Which will not hold true for all our <code>(x,y)</code> points but also for all other values of <code>x</code> we want to test - so we will have in the end fit a polynomial curve through all our points.
+It will not only hold true for all our <code>(x,y)</code> points but also for all other values of <code>x</code> we want to test - so we will have in the end fit a polynomial curve through all our points.
 </p>
 </div>
 </div>
@@ -387,14 +403,14 @@ Then we take these factors and stick them into gnuplot to get a quick plot
 
 
 <p>
-I don't have the original points plotted here, but by visual inspection you can see that the curve passes through all of our points
+I don't have the original points plotted here, but by visual inspection you can see that the curve passes through all of the points we started with.
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-09-15 Sat 14:20</p>
+<p class="date">Created: 2018-09-15 Sat 15:41</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
