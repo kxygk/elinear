@@ -66,7 +66,7 @@ To start we import ELisp linear algebra function we've developed
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle vandermonde.el
 (load-file "matrix.el")
 #+END_SRC
-
+* Code
 Next we build the /Vandermonde matrix/ which is the matrix of  ~x~'s and their exponents
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle vandermonde.el
   (defun matrix-vandermonde (list-of-xs number-of-points)
