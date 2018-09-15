@@ -1494,10 +1494,52 @@ Because our data is arranged row-by-row, it'll be easier for me to just build *(
 *TODO:* This could be rewritten to be tail recursive
 #+END_QUOTE
 * Least Squares
-Now we have a mechanism to solve square linear systems we need to extend *Ax=b* to the overdefined case where we have more linear equations than parameters (ie. a skinny matrix). If each equation is thought of as representing a "measurement" then in other words when we have more measurements than function paramters to solve for. In the general case (with the addition of noise) no explicit solution will exist for *A_{skinny}x=b* so we need to find the next-best-thing. Here there is a bit confusion in terminology b/c we think of our measurements as being an "input" and "output", but here the thing we are solving for (ie. what I've been calling an input) are the parameters of the function. So given a function *f(x)* we have measurements that say we passed in certain values *a* and got out values *b* and then we want to solve for the function parameters *p*. In matrix form (as for the Vandermonde case) we would write that out as *A_{f(a)}p=b*. But since there are too many measurements no exact solution will exist where *f(a_{i})=b_{i}* will always hold true. Instead we will get close-by values *f(a)=b_{estimate}*. Our goal is to solve for parameters *p* that will get us as close as possible. Ie *f(a)-b=b_{estimate}-b* or *A_{f(a)}p-b* should be as small as possible. To make the situation easier numerically we take the square of the difference (so all values are positive) *(f(a)-b)^{2}=(b_{estimate}-b)^{2}* or *(A_{f(a)}p-b)^{2}* . Minimizing a function is done by take the derivative and setting it equal to zero and then solving for the parameters. What /page 226/ shows is that the derivative of *(A_{f(a)}p-b)^{2}*  will give us the matrix form *A^{T}Ax=A^{T}b* which is smaller, square and has a solution. This amazingly holds for all linear equations.
+Now that we have a mechanism to solve square linear systems we need to extend *Ax=b* to the overdefined case where we have more linear equations than parameters. This situation will come up constantly, generally in situations where you only have a few inputs you want to solve for, but you have a lot of redundant measurements. 
+
+\begin{equation}
+\begin{bmatrix}
+a_11 & a_12\\
+a_21 & a_22\\
+a_31 & a_32\\
+a_41 & a_42\\
+...\\
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+y_1\\
+y_2\\
+\\
+\end{bmatrix}
+\end{equation}
+
+
+If the measurements were ideal then the rows of *A* will not be independent and you will be able to find an explicit solution though Gaussian Elimination. But in the general case (with the addition of noise and rounding erros) no explicit solution will exist for *A_{skinny}x=b* so banking on the ideal simply won't work . You could try to find a set of independent equations and throw away the extra equation to try to make a square matrix, but this is throwing information away. If the noise is non-negligible then you actually want all the measurements to build up an average "best fit" solution
+
+But if there is no =x= for which *A_{skinny}x=b* then what can we do? We solve for a close system *A_{skinny}x=b_{close}* which does have a solution. In other words we want to find an =x= that will give us a *b_{close}* which is as close as possible to *b*. We want to minimize the sum of the difference between *b_{close}* and *b* - ie. *sum_of_all_values(b_{close}-b)*.
+
+However this is kinda ugly.. and we haven't really found a convenient way to work with sums. Fortunately we do have a mechanism which is really close - the *inner product*. The inner product of a vector *x* with itself - *x^{T}x* - is the sum of the squares of the values of *x*. Furthermore squaring the numbers doesn't change the solution and the minimum stays the minimum. So instead of  *sum_of_all_values(b_{close}-b)*. we will work with *(b_{close}-b)^{T}(b_{close}-b)*
+
+If we plug in our equation for =x= for we get *(A_{skinny}x-b)^{T}(A_{skinny}x-b)*. 
+
+\begin{equation}
+(A_{skinny}x-b)^{T}(A_{skinny}x-b) \\
+((A_{skinny}x)^{T}-b^{T})(A_{skinny}x-b) \\
+(x^{T}A_{skinny}^{T}-b^{T})(A_{skinny}x-b) \\
+x^{T}A_{skinny}^{T}A_{skinny}x
+-x^{T}A_{skinny}^{T}b
+-b^{T}A_{skinny}x
++b^2
+\end{equation}
+
+
+As we learn in calculus, minimizing a function is done by take its derivative with respect to the parameter we are changing (here that's =x=), setting it equal to zero and then solving for that parameter (b/c the minimum point has zero slope). What /page 226-227/ shows is that the derivative of our difference equation give us the equation *A^{T}Ax=A^{T}b*. The right hand side *A^{T}b* is a vector, and in-fact the whole equation is in the form *Ax=b* which we know how to solve (again, solving for =x= here). Also note that *A^{T}A* is always square and singlular - and that b/c *A* was skinny it's actually smaller than *A*.
 
 ** Numerically stable solution
-Unfortunately this solution involves multiplcation so it has some numerical issues. A better solution is presented in *Exercise 4.6.9* with the equations
+Unfortunately while the solutions turned out in the end to be very clean, it does involve a matrix multiplication and therefore has some numerical issues. A better solution is presented in *Exercise 4.6.9* with the equations
 
 \begin{equation}
 \begin{bmatrix}
@@ -1517,10 +1559,10 @@ b\\
 
 If you multiply out the block matrices you will get two equation and you will see that *x_{2}* is equal to the least squares solution. (/Note:/ crucially the second equation tells you that *x_{1}* is in the *N(A^{T})*)
 
-This was tested in a [[../asparapiss/][little demo program]] written in Clojure. Fitting a high order polynomial over some random points the *A^{T}Ax=A^{T}b* solution (light blue) gives a broken solution much quicker than the stable solution (dark blue)
+I even double checked that this is true in a [[../asparapiss/][little demo program]] written in Clojure. Fitting a polynomial over some random points the *A^{T}Ax=A^{T}b* solution (light blue) quickly gives a broken result as the number of polynomial factors is increased. While the "stable solution" (dark blue) blows up much later.
 
 file:stable-least-squares.png
-
+* 
 * TODOs
 - Write a better example that I can expand on easily later
 - Implement the Sherman-Morrison update formula

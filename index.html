@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-09-15 Sat 14:25 -->
+<!-- 2018-09-15 Sat 17:04 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -268,9 +268,10 @@ for the JavaScript code in this tag.
 <li><a href="#sec-8-1">Numerically stable solution</a></li>
 </ul>
 </li>
-<li><a href="#sec-9">TODOs</a></li>
-<li><a href="#sec-10">SRC<sub>Block</sub> template</a></li>
-<li><a href="#sec-11">End</a></li>
+<li><a href="#sec-9"></a></li>
+<li><a href="#sec-10">TODOs</a></li>
+<li><a href="#sec-11">SRC<sub>Block</sub> template</a></li>
+<li><a href="#sec-12">End</a></li>
 </ul>
 </div>
 </div>
@@ -2170,7 +2171,59 @@ Because our data is arranged row-by-row, it'll be easier for me to just build <b
 <h2 id="sec-8">Least Squares</h2>
 <div class="outline-text-2" id="text-8">
 <p>
-Now we have a mechanism to solve square linear systems we need to extend <b>Ax=b</b> to the overdefined case where we have more linear equations than parameters (ie. a skinny matrix). If each equation is thought of as representing a "measurement" then in other words when we have more measurements than function paramters to solve for. In the general case (with the addition of noise) no explicit solution will exist for <b>A<sub>skinny</sub>x=b</b> so we need to find the next-best-thing. Here there is a bit confusion in terminology b/c we think of our measurements as being an "input" and "output", but here the thing we are solving for (ie. what I've been calling an input) are the parameters of the function. So given a function <b>f(x)</b> we have measurements that say we passed in certain values <b>a</b> and got out values <b>b</b> and then we want to solve for the function parameters <b>p</b>. In matrix form (as for the Vandermonde case) we would write that out as <b>A<sub>f(a)</sub>p=b</b>. But since there are too many measurements no exact solution will exist where <b>f(a<sub>i</sub>)=b<sub>i</sub></b> will always hold true. Instead we will get close-by values <b>f(a)=b<sub>estimate</sub></b>. Our goal is to solve for parameters <b>p</b> that will get us as close as possible. Ie <b>f(a)-b=b<sub>estimate</sub>-b</b> or <b>A<sub>f(a)</sub>p-b</b> should be as small as possible. To make the situation easier numerically we take the square of the difference (so all values are positive) <b>(f(a)-b)<sup>2</sup>=(b<sub>estimate</sub>-b)<sup>2</sup></b> or <b>(A<sub>f(a)</sub>p-b)<sup>2</sup></b> . Minimizing a function is done by take the derivative and setting it equal to zero and then solving for the parameters. What <i>page 226</i> shows is that the derivative of <b>(A<sub>f(a)</sub>p-b)<sup>2</sup></b>  will give us the matrix form <b>A<sup>T</sup>Ax=A<sup>T</sup>b</b> which is smaller, square and has a solution. This amazingly holds for all linear equations.
+Now that we have a mechanism to solve square linear systems we need to extend <b>Ax=b</b> to the overdefined case where we have more linear equations than parameters. This situation will come up constantly, generally in situations where you only have a few inputs you want to solve for, but you have a lot of redundant measurements. 
+</p>
+
+\begin{equation}
+\begin{bmatrix}
+a_11 & a_12\\
+a_21 & a_22\\
+a_31 & a_32\\
+a_41 & a_42\\
+...\\
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\
+x_2\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+y_1\\
+y_2\\
+\\
+\end{bmatrix}
+\end{equation}
+
+
+<p>
+If the measurements were ideal then the rows of <b>A</b> will not be independent and you will be able to find an explicit solution though Gaussian Elimination. But in the general case (with the addition of noise and rounding erros) no explicit solution will exist for <b>A<sub>skinny</sub>x=b</b> so banking on the ideal simply won't work . You could try to find a set of independent equations and throw away the extra equation to try to make a square matrix, but this is throwing information away. If the noise is non-negligible then you actually want all the measurements to build up an average "best fit" solution
+</p>
+
+<p>
+But if there is no <code>x</code> for which <b>A<sub>skinny</sub>x=b</b> then what can we do? We solve for a close system <b>A<sub>skinny</sub>x=b<sub>close</sub></b> which does have a solution. In other words we want to find an <code>x</code> that will give us a <b>b<sub>close</sub></b> which is as close as possible to <b>b</b>. We want to minimize the sum of the difference between <b>b<sub>close</sub></b> and <b>b</b> - ie. <b>sum<sub>of</sub><sub>all</sub><sub>values</sub>(b<sub>close</sub>-b)</b>.
+</p>
+
+<p>
+However this is kinda ugly.. and we haven't really found a convenient way to work with sums. Fortunately we do have a mechanism which is really close - the <b>inner product</b>. The inner product of a vector <b>x</b> with itself - <b>x<sup>T</sup>x</b> - is the sum of the squares of the values of <b>x</b>. Furthermore squaring the numbers doesn't change the solution and the minimum stays the minimum. So instead of  <b>sum<sub>of</sub><sub>all</sub><sub>values</sub>(b<sub>close</sub>-b)</b>. we will work with <b>(b<sub>close</sub>-b)<sup>T</sup>(b<sub>close</sub>-b)</b>
+</p>
+
+<p>
+If we plug in our equation for <code>x</code> for we get <b>(A<sub>skinny</sub>x-b)<sup>T</sup>(A<sub>skinny</sub>x-b)</b>. 
+</p>
+
+\begin{equation}
+(A_{skinny}x-b)^{T}(A_{skinny}x-b) \\
+((A_{skinny}x)^{T}-b^{T})(A_{skinny}x-b) \\
+(x^{T}A_{skinny}^{T}-b^{T})(A_{skinny}x-b) \\
+x^{T}A_{skinny}^{T}A_{skinny}x
+-x^{T}A_{skinny}^{T}b
+-b^{T}A_{skinny}x
++b^2
+\end{equation}
+
+
+<p>
+As we learn in calculus, minimizing a function is done by take its derivative with respect to the parameter we are changing (here that's <code>x</code>), setting it equal to zero and then solving for that parameter (b/c the minimum point has zero slope). What <i>page 226-227</i> shows is that the derivative of our difference equation give us the equation <b>A<sup>T</sup>Ax=A<sup>T</sup>b</b>. The right hand side <b>A<sup>T</sup>b</b> is a vector, and in-fact the whole equation is in the form <b>Ax=b</b> which we know how to solve (again, solving for <code>x</code> here). Also note that <b>A<sup>T</sup>A</b> is always square and singlular - and that b/c <b>A</b> was skinny it's actually smaller than <b>A</b>.
 </p>
 </div>
 
@@ -2178,7 +2231,7 @@ Now we have a mechanism to solve square linear systems we need to extend <b>Ax=b
 <h3 id="sec-8-1">Numerically stable solution</h3>
 <div class="outline-text-3" id="text-8-1">
 <p>
-Unfortunately this solution involves multiplcation so it has some numerical issues. A better solution is presented in <b>Exercise 4.6.9</b> with the equations
+Unfortunately while the solutions turned out in the end to be very clean, it does involve a matrix multiplication and therefore has some numerical issues. A better solution is presented in <b>Exercise 4.6.9</b> with the equations
 </p>
 
 \begin{equation}
@@ -2202,7 +2255,7 @@ If you multiply out the block matrices you will get two equation and you will se
 </p>
 
 <p>
-This was tested in a <a href="../asparapiss/">little demo program</a> written in Clojure. Fitting a high order polynomial over some random points the <b>A<sup>T</sup>Ax=A<sup>T</sup>b</b> solution (light blue) gives a broken solution much quicker than the stable solution (dark blue)
+I even double checked that this is true in a <a href="../asparapiss/">little demo program</a> written in Clojure. Fitting a polynomial over some random points the <b>A<sup>T</sup>Ax=A<sup>T</sup>b</b> solution (light blue) quickly gives a broken result as the number of polynomial factors is increased. While the "stable solution" (dark blue) blows up much later.
 </p>
 
 
@@ -2213,10 +2266,12 @@ This was tested in a <a href="../asparapiss/">little demo program</a> written in
 </div>
 </div>
 </div>
-
 <div id="outline-container-sec-9" class="outline-2">
-<h2 id="sec-9">TODOs</h2>
-<div class="outline-text-2" id="text-9">
+<h2 id="sec-9"></h2>
+</div>
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10">TODOs</h2>
+<div class="outline-text-2" id="text-10">
 <ul class="org-ul">
 <li>Write a better example that I can expand on easily later
 </li>
@@ -2231,9 +2286,9 @@ This was tested in a <a href="../asparapiss/">little demo program</a> written in
 </ul>
 </div>
 </div>
-<div id="outline-container-sec-10" class="outline-2">
-<h2 id="sec-10">SRC<sub>Block</sub> template</h2>
-<div class="outline-text-2" id="text-10">
+<div id="outline-container-sec-11" class="outline-2">
+<h2 id="sec-11">SRC<sub>Block</sub> template</h2>
+<div class="outline-text-2" id="text-11">
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-template</span> (matrix)
@@ -2244,9 +2299,9 @@ This was tested in a <a href="../asparapiss/">little demo program</a> written in
 </div>
 </div>
 
-<div id="outline-container-sec-11" class="outline-2">
-<h2 id="sec-11">End</h2>
-<div class="outline-text-2" id="text-11">
+<div id="outline-container-sec-12" class="outline-2">
+<h2 id="sec-12">End</h2>
+<div class="outline-text-2" id="text-12">
 <blockquote>
 <p>
 This webpage is generated from an org-document (at <code>./index.org</code>) that also generates all the files described. 
@@ -2271,7 +2326,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-09-15 Sat 14:25</p>
+<p class="date">Created: 2018-09-15 Sat 17:04</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
