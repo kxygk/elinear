@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Vandermonde matrices</title>
+<!-- 2018-09-15 Sat 14:20 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="George Kontsevich" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="../static/worg.css" />
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+    MathJax.Hub.Config({
+        // Only one of the two following lines, depending on user settings
+        // First allows browser-native MathML display, second forces HTML/CSS
+        //  config: ["MMLorHTML.js"], jax: ["input/TeX"],
+            jax: ["input/TeX", "output/HTML-CSS"],
+        extensions: ["tex2jax.js","TeX/AMSmath.js","TeX/AMSsymbols.js",
+                     "TeX/noUndefined.js"],
+        tex2jax: {
+            inlineMath: [ ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"], ["\\begin{displaymath}","\\end{displaymath}"] ],
+            skipTags: ["script","noscript","style","textarea","pre","code"],
+            ignoreClass: "tex2jax_ignore",
+            processEscapes: false,
+            processEnvironments: true,
+            preview: "TeX"
+        },
+        showProcessingMessages: true,
+        displayAlign: "center",
+        displayIndent: "2em",
+
+        "HTML-CSS": {
+             scale: 100,
+             availableFonts: ["STIX","TeX"],
+             preferredFont: "TeX",
+             webFont: "TeX",
+             imageFont: "TeX",
+             showMathMenu: true,
+        },
+        MMLorHTML: {
+             prefer: {
+                 MSIE:    "MML",
+                 Firefox: "MML",
+                 Opera:   "HTML",
+                 other:   "HTML"
+             }
+        }
+    });
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Vandermonde matrices</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Intro</a></li>
+<li><a href="#sec-2">Setup</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Intro</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+For context and to see what motivates the need for Vandermonde matrices, see the linear algebra system developed in <i>the parent directory</i>.
+The code is based off of the theories developed in <i>Matrix Analysis &amp; Applied Linear Algebra</i>
+</p>
+
+<p>
+<code>pages 185-186</code> introduces the Vandermonde matix which provides us with a way to solve for polynomials that fit a set of given points. 
+</p>
+
+<p>
+Polynomials are equations of the form:
+</p>
+\begin{equation}
+y=a_{1}+a_{2}x+a_{3}x^{2}+a_{4}x^{3}+...
+\end{equation}
+<p>
+If we have a problem that gives us many <code>(x,y)</code> points we can use this formula to generate many polynomial equation
+</p>
+\begin{equation}
+y_1=a_{1}+a_{2}x_1+a_{3}x_{1}^{2}+a_{4}x_{1}^{3}+...\\
+y_2=a_{1}+a_{2}x_2+a_{3}x_{2}^{2}+a_{4}x_{2}^{3}+...\\
+y_3=a_{1}+a_{2}x_3+a_{3}x_{3}^{2}+a_{4}x_{3}^{3}+...\\
+...
+\end{equation}
+<p>
+This is now a standard matrix problem with the <code>a</code>'s being the unknown
+</p>
+
+\begin{equation}
+\begin{bmatrix}
+1 & x_1 & x_{1}^2 & x_{1}^3 ..\\
+1 & x_2 & x_{2}^2 & x_{2}^3 ..\\
+1 & x_3 & x_{3}^2 & x_{3}^3 ..\\
+...\\
+\end{bmatrix}
+\begin{bmatrix}
+a_1\\
+a_2\\
+a_3\\
+a_4\\
+...\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+y_1\\
+y_2\\
+y_3\\
+...\\
+\end{bmatrix}
+\end{equation}
+
+<p>
+The trick here is now we can adjust he number of terms in the polynomial (ie. the number of <b>a<sub>n</sub></b>'s) so that the matrix is always square and in the general case non-singular. Now that we know how to solve <b>Ax=b</b> using the <b>LU decomposition</b> we can solve for all the polynomial factors <b>a<sub>n</sub></b> and we can end up with the original equation
+</p>
+
+\begin{equation}
+y=a_{1}+a_{2}x+a_{3}x^{2}+a_{4}x^{3}+...
+\end{equation}
+
+<p>
+Which will not hold true for all our <code>(x,y)</code> points but also for all other values of <code>x</code> we want to test - so we will have in the end fit a polynomial curve through all our points.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Setup</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+To start we import ELisp linear algebra function we've developed
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(load-file <span style="color: #ff1f8b;">"matrix.el"</span>)
+</pre>
+</div>
+
+<p>
+Next we build the <i>Vandermonde matrix</i> which is the matrix of  <code>x</code>'s and their exponents
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-vandermonde</span> (list-of-xs number-of-points)
+  <span style="color: #cc0000;">"Build a Vandermonde matrix of the appropriate rank from a LIST-OF-Xs"</span>
+  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-build-polynomial-list</span> (x degree)
+    <span style="color: #cc0000;">"Build a list of (X,X^2,X^3,..,X^DEGREE)"</span>
+    (<span style="color: #00af00;">cond</span>
+     ((zerop degree)
+      '(1))
+     (t
+      (cons
+       (expt x degree)
+       (matrix-build-polynomial-list x (1- degree))
+       ))))
+  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-vandermonde-data</span> (list-of-xs degree)
+    <span style="color: #cc0000;">"Builds the data vector of the Vandermonde matrix"</span>
+    (<span style="color: #00af00;">cond</span>
+     ((null list-of-xs)
+      '())
+     (t
+      (append
+       (reverse
+        (matrix-build-polynomial-list
+         (car list-of-xs)
+         degree))
+       (matrix-vandermonde-data
+        (cdr list-of-xs)
+        degree)))))
+  (matrix-from-data-list
+   number-of-points
+   number-of-points
+   (matrix-vandermonde-data
+    list-of-xs
+    (1- number-of-points))))
+</pre>
+</div>
+<p>
+Then given a set of points, we can fit a polynomial to them by using our input solver to solve for the polynomial factors.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-fit-polynomial</span> (x-coordinates y-coordinates)
+<span style="color: #cc0000;">"Given a list of x and y coordinates, solve for a polynomial that fits them using a Vandermonde matrixs. The result is a vector of factors 'a' that should be used in the standard order: a_1+a_2*x+a_3*x^2+a_4*x^3+... etc"</span>
+(<span style="color: #00af00;">let*</span> ((number-of-points (length x-coordinates))
+       (vandermonde-matrix
+        (matrix-vandermonde x-coordinates number-of-points))
+       (PLU (matrix-PLU-decomposition vandermonde-matrix)))
+
+  (matrix-solve-for-input
+   PLU
+   (matrix-from-data-list
+    number-of-points
+    1
+    y-coordinates))))
+</pre>
+</div>
+<p>
+To see it work we can try feeding in some random points and see what kind of polynomial we get
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp" id="edata">(matrix-data
+ (matrix-fit-polynomial
+  '(1.0 2.0 3.0 4.0 5.0)
+  '(1.9 2.5 1.8 2.8 4.2)))
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="right">-7.299999999999994</td>
+<td class="right">17.008333333333322</td>
+<td class="right">-9.920833333333327</td>
+<td class="right">2.2916666666666656</td>
+<td class="right">-0.17916666666666659</td>
+</tr>
+</tbody>
+</table>
+<p>
+Then we take these factors and stick them into gnuplot to get a quick plot
+</p>
+<div class="org-src-container">
+
+<pre class="src src-gnuplot"><span style="color: #ff8700;">f(x) =</span> -7.299 + 17.00833*x + -9.920833*x**2 + 2.29166*x**3 + -0.179166*x**4
+<span style="color: #1f5bff;">set</span> xrange[<span style="color: #1f5bff;">0:6</span>]
+<span style="color: #1f5bff;">set</span> yrange[<span style="color: #1f5bff;">-1:5</span>]
+<span style="color: #00af00;">plot</span> f(x)
+</pre>
+</div>
+
+
+<div class="figure">
+<p><img src="polynomial-fit.png" alt="polynomial-fit.png" />
+</p>
+</div>
+
+
+
+<p>
+I don't have the original points plotted here, but by visual inspection you can see that the curve passes through all of our points
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: George Kontsevich</p>
+<p class="date">Created: 2018-09-15 Sat 14:20</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

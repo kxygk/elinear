@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-06-26 Tue 21:42 -->
+<!-- 2018-09-15 Sat 14:25 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -253,11 +253,14 @@ for the JavaScript code in this tag.
 </li>
 <li><a href="#sec-7">Using the LU</a>
 <ul>
-<li><a href="#sec-7-1">Solving for x in Ax=b</a></li>
-<li><a href="#sec-7-2">EXAMPLE: Vandermonde matrices</a></li>
-<li><a href="#sec-7-3">The LDU Decomposition</a></li>
-<li><a href="#sec-7-4">The Cholesky Decomposition</a></li>
-<li><a href="#sec-7-5">Solving for A<sup>-1</sup></a></li>
+<li><a href="#sec-7-1">Solving for x in Ax=b</a>
+<ul>
+<li><a href="#sec-7-1-1">EXAMPLE: Vandermonde matrices</a></li>
+</ul>
+</li>
+<li><a href="#sec-7-2">The LDU Decomposition</a></li>
+<li><a href="#sec-7-3">The Cholesky Decomposition</a></li>
+<li><a href="#sec-7-4">Solving for A<sup>-1</sup></a></li>
 </ul>
 </li>
 <li><a href="#sec-8">Least Squares</a>
@@ -1993,139 +1996,19 @@ Now glueing everything together is now just a few lines of code
 </p>
 </blockquote>
 </div>
-</div>
 
+<div id="outline-container-sec-7-1-1" class="outline-4">
+<h4 id="sec-7-1-1">EXAMPLE: Vandermonde matrices</h4>
+<div class="outline-text-4" id="text-7-1-1">
+<p>
+For a good immediate usecase see <a href="./vandermonde.html">my explanation of the Vandermonde matrix</a> and how we can now fit polynomials to points (using the code we've just developed)
+</p>
+</div>
+</div>
+</div>
 <div id="outline-container-sec-7-2" class="outline-3">
-<h3 id="sec-7-2">EXAMPLE: Vandermonde matrices</h3>
+<h3 id="sec-7-2">The LDU Decomposition</h3>
 <div class="outline-text-3" id="text-7-2">
-<p>
-<code>pages 185-186</code> introduces the Vandermonde matix which provides us with a way to solve for polynomials that fit a set of given points. Polynomials are equations of the form:
-</p>
-\begin{equation}
-y=a_{1}+a_{2}x+a_{3}x^{2}+a_{4}x^{3}+...
-\end{equation}
-<p>
-So given some <code>(x,y)</code> points we can try to solve for these <b>a<sub>n</sub></b> factors. And we can choose the number of terms in the polynomial to insure we have a nonsingular matrix that's solvable (see bottom of <code>page 185</code>)
-</p>
-
-<p>
-The Vandermonde matrix is built from a list of <code>x</code>'s and their exponents
-</p>
-<div class="org-src-container">
-
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-vandermonde</span> (list-of-xs number-of-points)
-  <span style="color: #cc0000;">"Build a Vandermonde matrix of the appropriate rank from a LIST-OF-Xs"</span>
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-build-polynomial-list</span> (x degree)
-    <span style="color: #cc0000;">"Build a list of (X,X^2,X^3,..,X^DEGREE)"</span>
-    (<span style="color: #00af00;">cond</span>
-     ((zerop degree)
-      '(1))
-     (t
-      (cons
-       (expt x degree)
-       (matrix-build-polynomial-list x (1- degree))
-       ))))
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-vandermonde-data</span> (list-of-xs degree)
-    <span style="color: #cc0000;">"Builds the data vector of the Vandermonde matrix"</span>
-    (<span style="color: #00af00;">cond</span>
-     ((null list-of-xs)
-      '())
-     (t
-      (append
-       (reverse
-        (matrix-build-polynomial-list
-         (car list-of-xs)
-         degree))
-       (matrix-vandermonde-data
-        (cdr list-of-xs)
-        degree)))))
-  (matrix-from-data-list
-   number-of-points
-   number-of-points
-   (matrix-vandermonde-data
-    list-of-xs
-    (1- number-of-points))))
-</pre>
-</div>
-<p>
-Then given a set of points, we can fit a polynomial to them by using our input solver to solve for the polynomial factors.
-</p>
-<div class="org-src-container">
-
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-fit-polynomial</span> (x-coordinates y-coordinates)
-<span style="color: #cc0000;">"Given a list of x and y coordinates, solve for a polynomial that fits them using a Vandermonde matrixs. The result is a vector of factors 'a' that should be used in the standard order: a_1+a_2*x+a_3*x^2+a_4*x^3+... etc"</span>
-(<span style="color: #00af00;">let*</span> ((number-of-points (length x-coordinates))
-       (vandermonde-matrix
-        (matrix-vandermonde x-coordinates number-of-points))
-       (PLU (matrix-PLU-decomposition vandermonde-matrix)))
-
-  (matrix-solve-for-input
-   PLU
-   (matrix-from-data-list
-    number-of-points
-    1
-    y-coordinates))))
-</pre>
-</div>
-<p>
-To see it work we can try feeding in some random points and see what kind of polynomial we get
-</p>
-<div class="org-src-container">
-
-<pre class="src src-emacs-lisp" id="edata">(matrix-data
- (matrix-fit-polynomial
-  '(1.0 2.0 3.0 4.0 5.0)
-  '(1.9 2.5 1.8 2.8 4.2)))
-</pre>
-</div>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="right" />
-
-<col  class="right" />
-
-<col  class="right" />
-
-<col  class="right" />
-
-<col  class="right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="right">-7.299999999999994</td>
-<td class="right">17.008333333333322</td>
-<td class="right">-9.920833333333327</td>
-<td class="right">2.2916666666666656</td>
-<td class="right">-0.17916666666666659</td>
-</tr>
-</tbody>
-</table>
-<p>
-Then we take these factors and stick them into gnuplot to get a quick plot
-</p>
-<div class="org-src-container">
-
-<pre class="src src-gnuplot"><span style="color: #ff8700;">f(x) =</span> -7.299 + 17.00833*x + -9.920833*x**2 + 2.29166*x**3 + -0.179166*x**4
-<span style="color: #1f5bff;">set</span> xrange[<span style="color: #1f5bff;">0:6</span>]
-<span style="color: #1f5bff;">set</span> yrange[<span style="color: #1f5bff;">-1:5</span>]
-<span style="color: #00af00;">plot</span> f(x)
-</pre>
-</div>
-
-
-<div class="figure">
-<p><img src="polynomial-fit.png" alt="polynomial-fit.png" />
-</p>
-</div>
-</div>
-</div>
-
-<div id="outline-container-sec-7-3" class="outline-3">
-<h3 id="sec-7-3">The LDU Decomposition</h3>
-<div class="outline-text-3" id="text-7-3">
 <p>
 As mention on <i>page 154</i>, the <b>LU</b> can be further broken down into <b>LDU</b> - where both <b>L</b> and <b>U</b> have <b>1</b>'s on the diagonal and <b>D</b> is a diagonal matrix with all the pivots. This has the nice property of being more symmetric.
 </p>
@@ -2188,9 +2071,9 @@ An extra nicety is that if <b>A</b> is symmetric then <b>A=A<sup>T</sup></b> and
 </div>
 </div>
 
-<div id="outline-container-sec-7-4" class="outline-3">
-<h3 id="sec-7-4">The Cholesky Decomposition</h3>
-<div class="outline-text-3" id="text-7-4">
+<div id="outline-container-sec-7-3" class="outline-3">
+<h3 id="sec-7-3">The Cholesky Decomposition</h3>
+<div class="outline-text-3" id="text-7-3">
 <p>
 Going one step further - if we have a symmetric matrix (so <b>A=LDL<sup>T</sup></b>) and all the pivots are positive, then we can break up the <b>D</b>  into 2 further matrices <b>D<sub>split</sub></b>. The <b>D<sub>split</sub></b> matrix will be like <b>D</b>, but instead each element on the diagonal (the pivots from the original <b>U</b> matrix) will be replaced by its square root - so that <b>D<sub>split</sub>D<sub>split</sub>=D</b>. This is taking advantage of the fact that a unit diagonal multiplied with itself simply squares the diagonal elements. Note here that if any of the diagonal elements are negative, then you can't really take the square root here b/c you'd get complex numbers.
 </p>
@@ -2246,9 +2129,9 @@ see: <a href="https://math.stackexchange.com/questions/621045/why-does-cholesky-
 </blockquote>
 </div>
 </div>
-<div id="outline-container-sec-7-5" class="outline-3">
-<h3 id="sec-7-5">Solving for A<sup>-1</sup></h3>
-<div class="outline-text-3" id="text-7-5">
+<div id="outline-container-sec-7-4" class="outline-3">
+<h3 id="sec-7-4">Solving for A<sup>-1</sup></h3>
+<div class="outline-text-3" id="text-7-4">
 <p>
 On <i>page 148</i> we get a simple algorithm for efficiently contructing <b>A<sup>-1</sup></b>. Basically we are taking the equation <b>AA<sup>-1</sup>=I</b>, where <b>A<sup>-1</sup></b> is unknown, and solving it column by column. Treating each column of <b>A<sup>-1</sup></b> as <b>x</b> and each column of <b>I</b> and <b>b</b> we are reusing <b>Ax=b</b> and writing it as <b>AA<sup>-1</sup><sub>*j</sub>=e<sub>j</sub></b>. Once we solve each column we put them all together and rebuild <b>A<sup>-1</sup></b>.
 </p>
@@ -2388,7 +2271,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-06-26 Tue 21:42</p>
+<p class="date">Created: 2018-09-15 Sat 14:25</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
