@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Z-Score</title>
+<!-- 2018-09-17 Mon 17:03 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="George Kontsevich" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="../static/worg.css" />
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+    MathJax.Hub.Config({
+        // Only one of the two following lines, depending on user settings
+        // First allows browser-native MathML display, second forces HTML/CSS
+        //  config: ["MMLorHTML.js"], jax: ["input/TeX"],
+            jax: ["input/TeX", "output/HTML-CSS"],
+        extensions: ["tex2jax.js","TeX/AMSmath.js","TeX/AMSsymbols.js",
+                     "TeX/noUndefined.js"],
+        tex2jax: {
+            inlineMath: [ ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"], ["\\begin{displaymath}","\\end{displaymath}"] ],
+            skipTags: ["script","noscript","style","textarea","pre","code"],
+            ignoreClass: "tex2jax_ignore",
+            processEscapes: false,
+            processEnvironments: true,
+            preview: "TeX"
+        },
+        showProcessingMessages: true,
+        displayAlign: "center",
+        displayIndent: "2em",
+
+        "HTML-CSS": {
+             scale: 100,
+             availableFonts: ["STIX","TeX"],
+             preferredFont: "TeX",
+             webFont: "TeX",
+             imageFont: "TeX",
+             showMathMenu: true,
+        },
+        MMLorHTML: {
+             prefer: {
+                 MSIE:    "MML",
+                 Firefox: "MML",
+                 Opera:   "HTML",
+                 other:   "HTML"
+             }
+        }
+    });
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Z-Score</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Intro</a></li>
+<li><a href="#sec-2">Setup</a></li>
+<li><a href="#sec-3">Standardization</a>
+<ul>
+<li><a href="#sec-3-1">Mean</a></li>
+<li><a href="#sec-3-2">Variance</a></li>
+<li><a href="#sec-3-3">Standard Deviation</a></li>
+<li><a href="#sec-3-4">Standardizing</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Intro</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The <code>z score</code> is a method for evaluating how correlated 2 sets of values are. It tries to answer the question "If your <code>x</code> increases or decreases, how does <code>y</code> respond?". It does this by trying to eliminate any offset and scaling and then comparing the values to each other. Then finally through a "least squares fit" it attempts to give an quantatative answer to the question.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Setup</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+To start we import ELisp linear algebra function we've developed
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(load-file <span style="color: #ff1f8b;">"matrix.el"</span>)
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">Standardization</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+The first step is gettimg each set of values into a standard form with mean zero and a standard deviation of one
+</p>
+</div>
+<div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1">Mean</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Add up all the elements of the data and divide by the number of values. This is really easy to do with matrices
+</p>
+
+\begin{equation}
+\begin{bmatrix}
+1/n
+\end{bmatrix}
+\begin{bmatrix}
+x_1 & x_{2} & x_{3} & x_{4} && ..\\
+\end{bmatrix}
+\begin{bmatrix}
+1\\
+1\\
+1\\
+1\\
+..\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+1/n
+\end{bmatrix}
+\begin{bmatrix}
+x_1 + x_{2} + x_{3} + x_{4} + ..\\
+\end{bmatrix}
+\end{equation}
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">column-of-ones</span> (size)
+    <span style="color: #cc0000;">"Make a column vector full of ones"</span>
+    (matrix-from-data-list size 1 (make-list size 1)))
+
+  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">mean</span> (row-vector)
+    <span style="color: #cc0000;">"Get the mean of the elements of data"</span>
+    (<span style="color: #00af00;">let*</span> ((size (matrix-columns row-vector))
+           (sum (matrix-get-value 
+                 (matrix-product row-vector (col-of-ones size))
+                 0
+                 0)))
+      (/ sum size)))
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">(mean (matrix-from-data-list 1 4 (list 1.0 2.0 3.0 4.0)))</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">=&gt; 2.5</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2">Variance</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+is the average of how far points are from the mean
+</p>
+\begin{equation}
+\begin{bmatrix}
+1/n
+\end{bmatrix}
+\begin{bmatrix}
+x_1-\mu & x_{2}-\mu & x_{3}-\mu & x_{4}-\mu && ..\\
+\end{bmatrix}
+\begin{bmatrix}
+x_1-\mu\\
+x_{2}-\mu\\
+x_{3}-\mu\\
+x_{4}-\mu\\
+..\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+1/n
+\end{bmatrix}
+\begin{bmatrix}
+(x_1-\mu)^2 + (x_{2}-\mu)^2 + (x_{3}-\mu)^2 + (x_{4}-\mu)^2 + ..\\
+\end{bmatrix}
+\end{equation}
+<p>
+(the numbers are squared.. <a href="https://stats.stackexchange.com/questions/118/why-square-the-difference-instead-of-taking-the-absolute-value-in-standard-devia">which is the numerically easy version of taking the absolute values</a>)
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">row-of-values</span> (value size)
+  <span style="color: #cc0000;">"Make a row with a VALUE repeated SIZE number of times"</span>
+  (matrix-from-data-list 1 size (make-list size value)))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">variance</span> (row-vector)
+  <span style="color: #cc0000;">"Get the variance of the elements of data"</span>
+  (<span style="color: #00af00;">let*</span> ((row-mean (mean row-vector))
+         (row-of-deviations (matrix-subtract 
+                             row-vector
+                             (row-of-values row-mean (matrix-columns row-vector))))
+         (sum-of-squares (matrix-get-value
+                          (matrix-product row-of-deviations (matrix-transpose row-of-deviations))
+                          0
+                          0)))
+    (/ sum-of-squares row-mean)))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3">Standard Deviation</h3>
+<div class="outline-text-3" id="text-3-3">
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">standard-deviation</span> (row-vector)
+  <span style="color: #cc0000;">"Get the standard deviation of the elements of data"</span>
+  (sqrt (variance row-vector)))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-3-4" class="outline-3">
+<h3 id="sec-3-4">Standardizing</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+is taking each point, subtracting out the mean (so they all lie around zero) and dividing by the standard deviation (so the "spread" is "standard)
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">standardize</span> (row-vector)
+  <span style="color: #cc0000;">"See text.."</span>
+  (<span style="color: #00af00;">let*</span> ((row-mean (mean row-vector))
+         (row-standard-deviation (standard-deviation row-vector))
+         (row-of-deviations (matrix-subtract 
+                             row-vector
+                             (row-of-values row-mean (matrix-columns row-vector)))))
+    (matrix-scalar-product 
+     row-of-deviations
+     (/ 1 row-standard-deviation))))
+</pre>
+</div>
+<p>
+The resulting values are the <b>z-scores</b>
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: George Kontsevich</p>
+<p class="date">Created: 2018-09-17 Mon 17:03</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

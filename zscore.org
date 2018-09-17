@@ -1,0 +1,124 @@
+#+TITLE: Z-Score
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../static/worg.css" />
+#+options: num:nil
+#+HTML_MATHJAX: path: "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"
+
+* Intro
+The ~z score~ is a method for evaluating how correlated 2 sets of values are. It tries to answer the question "If your =x= increases or decreases, how does =y= respond?". It does this by trying to eliminate any offset and scaling and then comparing the values to each other. Then finally through a "least squares fit" it attempts to give an quantatative answer to the question.
+
+* Setup
+To start we import ELisp linear algebra function we've developed
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle zscore.el
+(load-file "matrix.el")
+#+END_SRC
+
+
+* Standardization
+The first step is gettimg each set of values into a standard form with mean zero and a standard deviation of one
+** Mean
+Add up all the elements of the data and divide by the number of values. This is really easy to do with matrices
+
+\begin{equation}
+\begin{bmatrix}
+1/n
+\end{bmatrix}
+\begin{bmatrix}
+x_1 & x_{2} & x_{3} & x_{4} && ..\\
+\end{bmatrix}
+\begin{bmatrix}
+1\\
+1\\
+1\\
+1\\
+..\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+1/n
+\end{bmatrix}
+\begin{bmatrix}
+x_1 + x_{2} + x_{3} + x_{4} + ..\\
+\end{bmatrix}
+\end{equation}
+
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle zscore.el
+  (defun column-of-ones (size)
+    "Make a column vector full of ones"
+    (matrix-from-data-list size 1 (make-list size 1)))
+
+  (defun mean (row-vector)
+    "Get the mean of the elements of data"
+    (let* ((size (matrix-columns row-vector))
+           (sum (matrix-get-value 
+                 (matrix-product row-vector (col-of-ones size))
+                 0
+                 0)))
+      (/ sum size)))
+           
+;; (mean (matrix-from-data-list 1 4 (list 1.0 2.0 3.0 4.0)))
+;; => 2.5
+#+END_SRC
+** Variance 
+is the average of how far points are from the mean
+\begin{equation}
+\begin{bmatrix}
+1/n
+\end{bmatrix}
+\begin{bmatrix}
+x_1-\mu & x_{2}-\mu & x_{3}-\mu & x_{4}-\mu && ..\\
+\end{bmatrix}
+\begin{bmatrix}
+x_1-\mu\\
+x_{2}-\mu\\
+x_{3}-\mu\\
+x_{4}-\mu\\
+..\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+1/n
+\end{bmatrix}
+\begin{bmatrix}
+(x_1-\mu)^2 + (x_{2}-\mu)^2 + (x_{3}-\mu)^2 + (x_{4}-\mu)^2 + ..\\
+\end{bmatrix}
+\end{equation}
+(the numbers are squared.. [[https://stats.stackexchange.com/questions/118/why-square-the-difference-instead-of-taking-the-absolute-value-in-standard-devia][which is the numerically easy version of taking the absolute values]])
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle zscore.el
+  (defun row-of-values (value size)
+    "Make a row with a VALUE repeated SIZE number of times"
+    (matrix-from-data-list 1 size (make-list size value)))
+
+  (defun variance (row-vector)
+    "Get the variance of the elements of data"
+    (let* ((row-mean (mean row-vector))
+           (row-of-deviations (matrix-subtract 
+                               row-vector
+                               (row-of-values row-mean (matrix-columns row-vector))))
+           (sum-of-squares (matrix-get-value
+                            (matrix-product row-of-deviations (matrix-transpose row-of-deviations))
+                            0
+                            0)))
+      (/ sum-of-squares row-mean)))
+#+END_SRC
+** Standard Deviation
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle zscore.el
+  (defun standard-deviation (row-vector)
+    "Get the standard deviation of the elements of data"
+    (sqrt (variance row-vector)))
+#+END_SRC
+** Standardizing
+is taking each point, subtracting out the mean (so they all lie around zero) and dividing by the standard deviation (so the "spread" is "standard)
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle zscore.el
+  (defun standardize (row-vector)
+    "See text.."
+    (let* ((row-mean (mean row-vector))
+           (row-standard-deviation (standard-deviation row-vector))
+           (row-of-deviations (matrix-subtract 
+                               row-vector
+                               (row-of-values row-mean (matrix-columns row-vector)))))
+      (matrix-scalar-product 
+       row-of-deviations
+       (/ 1 row-standard-deviation))))
+#+END_SRC
+The resulting values are the *z-scores*
+
