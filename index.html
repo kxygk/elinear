@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-09-15 Sat 17:04 -->
+<!-- 2018-10-04 Thu 18:07 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -249,29 +249,20 @@ for the JavaScript code in this tag.
 <li><a href="#sec-6-1-4">Extracting the pivots</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a href="#sec-7">Using the LU</a>
+<li><a href="#sec-6-2">Using the LU</a>
 <ul>
-<li><a href="#sec-7-1">Solving for x in Ax=b</a>
-<ul>
-<li><a href="#sec-7-1-1">EXAMPLE: Vandermonde matrices</a></li>
+<li><a href="#sec-6-2-1">Solving for x in Ax=b</a></li>
+<li><a href="#sec-6-2-2">The LDU Decomposition</a></li>
+<li><a href="#sec-6-2-3">The Cholesky Decomposition</a></li>
+<li><a href="#sec-6-2-4">Solving for A<sup>-1</sup></a></li>
+<li><a href="#sec-6-2-5">Least Squares</a></li>
 </ul>
 </li>
-<li><a href="#sec-7-2">The LDU Decomposition</a></li>
-<li><a href="#sec-7-3">The Cholesky Decomposition</a></li>
-<li><a href="#sec-7-4">Solving for A<sup>-1</sup></a></li>
 </ul>
 </li>
-<li><a href="#sec-8">Least Squares</a>
-<ul>
-<li><a href="#sec-8-1">Numerically stable solution</a></li>
-</ul>
-</li>
-<li><a href="#sec-9"></a></li>
-<li><a href="#sec-10">TODOs</a></li>
-<li><a href="#sec-11">SRC<sub>Block</sub> template</a></li>
-<li><a href="#sec-12">End</a></li>
+<li><a href="#sec-7">TODOs</a></li>
+<li><a href="#sec-8">SRC<sub>Block</sub> template</a></li>
+<li><a href="#sec-9">End</a></li>
 </ul>
 </div>
 </div>
@@ -1871,11 +1862,10 @@ So our method will still go reducing the matrix column by column and building up
 </div>
 </div>
 </div>
-</div>
 
-<div id="outline-container-sec-7" class="outline-2">
-<h2 id="sec-7">Using the LU</h2>
-<div class="outline-text-2" id="text-7">
+<div id="outline-container-sec-6-2" class="outline-3">
+<h3 id="sec-6-2">Using the LU</h3>
+<div class="outline-text-3" id="text-6-2">
 <blockquote>
 <p>
 <b><i>Notes on getting a good numerical solution:</i></b>
@@ -1896,9 +1886,9 @@ The topic of <i>residuals</i>, <i>sensitivity</i> and <i>coditioning</i> will be
 </div>
 
 
-<div id="outline-container-sec-7-1" class="outline-3">
-<h3 id="sec-7-1">Solving for x in Ax=b</h3>
-<div class="outline-text-3" id="text-7-1">
+<div id="outline-container-sec-6-2-1" class="outline-4">
+<h4 id="sec-6-2-1">Solving for x in Ax=b</h4>
+<div class="outline-text-4" id="text-6-2-1">
 <p>
 Now that we can break a linear system <b>A</b> into two systems <b>L</b> and <b>U</b> we need to go back to where we started and solve for inputs given some outputs.We started with <b>Ax=b</b> and now we know we can do <b>PA=LU</b>. Combinding the two we can get <b>PAx=Pb</b> and then <b>LUx=Pb</b>. As mentioned before, <b>b<sub>new</sub>=Pb</b>, so for simplicity <b>LUx=b<sub>new</sub></b>. The new <b>b</b> has the same output values, just reordered a bit due to pivot adjustments. Since the order of the original equations generally doesn't have a special significance this is just a minor change.
 </p>
@@ -1998,18 +1988,16 @@ Now glueing everything together is now just a few lines of code
 </blockquote>
 </div>
 
-<div id="outline-container-sec-7-1-1" class="outline-4">
-<h4 id="sec-7-1-1">EXAMPLE: Vandermonde matrices</h4>
-<div class="outline-text-4" id="text-7-1-1">
+<ul class="org-ul"><li><a id="sec-6-2-1-1" name="sec-6-2-1-1"></a>EXAMPLE: Vandermonde matrices<br  /><div class="outline-text-5" id="text-6-2-1-1">
 <p>
 For a good immediate usecase see <a href="./vandermonde.html">my explanation of the Vandermonde matrix</a> and how we can now fit polynomials to points (using the code we've just developed)
 </p>
 </div>
+</li></ul>
 </div>
-</div>
-<div id="outline-container-sec-7-2" class="outline-3">
-<h3 id="sec-7-2">The LDU Decomposition</h3>
-<div class="outline-text-3" id="text-7-2">
+<div id="outline-container-sec-6-2-2" class="outline-4">
+<h4 id="sec-6-2-2">The LDU Decomposition</h4>
+<div class="outline-text-4" id="text-6-2-2">
 <p>
 As mention on <i>page 154</i>, the <b>LU</b> can be further broken down into <b>LDU</b> - where both <b>L</b> and <b>U</b> have <b>1</b>'s on the diagonal and <b>D</b> is a diagonal matrix with all the pivots. This has the nice property of being more symmetric.
 </p>
@@ -2072,9 +2060,9 @@ An extra nicety is that if <b>A</b> is symmetric then <b>A=A<sup>T</sup></b> and
 </div>
 </div>
 
-<div id="outline-container-sec-7-3" class="outline-3">
-<h3 id="sec-7-3">The Cholesky Decomposition</h3>
-<div class="outline-text-3" id="text-7-3">
+<div id="outline-container-sec-6-2-3" class="outline-4">
+<h4 id="sec-6-2-3">The Cholesky Decomposition</h4>
+<div class="outline-text-4" id="text-6-2-3">
 <p>
 Going one step further - if we have a symmetric matrix (so <b>A=LDL<sup>T</sup></b>) and all the pivots are positive, then we can break up the <b>D</b>  into 2 further matrices <b>D<sub>split</sub></b>. The <b>D<sub>split</sub></b> matrix will be like <b>D</b>, but instead each element on the diagonal (the pivots from the original <b>U</b> matrix) will be replaced by its square root - so that <b>D<sub>split</sub>D<sub>split</sub>=D</b>. This is taking advantage of the fact that a unit diagonal multiplied with itself simply squares the diagonal elements. Note here that if any of the diagonal elements are negative, then you can't really take the square root here b/c you'd get complex numbers.
 </p>
@@ -2130,9 +2118,9 @@ see: <a href="https://math.stackexchange.com/questions/621045/why-does-cholesky-
 </blockquote>
 </div>
 </div>
-<div id="outline-container-sec-7-4" class="outline-3">
-<h3 id="sec-7-4">Solving for A<sup>-1</sup></h3>
-<div class="outline-text-3" id="text-7-4">
+<div id="outline-container-sec-6-2-4" class="outline-4">
+<h4 id="sec-6-2-4">Solving for A<sup>-1</sup></h4>
+<div class="outline-text-4" id="text-6-2-4">
 <p>
 On <i>page 148</i> we get a simple algorithm for efficiently contructing <b>A<sup>-1</sup></b>. Basically we are taking the equation <b>AA<sup>-1</sup>=I</b>, where <b>A<sup>-1</sup></b> is unknown, and solving it column by column. Treating each column of <b>A<sup>-1</sup></b> as <b>x</b> and each column of <b>I</b> and <b>b</b> we are reusing <b>Ax=b</b> and writing it as <b>AA<sup>-1</sup><sub>*j</sub>=e<sub>j</sub></b>. Once we solve each column we put them all together and rebuild <b>A<sup>-1</sup></b>.
 </p>
@@ -2166,10 +2154,9 @@ Because our data is arranged row-by-row, it'll be easier for me to just build <b
 </blockquote>
 </div>
 </div>
-</div>
-<div id="outline-container-sec-8" class="outline-2">
-<h2 id="sec-8">Least Squares</h2>
-<div class="outline-text-2" id="text-8">
+<div id="outline-container-sec-6-2-5" class="outline-4">
+<h4 id="sec-6-2-5">Least Squares</h4>
+<div class="outline-text-4" id="text-6-2-5">
 <p>
 Now that we have a mechanism to solve square linear systems we need to extend <b>Ax=b</b> to the overdefined case where we have more linear equations than parameters. This situation will come up constantly, generally in situations where you only have a few inputs you want to solve for, but you have a lot of redundant measurements. 
 </p>
@@ -2227,9 +2214,7 @@ As we learn in calculus, minimizing a function is done by take its derivative wi
 </p>
 </div>
 
-<div id="outline-container-sec-8-1" class="outline-3">
-<h3 id="sec-8-1">Numerically stable solution</h3>
-<div class="outline-text-3" id="text-8-1">
+<ul class="org-ul"><li><a id="sec-6-2-5-1" name="sec-6-2-5-1"></a>Numerically stable solution<br  /><div class="outline-text-5" id="text-6-2-5-1">
 <p>
 Unfortunately while the solutions turned out in the end to be very clean, it does involve a matrix multiplication and therefore has some numerical issues. A better solution is presented in <b>Exercise 4.6.9</b> with the equations
 </p>
@@ -2263,15 +2248,17 @@ I even double checked that this is true in a <a href="../asparapiss/">little dem
 <p><img src="stable-least-squares.png" alt="stable-least-squares.png" />
 </p>
 </div>
+<p>
+*
+</p>
+</div>
+</li></ul>
 </div>
 </div>
 </div>
-<div id="outline-container-sec-9" class="outline-2">
-<h2 id="sec-9"></h2>
-</div>
-<div id="outline-container-sec-10" class="outline-2">
-<h2 id="sec-10">TODOs</h2>
-<div class="outline-text-2" id="text-10">
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7">TODOs</h2>
+<div class="outline-text-2" id="text-7">
 <ul class="org-ul">
 <li>Write a better example that I can expand on easily later
 </li>
@@ -2286,9 +2273,9 @@ I even double checked that this is true in a <a href="../asparapiss/">little dem
 </ul>
 </div>
 </div>
-<div id="outline-container-sec-11" class="outline-2">
-<h2 id="sec-11">SRC<sub>Block</sub> template</h2>
-<div class="outline-text-2" id="text-11">
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8">SRC<sub>Block</sub> template</h2>
+<div class="outline-text-2" id="text-8">
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-template</span> (matrix)
@@ -2299,9 +2286,9 @@ I even double checked that this is true in a <a href="../asparapiss/">little dem
 </div>
 </div>
 
-<div id="outline-container-sec-12" class="outline-2">
-<h2 id="sec-12">End</h2>
-<div class="outline-text-2" id="text-12">
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9">End</h2>
+<div class="outline-text-2" id="text-9">
 <blockquote>
 <p>
 This webpage is generated from an org-document (at <code>./index.org</code>) that also generates all the files described. 
@@ -2326,7 +2313,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-09-15 Sat 17:04</p>
+<p class="date">Created: 2018-10-04 Thu 18:07</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

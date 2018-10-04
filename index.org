@@ -1274,7 +1274,7 @@ So our method will still go reducing the matrix column by column and building up
        0)))
 #+END_SRC
 
-* Using the LU
+** Using the LU
 #+BEGIN_QUOTE
 */Notes on getting a good numerical solution:/*
 
@@ -1287,7 +1287,7 @@ The topic of /residuals/, /sensitivity/ and /coditioning/ will be revisited late
 #+END_QUOTE
 
 
-** Solving for x in Ax=b
+*** Solving for x in Ax=b
 Now that we can break a linear system *A* into two systems *L* and *U* we need to go back to where we started and solve for inputs given some outputs.We started with *Ax=b* and now we know we can do *PA=LU*. Combinding the two we can get *PAx=Pb* and then *LUx=Pb*. As mentioned before, *b_{new}=Pb*, so for simplicity *LUx=b_{new}*. The new *b* has the same output values, just reordered a bit due to pivot adjustments. Since the order of the original equations generally doesn't have a special significance this is just a minor change.
 
 Next we define a new intermediary vector *Ux=y* so that we can write *Ly=b_{new}*. This value we can solve directly by forward substitution. The first row of the lower triangular matrix gives us a simple solvable equation of the form *ax=b* and every subsequent row adds an additional unknown that we can solve for directly.
@@ -1368,9 +1368,9 @@ Now glueing everything together is now just a few lines of code
 *Note:* I have /PLU/ as the input as opposed to *A* b/c we often want to solve *Ax=b* over and over for different values of *b* and we don't want to recompute /PLU/
 #+END_QUOTE
 
-*** EXAMPLE: Vandermonde matrices
+**** EXAMPLE: Vandermonde matrices
 For a good immediate usecase see [[./vandermonde.html][my explanation of the Vandermonde matrix]] and how we can now fit polynomials to points (using the code we've just developed)
-** The LDU Decomposition
+*** The LDU Decomposition
 As mention on /page 154/, the *LU* can be further broken down into *LDU* - where both *L* and *U* have *1*'s on the diagonal and *D* is a diagonal matrix with all the pivots. This has the nice property of being more symmetric.
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-LDU-decomposition (matrix)
@@ -1425,7 +1425,7 @@ An extra nicety is that if *A* is symmetric then *A=A^{T}* and therefore *LDU=(L
 
 #+END_SRC
 
-** The Cholesky Decomposition
+*** The Cholesky Decomposition
 Going one step further - if we have a symmetric matrix (so *A=LDL^{T}*) and all the pivots are positive, then we can break up the *D*  into 2 further matrices *D_{split}*. The *D_{split}* matrix will be like *D*, but instead each element on the diagonal (the pivots from the original *U* matrix) will be replaced by its square root - so that *D_{split}D_{split}=D*. This is taking advantage of the fact that a unit diagonal multiplied with itself simply squares the diagonal elements. Note here that if any of the diagonal elements are negative, then you can't really take the square root here b/c you'd get complex numbers.
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-is-positive-definite (matrix)
@@ -1469,7 +1469,7 @@ But if the pivots are positive, then we change *A=LDL^{T}* to *A=LD_{split}D_{sp
 
 see: https://math.stackexchange.com/questions/621045/why-does-cholesky-decomposition-exist#
 #+END_QUOTE
-** Solving for A^{-1}
+*** Solving for A^{-1}
 On /page 148/ we get a simple algorithm for efficiently contructing *A^{-1}*. Basically we are taking the equation *AA^{-1}=I*, where *A^{-1}* is unknown, and solving it column by column. Treating each column of *A^{-1}* as *x* and each column of *I* and *b* we are reusing *Ax=b* and writing it as *AA^{-1}_{*j}=e_{j}*. Once we solve each column we put them all together and rebuild *A^{-1}*.
 
 Because our data is arranged row-by-row, it'll be easier for me to just build *(A^{-1})^{T})* and then transpose it back to *A^{-1}* at the end.
@@ -1493,7 +1493,7 @@ Because our data is arranged row-by-row, it'll be easier for me to just build *(
 #+BEGIN_QUOTE
 *TODO:* This could be rewritten to be tail recursive
 #+END_QUOTE
-* Least Squares
+*** Least Squares
 Now that we have a mechanism to solve square linear systems we need to extend *Ax=b* to the overdefined case where we have more linear equations than parameters. This situation will come up constantly, generally in situations where you only have a few inputs you want to solve for, but you have a lot of redundant measurements. 
 
 \begin{equation}
@@ -1538,7 +1538,7 @@ x^{T}A_{skinny}^{T}A_{skinny}x
 
 As we learn in calculus, minimizing a function is done by take its derivative with respect to the parameter we are changing (here that's =x=), setting it equal to zero and then solving for that parameter (b/c the minimum point has zero slope). What /page 226-227/ shows is that the derivative of our difference equation give us the equation *A^{T}Ax=A^{T}b*. The right hand side *A^{T}b* is a vector, and in-fact the whole equation is in the form *Ax=b* which we know how to solve (again, solving for =x= here). Also note that *A^{T}A* is always square and singlular - and that b/c *A* was skinny it's actually smaller than *A*.
 
-** Numerically stable solution
+**** Numerically stable solution
 Unfortunately while the solutions turned out in the end to be very clean, it does involve a matrix multiplication and therefore has some numerical issues. A better solution is presented in *Exercise 4.6.9* with the equations
 
 \begin{equation}
@@ -1562,7 +1562,7 @@ If you multiply out the block matrices you will get two equation and you will se
 I even double checked that this is true in a [[../asparapiss/][little demo program]] written in Clojure. Fitting a polynomial over some random points the *A^{T}Ax=A^{T}b* solution (light blue) quickly gives a broken result as the number of polynomial factors is increased. While the "stable solution" (dark blue) blows up much later.
 
 file:stable-least-squares.png
-* 
+*
 * TODOs
 - Write a better example that I can expand on easily later
 - Implement the Sherman-Morrison update formula
