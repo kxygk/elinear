@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-10-04 Thu 18:07 -->
+<!-- 2018-10-11 Thu 23:49 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -260,9 +260,20 @@ for the JavaScript code in this tag.
 </li>
 </ul>
 </li>
-<li><a href="#sec-7">TODOs</a></li>
-<li><a href="#sec-8">SRC<sub>Block</sub> template</a></li>
-<li><a href="#sec-9">End</a></li>
+<li><a href="#sec-7">The QR Decomposition</a>
+<ul>
+<li><a href="#sec-7-1">The Gram-Schmidt procedure</a>
+<ul>
+<li><a href="#sec-7-1-1">The Base case</a></li>
+<li><a href="#sec-7-1-2">Recursive Step</a></li>
+</ul>
+</li>
+<li><a href="#sec-7-2">Decomposing</a></li>
+</ul>
+</li>
+<li><a href="#sec-8">TODOs</a></li>
+<li><a href="#sec-9">SRC<sub>Block</sub> template</a></li>
+<li><a href="#sec-10">End</a></li>
 </ul>
 </div>
 </div>
@@ -2257,8 +2268,375 @@ I even double checked that this is true in a <a href="../asparapiss/">little dem
 </div>
 </div>
 <div id="outline-container-sec-7" class="outline-2">
-<h2 id="sec-7">TODOs</h2>
+<h2 id="sec-7">The QR Decomposition</h2>
 <div class="outline-text-2" id="text-7">
+<p>
+The 70 or so pages that follow the "Least Squares" section in the book are rather frustrating b/c there is no end goal in sight, but on paged <i>307-308</i> we have our big reveal. The goal is to construct a new decomposition <b>A=QR</b> that will give us similar benefits to the LU while presenting us with a few more useful properties. It will combine the benefits of lower/upper triangular matrices which gave us forward/back-substitution and the benefits of an orthonormal basis.
+</p>
+
+<p>
+An <i>orthonormal</i> matrices have a very useful property that its inverse is its transpose <b>Q<sup>T</sup>=Q<sup>-1</sup></b>. This is because each column/row of the matrix is of unit length and orthogonal to the other columns. So when you write out <b>Q<sup>T</sup>Q</b> you see that 
+</p>
+
+<ul class="org-ul">
+<li>the diagonal elements are the inner products of the columns - and b/c of their unit length it's always equal to 1 
+</li>
+<li>the off-diagonal elements involve inner products of orthogonal columns and therefore are equal to 0.
+</li>
+</ul>
+
+<p>
+If <b>A</b> is square then the columns of <b>A</b> are already technically in an orthonormal basis, the standard basis (<b>I<sup>T</sup>I=I</b>), where <b>A=IA</b> but obviously that's not very useful. The goal is have the second matrix be something a bit nicer and triangular like in the <b>LU</b> decomposition. We also would like something that generalizes to more than the square case.
+</p>
+</div>
+
+<div id="outline-container-sec-7-1" class="outline-3">
+<h3 id="sec-7-1">The Gram-Schmidt procedure</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+The Gram-Schmidt procedure is a recursive algorithm for taking a set of linearly independent vectors (in the standard basis) and rewriting it as a set of coordinates in a new orthonormal basis that will span the same space. The new basis will naturally be in the same space <b>R<sup>n</sup></b> and its dimension will equal the number of indepenent vectors. So given <b>n</b> linearly independent vectors it will return to you a set of <b>n</b> orthonormal vectors that span the same space.
+</p>
+
+<p>
+This already at face value seems like something that could prove to be useful. After describing the algorithm we will see how we can use these properties to build up the decomposition we want.
+</p>
+</div>
+<div id="outline-container-sec-7-1-1" class="outline-4">
+<h4 id="sec-7-1-1">The Base case</h4>
+<div class="outline-text-4" id="text-7-1-1">
+<p>
+We will see that the procedure builds the new basis incrementally one basis vector at a time. And that if we've built a basis for <b>n</b> independent vectors, then adding an <b>n+1</b>'th vector will be very easy. So first we look at the simplest case of just one vector (that's.. independent b/c it's just all alone). To make an orthonormal basis for one vector you just normalizes it. Bare in mind that both the vector and the new basis span the same space
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-column-2-norm</span> (column)
+  <span style="color: #cc0000;">"takes the inner product of a column with itself to get its 2-norm"</span>
+  (matrix-inner-product (matrix-transpose column) column))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-normalize-column</span> (column)
+  <span style="color: #cc0000;">"takes a column and returns a normalized copy"</span>
+    (matrix-scalar-product 
+     column 
+     (/ 1.0 (sqrt (matrix-column-2-norm column)))))
+
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-row-2-norm</span> (row)
+  <span style="color: #cc0000;">"takes the inner product of a column with itself to get its 2-norm"</span>
+  (matrix-inner-product row (matrix-transpose row)))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-normalize-row</span> (row)
+  <span style="color: #cc0000;">"takes a column and returns a normalized copy"</span>
+    (matrix-scalar-product 
+     row 
+     (/ 1.0 (sqrt (matrix-row-2-norm row)))))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-7-1-2" class="outline-4">
+<h4 id="sec-7-1-2">Recursive Step</h4>
+<div class="outline-text-4" id="text-7-1-2">
+<p>
+The recursive step describes how to expand your basis when you're given a new independent vector - ie. one that's not in its span - so that the new basis includes this vector. I think it's not immediately obvious, but this will always involve adding just one additional vector to the basis
+</p>
+
+<blockquote>
+<p>
+<b>Example</b>: If you have a basis vector [1 0 0 0 0 0] and you're given a new vector [3 6 7 2 5 8]. The span of the two will actually just be some 2-D hyperplane and you just need one extra orthonormal vector for the new basis to cover it.
+</p>
+</blockquote>
+
+<p>
+And here we get to the meat of the Gram-Schmidt procedure. The fact that it's not in the span of our existing basis means it has two components, one that is in the span and one that is orthogonal to the other basis vectors. (the only corner case is if it's orthogonal already)
+</p>
+
+\begin{equation}
+x_{k+1}=x_{k+1,orthogonal}+x_{k+1,in-span}
+\end{equation}
+
+<p>
+Visually you can picture any vector coming out of a plane has a component in the plane and a component perpendicular to the plane. The orthogonal part is what we want to use for our new basis vector.
+</p>
+
+\begin{equation}
+x_{k+1,orthogonal}=x_{k+1} - x_{k+1,in-span}
+\end{equation}
+
+<p>
+The part in the span can be constructed by using the inner product to project our new vector <b>x<sub>k+1</sub></b> onto all of our basis vectors <b>q<sub>1</sub></b>, <b>q<sub>2</sub></b>, <b>q<sub>3</sub></b>, <b>&#x2026;</b>. The projections are coordinates in the new basis and they are scalar values, so we multiply them times their respective basis vectors and add them up to get the in-span vector
+</p>
+
+\begin{equation}
+x_{k+1,in-span}=(q_{1}^{T}x_{k+1})q_{1} + (q_{2}^{T}x_{k+1})q_{2} + .. + (q_{k}^{T}x_{k+1})q_{k}
+\end{equation}
+
+<p>
+In matrix form we stick the basis vectors into a matrix
+</p>
+\begin{equation}
+Q_k=
+\begin{bmatrix}
+q_1 & | & q_2 & | & q_3 & .. & q_k \\
+\end{bmatrix}
+\end{equation}
+
+<p>
+Then we can write a column-matrix multiplication to get the coordinates/projections
+</p>
+
+\begin{equation}
+\begin{bmatrix}
+c_{1} \\
+c_{2} \\
+c_{3} \\
+.. \\
+c_{k} \\
+
+\end{bmatrix}
+ =
+\begin{bmatrix}
+-- q_1^{T} -- \\
+-- q_2^{T} -- \\
+-- q_3^{T} -- \\
+... \\
+-- q_k^{T} -- \\
+\end{bmatrix}
+\begin{bmatrix}
+| \\
+x_{k+1} \\
+| \\
+\end{bmatrix}
+\end{equation}
+
+<p>
+And finally with the coordinates and the basis vectors we can  build the <i>in-span</i> vector (this is equivalent to the equation)
+</p>
+\begin{equation}
+x_{k+1,in-span}=
+\begin{bmatrix}
+q_1 & | & q_2 & | & q_3 & .. & q_k \\
+\end{bmatrix}
+\begin{bmatrix}
+c_{1} \\
+c_{2} \\
+c_{3} \\
+.. \\
+c_{k} \\
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+x_{k+1,in-span}=
+\begin{bmatrix}
+q_1 & | & q_2 & | & q_3 & .. & q_k \\
+\end{bmatrix}
+\begin{bmatrix}
+-- q_1^{T} -- \\
+-- q_2^{T} -- \\
+-- q_3^{T} -- \\
+... \\
+-- q_k^{T} -- \\
+\end{bmatrix}
+\begin{bmatrix}
+| \\
+x_{k+1} \\
+| \\
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+x_{k+1,in-span}=
+Q_k Q_k^{T} x_{k+1}
+\end{equation}
+
+<p>
+And then we can also plug it into the previous equation for the orthogonal component.
+</p>
+\begin{equation}
+x_{k+1,orthogonal}=x_{k+1} - Q_k Q_k^{T} x_{k+1}
+\end{equation}
+<p>
+The code follows the same procedure
+</p>
+<blockquote>
+<p>
+<b>Note</b>: Because I've implemented matrices in <a href="https://en.wikipedia.org/wiki/Row-_and_column-major_order">row-major order</a> and because each time we make a new orthogonal basis we want to append it to our existing list - the matrix <b>Q</b> will be treated as <b>Q<sup>T</sup></b> in code
+</p>
+</blockquote>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-get-orthogonal-component</span> (matrix-of-orthonormal-rows linearly-independent-vector )
+  <span style="color: #cc0000;">"Given matrix of orthonormal rows and a vector that is linearly independent of them - get its orthogonal component"</span>
+  (<span style="color: #00af00;">let*</span> ((QT matrix-of-orthonormal-rows)
+        (Q (matrix-transpose QT))
+        (in-span-coordinates (matrix-product QT linearly-independent-vector))
+        (in-span-vector (matrix-product Q in-span-coordinates)))
+    (matrix-subtract linearly-independent-vector in-span-vector)))
+</pre>
+</div>
+
+<p>
+In the textbook they pull out the vector and write it as:
+</p>
+\begin{equation}
+x_{k+1,orthogonal}=(I - Q_k Q_k^{T}) x_{k+1}
+\end{equation}
+
+<p>
+But the result is the same. With the orthogonal piece we can finally get the new basis vector by just normalizing it
+</p>
+\begin{equation}
+q_{k+1} = x_{k+1,orthogonal}/||x_{k+1,orthogonal}||
+\end{equation}
+\begin{equation}
+q_{k+1} = (I - Q_k Q_k^{T}) x_{k+1}/||(I - Q_k Q_k^{T}) x_{k+1}||
+\end{equation}
+
+<p>
+In code it's just a matter of running <code>(matrix-normalize-column ...)</code>.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-7-2" class="outline-3">
+<h3 id="sec-7-2">Decomposing</h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+So now we have a procedure to build an orthonormal basis <b>Q</b> from linearly independent vectors, but we still need to do the last step of turning this into a decompositon similar in form to <b>A=LU</b> - where given a matrix <b>A</b> we can write it as the product of several other matrices
+</p>
+
+<p>
+A condition of the method (just like with the <b>LU</b>) is that <b>A</b> must be non-singular. That way we can ensure that the columns of <b>A</b> will be linearly independent. The Gram-Schmidt procedure tell us two things: 
+</p>
+<ul class="org-ul">
+<li>How to add a new basis vector to a basis using a new vector not in its span
+</li>
+<li>The basis for one vector on its own
+</li>
+</ul>
+
+<p>
+Now to get the orthonormal basis of the columns of <b>A</b>, ie. <b>A<sub>1..n *</sub></b> we want to think of it as add the column <b>A<sub>n *</sub></b> to the orthonormal basis of <b>A{1..n-1 *}</b>. Then the orthogonal basis of <b>A{1..n-1 *}</b> is really the column <b>A<sub>n-1 *</sub></b> added to the orthogonal basis of <b>A{1..n-2 *}</b> and so on.. till you get to the orthonormal basis of <b>A{1 *}</b> which we know how to do.
+</p>
+
+<blockquote>
+<p>
+<b>Note</b>: If the matrix is huge this way of computing will blow the stack. It's more efficient to first <b>A{1 *}</b> and then appending basis vectors, but the result is less elegant b/c you need to keep track of indeces. The way presented here reuses the code cleanly b/c the procedure on <b>A<sub>n</sub></b> is just the procedure on <b>A<sub>n-1</sub></b> + some extra work. The algorithm itself breaks down the problem into it's smaller parts.
+</p>
+
+<p>
+<b>Note2</b>: Again, everything is transposed for convenience.. which is not very ergonomic
+</p>
+</blockquote>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-gram-schmidt</span> (A-transpose)
+  <span style="color: #cc0000;">"For a column return it's normalized basis. For a matrix adds a new orthonormal vector to the orthonormal basis of A_{n-1}"</span>
+  (<span style="color: #00af00;">cond</span> ((= 1 (matrix-rows A-transpose)) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">base cas</span>
+         (matrix-normalize-row A-transpose))
+        (t <span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">recursive case</span>
+         (<span style="color: #00af00;">let*</span> ((basis (matrix-gram-schmidt
+                        (matrix-submatrix A-transpose 
+                                          0
+                                          0
+                                          (- (matrix-rows A-transpose) 1)
+                                          (matrix-columns A-transpose))))
+                (orthogonal-component (matrix-get-orthogonal-component
+                                       basis
+                                       (matrix-transpose 
+                                        (matrix-get-row A-transpose (1- (matrix-rows A-transpose)))))))
+           (matrix-append basis (matrix-transpose (matrix-normalize-column orthogonal-component)))))))
+</pre>
+</div>
+
+
+
+
+<p>
+So how do we express <b>A</b> in the term of the new orthogonal basis <b>Q</b>? We just look at the equations we've used and work backwards. We start again with breaking up the linearaly independent columns of <b>A</b> into the orthogonal components and the component in the span of the previous <b>k</b> columns
+</p>
+
+\begin{equation}
+x_{k+1}=x_{k+1,orthogonal}+x_{k+1,in-span}
+\end{equation}
+
+<p>
+Now this time we want to express everything in terms of the columns of <b>Q</b> and <b>A</b>. We already know <i>x<sub>k+1,in-span</sub></i> is the projections of <i>x<sub>k+1</sub></i> onto the q<sub>1 .. k</sub> vectors - so nothing new there. But we now we want to rewrite the <i>x<sub>k+1,orthogonal</sub></i> in terms of the columns of <b>Q</b> instead of the awkward intermediate <b>Q<sub>k</sub></b> matrices we used during the procedure. Remember during the recursive step we found the orthogonal component using the following formula:
+</p>
+
+\begin{equation}
+x_{k+1,orthogonal}=(I - Q_k Q_k^{T}) x_{k+1}
+\end{equation}
+
+<p>
+And then we normalized it to get <i>q<sub>k+1</sub></i>:
+</p>
+
+\begin{equation}
+q_{k+1} = (I - Q_k Q_k^{T}) x_{k+1}/||(I - Q_k Q_k^{T}) x_{k+1}||
+\end{equation}
+
+<p>
+But when building <b>R</b> we already have <i>q<sub>k+1</sub></i> and we are finding a way to get our column of <b>A</b> - <i>x<sub>k+1,orthogonal</sub></i>. So combining the two we get
+</p>
+
+\begin{equation}
+q_{k+1} = x_{k+1,orthogonal}/||(I - Q_k Q_k^{T}) x_{k+1}||
+\end{equation}
+
+\begin{equation}
+x_{k+1,orthogonal}= ||(I - Q_k Q_k^{T}) x_{k+1}|| q_{k+1}
+\end{equation}
+
+<p>
+So the full equation for a column of A in terms of the columns of Q becomes:
+</p>
+
+\begin{equation}
+x_{k+1}=x_{k+1,orthogonal}+x_{k+1,in-span}
+\end{equation}
+\begin{equation}
+x_{k+1}= ||(I - Q_k Q_k^{T}) x_{k+1}|| q_{k+1}  + (q_{1}^{T}x_{k+1})q_{1} + (q_{2}^{T}x_{k+1})q_{2} + .. + (q_{k}^{T}x_{k+1})q_{k}
+\end{equation}
+
+<p>
+And in matrix form this looks like
+</p>
+
+\begin{equation}
+R=
+\begin{bmatrix}
+||(I - Q_1 Q_1^{T}) x_1 || && q_1^T x_2 && q_1^T x_3 && ... \\
+0 && ||(I - Q_2 Q_2^{T}) x_2 || && q_2^T x_3 && ... \\
+0 && 0 && || (I - Q_3 Q_3^{T}) x_2 || &&  ... \\
+... && ... && ... \\
+\end{bmatrix}
+\end{equation}
+
+<p>
+The diagonal values are just scalars, but they still remain rather awkward. However, the key thing to recognize is that all these values are just by-products of building the orthonormal basis <b>Q</b>. So if we build <b>R</b> as we go through the Gram-Schmidt procedure and build <b>Q</b> we have no extra work to do!
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-QR-decomposition</span> (matrix)
+  <span style="color: #cc0000;">"template"</span>
+  (<span style="color: #00af00;">cond</span> 
+ ))
+</pre>
+</div>
+
+<p>
+We just need to rewrite this in term of our new
+is in effect doing what we did in the recursive step, but backwards
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8">TODOs</h2>
+<div class="outline-text-2" id="text-8">
 <ul class="org-ul">
 <li>Write a better example that I can expand on easily later
 </li>
@@ -2273,9 +2651,9 @@ I even double checked that this is true in a <a href="../asparapiss/">little dem
 </ul>
 </div>
 </div>
-<div id="outline-container-sec-8" class="outline-2">
-<h2 id="sec-8">SRC<sub>Block</sub> template</h2>
-<div class="outline-text-2" id="text-8">
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9">SRC<sub>Block</sub> template</h2>
+<div class="outline-text-2" id="text-9">
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-template</span> (matrix)
@@ -2286,9 +2664,9 @@ I even double checked that this is true in a <a href="../asparapiss/">little dem
 </div>
 </div>
 
-<div id="outline-container-sec-9" class="outline-2">
-<h2 id="sec-9">End</h2>
-<div class="outline-text-2" id="text-9">
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10">End</h2>
+<div class="outline-text-2" id="text-10">
 <blockquote>
 <p>
 This webpage is generated from an org-document (at <code>./index.org</code>) that also generates all the files described. 
@@ -2313,7 +2691,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-10-04 Thu 18:07</p>
+<p class="date">Created: 2018-10-11 Thu 23:49</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
