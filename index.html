@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-10-11 Thu 23:49 -->
+<!-- 2018-10-12 Fri 22:16 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -1486,7 +1486,6 @@ The result is surprisingly simple and we can see that we didn't really need to c
 </div>
 </div>
 
-
 <div id="outline-container-sec-6-1-2" class="outline-4">
 <h4 id="sec-6-1-2">Building the <b>L</b> Matrix</h4>
 <div class="outline-text-4" id="text-6-1-2">
@@ -2516,7 +2515,7 @@ A condition of the method (just like with the <b>LU</b>) is that <b>A</b> must b
 </ul>
 
 <p>
-Now to get the orthonormal basis of the columns of <b>A</b>, ie. <b>A<sub>1..n *</sub></b> we want to think of it as add the column <b>A<sub>n *</sub></b> to the orthonormal basis of <b>A{1..n-1 *}</b>. Then the orthogonal basis of <b>A{1..n-1 *}</b> is really the column <b>A<sub>n-1 *</sub></b> added to the orthogonal basis of <b>A{1..n-2 *}</b> and so on.. till you get to the orthonormal basis of <b>A{1 *}</b> which we know how to do.
+Now to get the orthonormal basis of the columns of <b>A</b>, ie. <b>A<sub>1..n *</sub></b> we want to think of it as: add the column <b>A<sub>n *</sub></b> to the orthonormal basis of <b>A{1..n-1 *}</b>. Then think of the orthogonal basis of <b>A{1..n-1 *}</b> as really the column <b>A<sub>n-1 *</sub></b> added to the orthogonal basis of <b>A{1..n-2 *}</b> and so on.. till you get to the orthonormal basis of <b>A{1 *}</b> which we know how to do.
 </p>
 
 <blockquote>
@@ -2525,7 +2524,7 @@ Now to get the orthonormal basis of the columns of <b>A</b>, ie. <b>A<sub>1..n *
 </p>
 
 <p>
-<b>Note2</b>: Again, everything is transposed for convenience.. which is not very ergonomic
+<b>Note2</b>: Again, everything is transposed for convenience.. which is not very ergonomic. If I were to start over I'd write it in column major order.
 </p>
 </blockquote>
 
@@ -2533,7 +2532,7 @@ Now to get the orthonormal basis of the columns of <b>A</b>, ie. <b>A<sub>1..n *
 
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-gram-schmidt</span> (A-transpose)
   <span style="color: #cc0000;">"For a column return it's normalized basis. For a matrix adds a new orthonormal vector to the orthonormal basis of A_{n-1}"</span>
-  (<span style="color: #00af00;">cond</span> ((= 1 (matrix-rows A-transpose)) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">base cas</span>
+  (<span style="color: #00af00;">cond</span> ((= 1 (matrix-rows A-transpose)) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">base case</span>
          (matrix-normalize-row A-transpose))
         (t <span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">recursive case</span>
          (<span style="color: #00af00;">let*</span> ((basis (matrix-gram-schmidt
@@ -2542,19 +2541,18 @@ Now to get the orthonormal basis of the columns of <b>A</b>, ie. <b>A<sub>1..n *
                                           0
                                           (- (matrix-rows A-transpose) 1)
                                           (matrix-columns A-transpose))))
-                (orthogonal-component (matrix-get-orthogonal-component
-                                       basis
-                                       (matrix-transpose 
-                                        (matrix-get-row A-transpose (1- (matrix-rows A-transpose)))))))
+                (next-column (matrix-transpose
+                                        (matrix-get-row A-transpose
+                                                        (1- (matrix-rows A-transpose)))))
+                (orthogonal-component (matrix-get-orthogonal-component basis
+                                                                       next-column)))
            (matrix-append basis (matrix-transpose (matrix-normalize-column orthogonal-component)))))))
 </pre>
 </div>
 
 
-
-
 <p>
-So how do we express <b>A</b> in the term of the new orthogonal basis <b>Q</b>? We just look at the equations we've used and work backwards. We start again with breaking up the linearaly independent columns of <b>A</b> into the orthogonal components and the component in the span of the previous <b>k</b> columns
+So the function above gives us the orthonormal basis <b>Q</b>, but how do we express <b>A</b> in the term <b>Q</b>? We just look at the equations we've used and work backwards. We start again with breaking up the linearaly independent columns of <b>A</b> into their orthogonal components and their component in the span of the previous <b>k</b> columns
 </p>
 
 \begin{equation}
@@ -2578,7 +2576,7 @@ q_{k+1} = (I - Q_k Q_k^{T}) x_{k+1}/||(I - Q_k Q_k^{T}) x_{k+1}||
 \end{equation}
 
 <p>
-But when building <b>R</b> we already have <i>q<sub>k+1</sub></i> and we are finding a way to get our column of <b>A</b> - <i>x<sub>k+1,orthogonal</sub></i>. So combining the two we get
+So combining the two:
 </p>
 
 \begin{equation}
@@ -2590,7 +2588,7 @@ x_{k+1,orthogonal}= ||(I - Q_k Q_k^{T}) x_{k+1}|| q_{k+1}
 \end{equation}
 
 <p>
-So the full equation for a column of A in terms of the columns of Q becomes:
+So the full equation for a column of <b>A</b> in terms of the columns of <b>Q</b> becomes:
 </p>
 
 \begin{equation}
@@ -2601,7 +2599,7 @@ x_{k+1}= ||(I - Q_k Q_k^{T}) x_{k+1}|| q_{k+1}  + (q_{1}^{T}x_{k+1})q_{1} + (q_{
 \end{equation}
 
 <p>
-And in matrix form this looks like
+And in matrix form this give us the decomposition <b>QR</b> where:
 </p>
 
 \begin{equation}
@@ -2618,14 +2616,94 @@ R=
 The diagonal values are just scalars, but they still remain rather awkward. However, the key thing to recognize is that all these values are just by-products of building the orthonormal basis <b>Q</b>. So if we build <b>R</b> as we go through the Gram-Schmidt procedure and build <b>Q</b> we have no extra work to do!
 </p>
 
+<blockquote>
+<p>
+<b>Note</b>: The following code works but is uglier and longer than it should be. It definitely shouldn't need rec and non-rec functions. 
+</p>
+
+<ul class="org-ul">
+<li>First, you would normally you would just build up <b>R</b> for the <b>A<sub>n-1</sub></b> case and then appending a row of zeroes and then appending the next column at each iteration - each iteration indepedent of each other (without passing the rediculous "dimension" variable)
+</li>
+<li>Second this would be a lot simpler if matrices were in column major order. The QR-rec function has to work on the transposes of matrices and it's very awkward
+</li>
+</ul>
+</blockquote>
+
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-QR-decomposition</span> (matrix)
-  <span style="color: #cc0000;">"template"</span>
-  (<span style="color: #00af00;">cond</span> 
- ))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-build-R-column-rec</span> (QT next-linearly-independent-vector norm-factor dimension)
+  <span style="color: #cc0000;">"Builds the data vector for a column of R"</span>
+  (<span style="color: #00af00;">cond</span> ((= 0 dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">finished building column</span>
+         '())
+
+        ((&lt; (matrix-rows QT) dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">add bottom zeroes</span>
+         (cons
+          9.0
+          (matrix-build-R-column-rec QT next-linearly-independent-vector norm-factor (1- dimension))))
+
+        (( = (matrix-rows QT) dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">add orthogonal part</span>
+         (cons
+          norm-factor
+          (matrix-build-R-column-rec QT next-linearly-independent-vector norm-factor (1- dimension))))
+
+        ((&gt; (matrix-rows QT) dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">add in-span part</span>
+         (cons
+          (matrix-get-value (matrix-product
+                             (matrix-get-row QT dimension)
+                             next-linearly-independent-vector)
+                            0
+                            0)
+          (matrix-build-R-column-rec Q next-linearly-independent-vector norm-factor (1- dimension))))))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-build-R-column</span> (Q next-linearly-independent-vector norm-factor dimension)
+  <span style="color: #cc0000;">"Returns a column vector for the new column of R"</span>
+  (matrix-from-data-list dimension 1  (reverse (matrix-build-R-column-rec Q next-linearly-independent-vector norm-factor dimension))))
+
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-QR-decomposition-rec</span> (A-transpose dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">'dimension' keeps track of the ultimate size of R</span>
+  <span style="color: #cc0000;">"The recursive helper function that builds up the Q and R matrices"</span>
+  (<span style="color: #00af00;">cond</span> ((= 1 (matrix-rows A-transpose)) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">base case</span>
+         (list
+          (matrix-normalize-row A-transpose) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">starting Q "matrix"</span>
+          (matrix-scalar-product (matrix-unit-row 0 dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">starting R "matrix"</span>
+                                 (matrix-row-2-norm A-transpose))))
+        (t <span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">recursive case</span>
+         (<span style="color: #00af00;">let*</span> ((QTRT (matrix-QR-decomposition-rec
+                       (matrix-submatrix A-transpose
+                                         0
+                                         0
+                                         (- (matrix-rows A-transpose) 1)
+                                         (matrix-columns A-transpose))
+                       dimension))
+                (basis (first QTRT))
+                (RT (second QTRT))
+                (next-column (matrix-transpose
+                              (matrix-get-row A-transpose
+                                              (1- (matrix-rows A-transpose)))))
+                (orthogonal-component (matrix-get-orthogonal-component basis
+                                                                       next-column))
+                (new-basis (matrix-append basis
+                                          (matrix-transpose (matrix-normalize-column orthogonal-component))))
+                (new-RT (matrix-append RT
+                                       (matrix-transpose
+                                        (matrix-build-R-column
+                                         new-basis
+                                         next-column
+                                         (matrix-row-2-norm orthogonal-component)
+                                         dimension)))))
+           (list new-basis new-RT)))))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-QR-decomposition</span> (A)
+  <span style="color: #cc0000;">"Returns a list of the Q and R matrices for A"</span>
+  (matrix-QR-decomposition-rec (matrix-transpose A)
+                               (matrix-columns A)))
 </pre>
 </div>
+
+
+<p>
+#+END<sub>SRC</sub>
+</p>
 
 <p>
 We just need to rewrite this in term of our new
@@ -2691,7 +2769,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-10-11 Thu 23:49</p>
+<p class="date">Created: 2018-10-12 Fri 22:16</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

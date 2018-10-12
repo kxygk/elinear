@@ -953,7 +953,6 @@ The result is surprisingly simple and we can see that we didn't really need to c
 
 #+END_SRC
 
-
 *** Building the *L* Matrix
 So now our product of elementary matrices *R_{n}R_{...}R_{2}R_{1}A=U* shortens to something similar *G_{r}G_{...}G_{2}G_{1}A=U*, but where each /Elementary Lower-Triangular Matrix/ *G* takes the place of several *R* matrices. The product *G_{r}G_{...}G_{2}G_{1}* involved a lot of matrix products, but fortunately we have a shortcut. These *G* matrices have the property that their inverse is just a matter of flipping the sign of the factors' in their column. You can confirm this by inverting our definition *G=R_{n}R_{...}R_{2}R_{1}* and remembering that the *R*'s just involve a sign flip and *R^{-1}*'s are also ~Type III~ matrices. 
 
@@ -1738,18 +1737,18 @@ A condition of the method (just like with the *LU*) is that *A* must be non-sing
  - How to add a new basis vector to a basis using a new vector not in its span
  - The basis for one vector on its own
 
-Now to get the orthonormal basis of the columns of *A*, ie. *A_{1..n *}* we want to think of it as add the column *A_{n *}* to the orthonormal basis of *A{1..n-1 *}*. Then the orthogonal basis of *A{1..n-1 *}* is really the column *A_{n-1 *}* added to the orthogonal basis of *A{1..n-2 *}* and so on.. till you get to the orthonormal basis of *A{1 *}* which we know how to do.
+Now to get the orthonormal basis of the columns of *A*, ie. *A_{1..n *}* we want to think of it as: add the column *A_{n *}* to the orthonormal basis of *A{1..n-1 *}*. Then think of the orthogonal basis of *A{1..n-1 *}* as really the column *A_{n-1 *}* added to the orthogonal basis of *A{1..n-2 *}* and so on.. till you get to the orthonormal basis of *A{1 *}* which we know how to do.
 
 #+BEGIN_QUOTE
 *Note*: If the matrix is huge this way of computing will blow the stack. It's more efficient to first *A{1 *}* and then appending basis vectors, but the result is less elegant b/c you need to keep track of indeces. The way presented here reuses the code cleanly b/c the procedure on *A_n* is just the procedure on *A_{n-1}* + some extra work. The algorithm itself breaks down the problem into it's smaller parts.
 
-*Note2*: Again, everything is transposed for convenience.. which is not very ergonomic
+*Note2*: Again, everything is transposed for convenience.. which is not very ergonomic. If I were to start over I'd write it in column major order.
 #+END_QUOTE
 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun matrix-gram-schmidt (A-transpose)
     "For a column return it's normalized basis. For a matrix adds a new orthonormal vector to the orthonormal basis of A_{n-1}"
-    (cond ((= 1 (matrix-rows A-transpose)) ;; base cas
+    (cond ((= 1 (matrix-rows A-transpose)) ;; base case
            (matrix-normalize-row A-transpose))
           (t ;;recursive case
            (let* ((basis (matrix-gram-schmidt
@@ -1758,17 +1757,16 @@ Now to get the orthonormal basis of the columns of *A*, ie. *A_{1..n *}* we want
                                             0
                                             (- (matrix-rows A-transpose) 1)
                                             (matrix-columns A-transpose))))
-                  (orthogonal-component (matrix-get-orthogonal-component
-                                         basis
-                                         (matrix-transpose 
-                                          (matrix-get-row A-transpose (1- (matrix-rows A-transpose)))))))
+                  (next-column (matrix-transpose
+                                          (matrix-get-row A-transpose
+                                                          (1- (matrix-rows A-transpose)))))
+                  (orthogonal-component (matrix-get-orthogonal-component basis
+                                                                         next-column)))
              (matrix-append basis (matrix-transpose (matrix-normalize-column orthogonal-component)))))))
 #+END_SRC
 
 
-
-
- So how do we express *A* in the term of the new orthogonal basis *Q*? We just look at the equations we've used and work backwards. We start again with breaking up the linearaly independent columns of *A* into the orthogonal components and the component in the span of the previous *k* columns
+So the function above gives us the orthonormal basis *Q*, but how do we express *A* in the term *Q*? We just look at the equations we've used and work backwards. We start again with breaking up the linearaly independent columns of *A* into their orthogonal components and their component in the span of the previous *k* columns
 
 \begin{equation}
 x_{k+1}=x_{k+1,orthogonal}+x_{k+1,in-span}
@@ -1786,7 +1784,7 @@ And then we normalized it to get /q_{k+1}/:
 q_{k+1} = (I - Q_k Q_k^{T}) x_{k+1}/||(I - Q_k Q_k^{T}) x_{k+1}||
 \end{equation}
 
-But when building *R* we already have /q_{k+1}/ and we are finding a way to get our column of *A* - /x_{k+1,orthogonal}/. So combining the two we get
+So combining the two:
 
 \begin{equation}
 q_{k+1} = x_{k+1,orthogonal}/||(I - Q_k Q_k^{T}) x_{k+1}||
@@ -1796,7 +1794,7 @@ q_{k+1} = x_{k+1,orthogonal}/||(I - Q_k Q_k^{T}) x_{k+1}||
 x_{k+1,orthogonal}= ||(I - Q_k Q_k^{T}) x_{k+1}|| q_{k+1}
 \end{equation}
 
-So the full equation for a column of A in terms of the columns of Q becomes:
+So the full equation for a column of *A* in terms of the columns of *Q* becomes:
 
 \begin{equation}
 x_{k+1}=x_{k+1,orthogonal}+x_{k+1,in-span}
@@ -1805,7 +1803,7 @@ x_{k+1}=x_{k+1,orthogonal}+x_{k+1,in-span}
 x_{k+1}= ||(I - Q_k Q_k^{T}) x_{k+1}|| q_{k+1}  + (q_{1}^{T}x_{k+1})q_{1} + (q_{2}^{T}x_{k+1})q_{2} + .. + (q_{k}^{T}x_{k+1})q_{k}
 \end{equation}
 
-And in matrix form this looks like
+And in matrix form this give us the decomposition *QR* where:
 
 \begin{equation}
 R=
@@ -1819,11 +1817,81 @@ R=
 
 The diagonal values are just scalars, but they still remain rather awkward. However, the key thing to recognize is that all these values are just by-products of building the orthonormal basis *Q*. So if we build *R* as we go through the Gram-Schmidt procedure and build *Q* we have no extra work to do!
 
+#+BEGIN_QUOTE
+*Note*: The following code works but is uglier and longer than it should be. It definitely shouldn't need rec and non-rec functions. 
+
+ - First, you would normally you would just build up *R* for the *A_{n-1}* case and then appending a row of zeroes and then appending the next column at each iteration - each iteration indepedent of each other (without passing the rediculous "dimension" variable)
+ - Second this would be a lot simpler if matrices were in column major order. The QR-rec function has to work on the transposes of matrices and it's very awkward
+#+END_QUOTE
+
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-QR-decomposition (matrix)
-    "template"
-    (cond 
-   ))
+  (defun matrix-build-R-column-rec (QT next-linearly-independent-vector norm-factor dimension)
+    "Builds the data vector for a column of R"
+    (cond ((= 0 dimension) ;; finished building column
+           '())
+
+          ((< (matrix-rows QT) dimension) ;; add bottom zeroes
+           (cons
+            9.0
+            (matrix-build-R-column-rec QT next-linearly-independent-vector norm-factor (1- dimension))))
+
+          (( = (matrix-rows QT) dimension) ;; add orthogonal part
+           (cons
+            norm-factor
+            (matrix-build-R-column-rec QT next-linearly-independent-vector norm-factor (1- dimension))))
+
+          ((> (matrix-rows QT) dimension) ;; add in-span part
+           (cons
+            (matrix-get-value (matrix-product
+                               (matrix-get-row QT dimension)
+                               next-linearly-independent-vector)
+                              0
+                              0)
+            (matrix-build-R-column-rec Q next-linearly-independent-vector norm-factor (1- dimension))))))
+
+  (defun matrix-build-R-column (Q next-linearly-independent-vector norm-factor dimension)
+    "Returns a column vector for the new column of R"
+    (matrix-from-data-list dimension 1  (reverse (matrix-build-R-column-rec Q next-linearly-independent-vector norm-factor dimension))))
+
+
+  (defun matrix-QR-decomposition-rec (A-transpose dimension) ;; 'dimension' keeps track of the ultimate size of R
+    "The recursive helper function that builds up the Q and R matrices"
+    (cond ((= 1 (matrix-rows A-transpose)) ;; base case
+           (list
+            (matrix-normalize-row A-transpose) ;; starting Q "matrix"
+            (matrix-scalar-product (matrix-unit-row 0 dimension) ;; starting R "matrix"
+                                   (matrix-row-2-norm A-transpose))))
+          (t ;;recursive case
+           (let* ((QTRT (matrix-QR-decomposition-rec
+                         (matrix-submatrix A-transpose
+                                           0
+                                           0
+                                           (- (matrix-rows A-transpose) 1)
+                                           (matrix-columns A-transpose))
+                         dimension))
+                  (basis (first QTRT))
+                  (RT (second QTRT))
+                  (next-column (matrix-transpose
+                                (matrix-get-row A-transpose
+                                                (1- (matrix-rows A-transpose)))))
+                  (orthogonal-component (matrix-get-orthogonal-component basis
+                                                                         next-column))
+                  (new-basis (matrix-append basis
+                                            (matrix-transpose (matrix-normalize-column orthogonal-component))))
+                  (new-RT (matrix-append RT
+                                         (matrix-transpose
+                                          (matrix-build-R-column
+                                           new-basis
+                                           next-column
+                                           (matrix-row-2-norm orthogonal-component)
+                                           dimension)))))
+             (list new-basis new-RT)))))
+
+  (defun matrix-QR-decomposition (A)
+    "Returns a list of the Q and R matrices for A"
+    (matrix-QR-decomposition-rec (matrix-transpose A)
+                                 (matrix-columns A)))
+#+END_SRC
 
 
 #+END_SRC
