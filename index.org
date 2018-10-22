@@ -1898,6 +1898,24 @@ The diagonal values are just scalars, but they still remain rather awkward. Howe
 
 We just need to rewrite this in term of our new
 is in effect doing what we did in the recursive step, but backwards
+** The Householder reduction
+An alternate method to build a QR matrix is to take a more direct approach like in the *LU* and to zero out columns to build an upper triangular *R*. The difference from the *LU* is that now instead of using row operations to get zeroes we will restrict ourselves to using *elementary reflectors*. Their key property is that they are orthonormal, so when we carry out a series of reflections *R_{1}R_{2}..R_{k}A* we can combine them into one matrix which will be guaranteed to be orthonormal too. In the *LU*'s Gaussian elimination the elementary matrices we used were not  orthonormal so we didn't have this same guarantee (simple example being row addition: it's not orthogonal and its norm isn't equal to 1)
+
+*** elementary reflector
+An elementary reflector is a special matrix/linear-system which when given a vector produces its reflection across a hyperplane. The hyperplane is orthogonal to some reference vector *u*. The textbook has a nice illustration for the *R^3* case , but to understand it in higher dimensions you need to break up the problem. The hyperplane you reflect over is the /not-in-span-of/ *u* space. So in effect you are getting the component of your vector that's in the direction of *u* and subtracting it twice to create this reflection. If the input vector is *x* then:
+ - *u^tx* is the amount of *x* in the direction of *u* (a scalar)
+ -  *uu^tx* is the vector component in the direction of *u* (a vector)
+ -  *uu^tx/u^tu* is the same vector normalized (a vector)
+ -  *x - 2uu^tx/u^tu* is you subtracting that vector component twice to get the reflection
+In matrix form we'd factor out the *x* and get *(I-2uu^t/u^tu)x*
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-elementary-reflector (column-vector)
+    "Build a matrix that will reflect vector across the hyperplane orthogonal to COLUMN-VECTOR"
+    (let ((dimension (matrix-rows column-vector)))
+      (matrix-subtract (matrix-identity dimension)
+                       (matrix-scalar-product (matrix-product column-vector (matrix-transpose column-vector))
+                                              (/ 2 (matrix-column-2-norm column-vector))))))
+#+END_SRC
 * TODOs
 - Write a better example that I can expand on easily later
 - Implement the Sherman-Morrison update formula

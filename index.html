@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linear Systems in Lisp</title>
-<!-- 2018-10-12 Fri 22:16 -->
+<!-- 2018-10-22 Mon 12:00 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="George Kontsevich" />
@@ -269,6 +269,11 @@ for the JavaScript code in this tag.
 </ul>
 </li>
 <li><a href="#sec-7-2">Decomposing</a></li>
+<li><a href="#sec-7-3">The Householder reduction</a>
+<ul>
+<li><a href="#sec-7-3-1">elementary reflector</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#sec-8">TODOs</a></li>
@@ -2711,6 +2716,46 @@ is in effect doing what we did in the recursive step, but backwards
 </p>
 </div>
 </div>
+<div id="outline-container-sec-7-3" class="outline-3">
+<h3 id="sec-7-3">The Householder reduction</h3>
+<div class="outline-text-3" id="text-7-3">
+<p>
+An alternate method to build a QR matrix is to take a more direct approach like in the <b>LU</b> and to zero out columns to build an upper triangular <b>R</b>. The difference from the <b>LU</b> is that now instead of using row operations to get zeroes we will restrict ourselves to using <b>elementary reflectors</b>. Their key property is that they are orthonormal, so when we carry out a series of reflections <b>R<sub>1</sub>R<sub>2</sub>..R<sub>k</sub>A</b> we can combine them into one matrix which will be guaranteed to be orthonormal too. In the <b>LU</b>'s Gaussian elimination the elementary matrices we used were not  orthonormal so we didn't have this same guarantee (simple example being row addition: it's not orthogonal and its norm isn't equal to 1)
+</p>
+</div>
+
+<div id="outline-container-sec-7-3-1" class="outline-4">
+<h4 id="sec-7-3-1">elementary reflector</h4>
+<div class="outline-text-4" id="text-7-3-1">
+<p>
+An elementary reflector is a special matrix/linear-system which when given a vector produces its reflection across a hyperplane. The hyperplane is orthogonal to some reference vector <b>u</b>. The textbook has a nice illustration for the <b>R<sup>3</sup></b> case , but to understand it in higher dimensions you need to break up the problem. The hyperplane you reflect over is the <i>not-in-span-of</i> <b>u</b> space. So in effect you are getting the component of your vector that's in the direction of <b>u</b> and subtracting it twice to create this reflection. If the input vector is <b>x</b> then:
+</p>
+<ul class="org-ul">
+<li><b>u<sup>tx</sup></b> is the amount of <b>x</b> in the direction of <b>u</b> (a scalar)
+</li>
+<li><b>uu<sup>tx</sup></b> is the vector component in the direction of <b>u</b> (a vector)
+</li>
+<li><b>uu<sup>tx</sup>/u<sup>tu</sup></b> is the same vector normalized (a vector)
+</li>
+<li><b>x - 2uu<sup>tx</sup>/u<sup>tu</sup></b> is you subtracting that vector component twice to get the reflection
+</li>
+</ul>
+<p>
+In matrix form we'd factor out the <b>x</b> and get <b>(I-2uu<sup>t</sup>/u<sup>tu</sup>)x</b>
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-reflector</span> (column-vector)
+  <span style="color: #cc0000;">"Build a matrix that will reflect vector across the hyperplane orthogonal to COLUMN-VECTOR"</span>
+  (<span style="color: #00af00;">let</span> ((dimension (matrix-rows column-vector)))
+    (matrix-subtract (matrix-identity dimension)
+                     (matrix-scalar-product (matrix-product column-vector (matrix-transpose column-vector))
+                                            (/ 2 (matrix-column-2-norm column-vector))))))
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="outline-container-sec-8" class="outline-2">
 <h2 id="sec-8">TODOs</h2>
@@ -2769,7 +2814,7 @@ Once opened in Emacs:<br  />
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2018-10-12 Fri 22:16</p>
+<p class="date">Created: 2018-10-22 Mon 12:00</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
