@@ -1938,7 +1938,7 @@ Here *x* is our vector and *e_{1}* is the coordinate axis onto which we want to 
 The =sign(x_{1})= is a bit confusion for me to think about... If you stick to *u = x - ||x||e_{1}* it should be more clear. *TODO* ..  revisit this
 #+END_QUOTE
 
-So given a vector and a coordinate axis we can quickly build this on top of our previous function
+So given a vector and a coordinate axis we can quickly build this on top of our previous function. We just need to add a little catch for the case where the vector is already on axis (then it's ofcourse simply the identity matrix!)
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun sign (number)
     "returns 1 if positive or zero and -1 if negative.. Cant' find an ELisp function that does this"
@@ -1947,11 +1947,15 @@ So given a vector and a coordinate axis we can quickly build this on top of our 
 
   (defun matrix-elementary-coordinate-reflector (column-vector coordinate-axis)
     "Build a matrix that will reflect the COLUMN-VECTOR on to the COORDINATE-AXIS"
-
-    (matrix-elementary-reflector (matrix-add column-vector
-                                             (matrix-scalar-product coordinate-axis
-                                                                    ( * (sign (matrix-get-value column-vector 0 0))
-                                                                        (matrix-column-2-norm column-vector))))))
+    (let ((vector-orthogonal-to-reflection-plane
+          (matrix-subtract column-vector
+                           (matrix-scalar-product coordinate-axis
+                                                  ( * (sign (matrix-get-value column-vector 0 0))
+                                                      (matrix-column-2-norm column-vector))))))
+      (cond (( = 0 ( matrix-column-2-norm vector-orthogonal-to-reflection-plane)) ;; when both vectors are the same
+             (matrix-identity (matrix-rows column-vector))) ;; then the reflector is the identity
+            (t
+             (matrix-elementary-reflector vector-orthogonal-to-reflection-plane)))))
 #+END_SRC
 
 #+END_SRC
