@@ -1958,7 +1958,120 @@ So given a vector and a coordinate axis we can quickly build this on top of our 
              (matrix-elementary-reflector vector-orthogonal-to-reflection-plane)))))
 #+END_SRC
 
+*** The QR decomposition - part 2
+So now we can build matrices that reflect vector onto axis. We need to leverage this to build the upper triangluar matrix *R* of the *QR*. If we directly start to zero out things column after column with reflectors like we did in the *LU* case we would get an equation of the form  *Q_{k}..Q_{2}Q_{1}A=R*. But the problem is that the *Q_{i}*'s are not as clean as row operations and the column of zeroes will not get preserved between reflections. In other words *Q_{1}* will reflect the first column onto *e_{1}*, but then the second reflector *Q_{2}* will reflect it away somewhere else and you will lose those zeroes. So we need to be a little more clever here and find a way to preserve these columns as we go forward.
+
+/p. 341/ shows how using block matrices we can write *Q_{2}* in such a way as to not disrupt the first column (Note that the book chooses to confusingly use the letter *R_{i}* where I'm using *Q_{i}*)
+
+\begin{equation}
+Q_{2}
+=
+\begin{bmatrix}
+1 & 0\\
+0 & S_{ n-1, m-1 }\\
+\end{bmatrix}
+\end{equation}
+
+This specially constructed *Q_{2}* will leave the first column untouched but will apply *S* on to a /submatrix/ of *Q_{1}A*. And *S* is just another reflector matrix, but it's one row/column smaller and it's job will be to  zero out the first column of that submatrix - which will be the /second/ column of *A*.
+
+It's interesting that this also leaves the first row of *Q_{1}A* untouched so there is also a pattern to how *R* emerges as we apply these special reflectors.
+
+On the next page (342) the book generalizes this trick to any dimension and shows you how to build this rest of the *Q_{i}* matrices - *Do not use this!!* There is a much better way!!
+
+Here we need to go a step further than the book to expose an elegance they miss. Imagine we had the full *QR* for the sub-matrix already somehow. In other words we had some smaller matrix *Q_{s}* that could triangularize the sub-matrix entirely in one go. Well with the help of the previous formula we can augment *Q_{s}*, combine it with our *Q_{1}* (b/c it handles the first column of *A*, the part not in the submatrix) and build our *Q* directly!
+
+\begin{equation}
+\begin{bmatrix}
+Q\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 0\\
+0 & Q_{s}\\
+\end{bmatrix}
+\begin{bmatrix}
+Q_{1}\\
+\end{bmatrix}
+\end{equation}
+
+
+\begin{equation}
+\begin{bmatrix}
+1 & 0\\
+0 & Q_{s}\\
+\end{bmatrix}
+\begin{bmatrix}
+Q_{1}\\
+\end{bmatrix}
+\begin{bmatrix}
+A\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+R\\
+\end{bmatrix}
+\end{equation}
+
+But we don't have the *QR* for this submatrix yet! ie. no *Q_{s}*, so to get it we need to start this method over again, but now working on this smaller submatrix. And a method that invokes itself is really just a recursive function! Each time the method calls itself the problem get smaller and the submatrices are one column and row shorter. Once we hit a simple column or row vector the *QR* decomposition becomes apparent. Then going back up we know how to combine the smaller *QR* which each steps reflector to build up the finally *Q* matrix for *A*.
+
+*R* is built up similarly in parallel
+
+#+BEGIN_QUOTE
+B/c of inadequacies of my matrix format and the minimal array of helper functions this is a bit longer than it really should be.
+#+END_QUOTE
+#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+  (defun matrix-add-zero-column-data (data-list columns)
+    "Adds a zero column to the front of a matrix data list. Provide the amount of COLUMNS on input"
+    (cond ((not data-list) '())
+          (t (append (cons 0.0 (seq-take data-list columns))
+                     (matrix-add-zero-column-data (seq-subseq data-list columns) columns)))))
+
+  (defun matrix-raise-rank-Q (matrix)
+    "Adds a row and column of zeroes in at the top left corner. And a one in position 0,0"
+    (let ((rank (matrix-rows matrix))) ;; Q is always square
+      (matrix-from-data-list (1+ rank)
+                             (1+ rank)
+                             (append (cons 1.0 (make-list rank 0.0))
+                                     (matrix-add-zero-column-data (matrix-data matrix)
+                                                                  rank)))))
+
+  (defun matrix-build-R (sub-R intermediate-matrix)
+    "Insets SUB-R into INTERMEDIATE-MATRIX so that only the first row and columns are preserved"
+    (matrix-from-data-list (matrix-rows intermediate-matrix)
+                           (matrix-columns intermediate-matrix)
+                           (append (seq-take (matrix-data intermediate-matrix)
+                                             (matrix-columns intermediate-matrix))
+                                   (matrix-add-zero-column-data (matrix-data sub-R)
+                                                                (matrix-columns sub-R)))))
+
+
+  (defun matrix-householder-QR (matrix)
+    "Use reflection matrices to build the QR matrix"
+    (let* ((reflector-matrix (matrix-elementary-coordinate-reflector (matrix-get-column matrix 0)
+                                                                     (matrix-unit-column 0 (matrix-rows matrix))))
+           (intermediate-matrix (matrix-product reflector-matrix
+                                                matrix)))
+      (cond (( = (matrix-columns matrix) 1)
+             (list reflector-matrix intermediate-matrix))
+            (( = (matrix-rows matrix) 1)
+             (list reflector-matrix intermediate-matrix))
+            (t
+             (let* ((submatrix (matrix-submatrix intermediate-matrix
+                                                 1
+                                                 1
+                                                 (matrix-rows intermediate-matrix)
+                                                 (matrix-columns intermediate-matrix)))
+                    (submatrix-QR (matrix-householder-QR submatrix)))
+               (let ((sub-Q (first submatrix-QR))
+                     (sub-R (second submatrix-QR)))
+                 (list (matrix-product (matrix-raise-rank-Q sub-Q)
+                                       reflector-matrix)
+                       (matrix-build-R sub-R
+                                       intermediate-matrix))))))))
+
+  )
 #+END_SRC
+ In some ways this method is nicer than Gram-Schmidt b/c the goal is more direct - to zero out the columns; and the mthod is very clean and recursive. However the end result is harder to interpret. *Q* is now a product of reflectors each working on a different dimensions. It's easy to see why it's orthonormal, but what this final product signifies is not as clear as with Gram Schmidt. B/c both methods produce the same result we can use both to glean insight.
 * TODOs
 - Write a better example that I can expand on easily later
 - Implement the Sherman-Morrison update formula
