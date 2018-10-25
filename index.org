@@ -1933,7 +1933,7 @@ So given a vector and a coordinate axis we can quickly build this on top of our 
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun sign (number)
     "returns 1 if positive or zero and -1 if negative.. Cant' find an ELisp function that does this"
-    (cond ((= number 0) 1)
+    (cond ((= number 0.0) 1.0)
           (t (/ number (abs number)))))
 
   (defun matrix-elementary-coordinate-reflector (column-vector coordinate-axis)
