@@ -1928,8 +1928,9 @@ The =sign(x_{1})= is a bit confusion for me to think about... If you stick to *u
 So given a vector and a coordinate axis we can quickly build this on top of our previous function
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
   (defun sign (number)
-    "returns 1 if positive and -1 if negative.. Cant' find an ELisp function that does this"
-    (/ number (abs number)))
+    "returns 1 if positive or zero and -1 if negative.. Cant' find an ELisp function that does this"
+    (cond ((= number 0) 1)
+          (t (/ number (abs number)))))
 
   (defun matrix-elementary-coordinate-reflector (column-vector coordinate-axis)
     "Build a matrix that will reflect the COLUMN-VECTOR on to the COORDINATE-AXIS"
