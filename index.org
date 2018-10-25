@@ -1579,26 +1579,35 @@ This already at face value seems like something that could prove to be useful. A
 *** The Base case
 We will see that the procedure builds the new basis incrementally one basis vector at a time. And that if we've built a basis for *n* independent vectors, then adding an *n+1*'th vector will be very easy. So first we look at the simplest case of just one vector (that's.. independent b/c it's just all alone). To make an orthonormal basis for one vector you just normalizes it. Bare in mind that both the vector and the new basis span the same space
 #+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
+
+  (defun matrix-column-2-norm-squared (column)
+     "get the inner product of a column with itself to get its 2-norm"
+     (matrix-inner-product (matrix-transpose column) column))
+
   (defun matrix-column-2-norm (column)
-    "takes the inner product of a column with itself to get its 2-norm"
-    (matrix-inner-product (matrix-transpose column) column))
+     "get the 2-norm of a column-vector"
+     (sqrt (matrix-column-2-norm-squared column)))
 
-  (defun matrix-normalize-column (column)
-    "takes a column and returns a normalized copy"
-      (matrix-scalar-product 
-       column 
-       (/ 1.0 (sqrt (matrix-column-2-norm column)))))
+   (defun matrix-normalize-column (column)
+     "takes a column and returns a normalized copy"
+       (matrix-scalar-product
+        column
+        (/ 1.0 (matrix-column-2-norm column))))
 
 
-  (defun matrix-row-2-norm (row)
-    "takes the inner product of a column with itself to get its 2-norm"
-    (matrix-inner-product row (matrix-transpose row)))
+   (defun matrix-row-2-norm-squared (row)
+     "takes the inner product of a column with itself to get its 2-norm"
+     (matrix-inner-product row (matrix-transpose row)))
 
-  (defun matrix-normalize-row (row)
-    "takes a column and returns a normalized copy"
-      (matrix-scalar-product 
-       row 
-       (/ 1.0 (sqrt (matrix-row-2-norm row)))))
+   (defun matrix-row-2-norm (row)
+     "get the 2-norm of a column-vector"
+     (sqrt (matrix-row-2-norm-squared row)))
+
+   (defun matrix-normalize-row (row)
+     "takes a column and returns a normalized copy"
+       (matrix-scalar-product
+        row
+        (/ 1.0 (matrix-row-2-norm row))))
 #+END_SRC
 *** Recursive Step
 The recursive step describes how to expand your basis when you're given a new independent vector - ie. one that's not in its span - so that the new basis includes this vector. I think it's not immediately obvious, but this will always involve adding just one additional vector to the basis
@@ -1860,7 +1869,7 @@ The diagonal values are just scalars, but they still remain rather awkward. Howe
            (list
             (matrix-normalize-row A-transpose) ;; starting Q "matrix"
             (matrix-scalar-product (matrix-unit-row 0 dimension) ;; starting R "matrix"
-                                   (matrix-row-2-norm A-transpose))))
+                                   (matrix-row-2-norm-squared A-transpose))))
           (t ;;recursive case
            (let* ((QTRT (matrix-QR-decomposition-rec
                          (matrix-submatrix A-transpose
@@ -1883,7 +1892,7 @@ The diagonal values are just scalars, but they still remain rather awkward. Howe
                                           (matrix-build-R-column
                                            new-basis
                                            next-column
-                                           (matrix-row-2-norm orthogonal-component)
+                                           (matrix-row-2-norm-squared orthogonal-component)
                                            dimension)))))
              (list new-basis new-RT)))))
 
@@ -1914,7 +1923,7 @@ In matrix form we'd factor out the *x* and get *(I-2uu^t/u^tu)x*
     (let ((dimension (matrix-rows column-vector)))
       (matrix-subtract (matrix-identity dimension)
                        (matrix-scalar-product (matrix-product column-vector (matrix-transpose column-vector))
-                                              (/ 2 (matrix-column-2-norm column-vector))))))
+                                              (/ 2 (matrix-column-2-norm-squared column-vector))))))
 #+END_SRC
 *** elementary coordinate reflector
 To build an upper triangular matrix we need to zero out values below the diagonal. The way we're going to do is by reflecting those columns onto coordinate axis. One a vector is on a coordinate axis then it's other components are naturally zero!
