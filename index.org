@@ -1,10 +1,10 @@
-#+TITLE: Linear Systems in Lisp
+#+TITLE: Linear Systems - Part 1: ELisp
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../static/worg.css" />
 #+options: num:nil
 # This will export a README.org file for Github, so that people that land in my repo know where to find the relevant webpage
 #+HTML_MATHJAX: path: "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"
 #+BEGIN_SRC org :tangle README.org :exports none :eval never
-  see description [[http://geokon-gh.github.io/linearsystems/index.html][here]]
+  see description [[http://geokon-gh.github.io/linearsystems-part1/index.html][here]]
 #+END_SRC
 
 * Preface
