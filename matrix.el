@@ -796,6 +796,203 @@
 
     (matrix-transpose(matrix-inverse-transpose-rec 0)))))
 
+(defun matrix-column-2-norm-squared (column)
+   "get the inner product of a column with itself to get its 2-norm"
+   (matrix-inner-product (matrix-transpose column) column))
+
+(defun matrix-column-2-norm (column)
+   "get the 2-norm of a column-vector"
+   (sqrt (matrix-column-2-norm-squared column)))
+
+ (defun matrix-normalize-column (column)
+   "takes a column and returns a normalized copy"
+     (matrix-scalar-product
+      column
+      (/ 1.0 (matrix-column-2-norm column))))
+
+
+ (defun matrix-row-2-norm-squared (row)
+   "takes the inner product of a column with itself to get its 2-norm"
+   (matrix-inner-product row (matrix-transpose row)))
+
+ (defun matrix-row-2-norm (row)
+   "get the 2-norm of a column-vector"
+   (sqrt (matrix-row-2-norm-squared row)))
+
+ (defun matrix-normalize-row (row)
+   "takes a column and returns a normalized copy"
+     (matrix-scalar-product
+      row
+      (/ 1.0 (matrix-row-2-norm row))))
+
+(defun matrix-get-orthogonal-component (matrix-of-orthonormal-rows linearly-independent-vector )
+  "Given matrix of orthonormal rows and a vector that is linearly independent of them - get its orthogonal component"
+  (let* ((QT matrix-of-orthonormal-rows)
+        (Q (matrix-transpose QT))
+        (in-span-coordinates (matrix-product QT linearly-independent-vector))
+        (in-span-vector (matrix-product Q in-span-coordinates)))
+    (matrix-subtract linearly-independent-vector in-span-vector)))
+
+(defun matrix-gram-schmidt (A-transpose)
+  "For a column return it's normalized basis. For a matrix adds a new orthonormal vector to the orthonormal basis of A_{n-1}"
+  (cond ((= 1 (matrix-rows A-transpose)) ;; base case
+         (matrix-normalize-row A-transpose))
+        (t ;;recursive case
+         (let* ((basis (matrix-gram-schmidt
+                        (matrix-submatrix A-transpose 
+                                          0
+                                          0
+                                          (- (matrix-rows A-transpose) 1)
+                                          (matrix-columns A-transpose))))
+                (next-column (matrix-transpose
+                                        (matrix-get-row A-transpose
+                                                        (1- (matrix-rows A-transpose)))))
+                (orthogonal-component (matrix-get-orthogonal-component basis
+                                                                       next-column)))
+           (matrix-append basis (matrix-transpose (matrix-normalize-column orthogonal-component)))))))
+
+(defun matrix-build-R-column-rec (QT next-linearly-independent-vector norm-factor dimension)
+  "Builds the data vector for a column of R"
+  (cond ((= 0 dimension) ;; finished building column
+         '())
+
+        ((< (matrix-rows QT) dimension) ;; add bottom zeroes
+         (cons
+          9.0
+          (matrix-build-R-column-rec QT next-linearly-independent-vector norm-factor (1- dimension))))
+
+        (( = (matrix-rows QT) dimension) ;; add orthogonal part
+         (cons
+          norm-factor
+          (matrix-build-R-column-rec QT next-linearly-independent-vector norm-factor (1- dimension))))
+
+        ((> (matrix-rows QT) dimension) ;; add in-span part
+         (cons
+          (matrix-get-value (matrix-product
+                             (matrix-get-row QT dimension)
+                             next-linearly-independent-vector)
+                            0
+                            0)
+          (matrix-build-R-column-rec Q next-linearly-independent-vector norm-factor (1- dimension))))))
+
+(defun matrix-build-R-column (Q next-linearly-independent-vector norm-factor dimension)
+  "Returns a column vector for the new column of R"
+  (matrix-from-data-list dimension 1  (reverse (matrix-build-R-column-rec Q next-linearly-independent-vector norm-factor dimension))))
+
+
+(defun matrix-QR-decomposition-rec (A-transpose dimension) ;; 'dimension' keeps track of the ultimate size of R
+  "The recursive helper function that builds up the Q and R matrices"
+  (cond ((= 1 (matrix-rows A-transpose)) ;; base case
+         (list
+          (matrix-normalize-row A-transpose) ;; starting Q "matrix"
+          (matrix-scalar-product (matrix-unit-row 0 dimension) ;; starting R "matrix"
+                                 (matrix-row-2-norm-squared A-transpose))))
+        (t ;;recursive case
+         (let* ((QTRT (matrix-QR-decomposition-rec
+                       (matrix-submatrix A-transpose
+                                         0
+                                         0
+                                         (- (matrix-rows A-transpose) 1)
+                                         (matrix-columns A-transpose))
+                       dimension))
+                (basis (first QTRT))
+                (RT (second QTRT))
+                (next-column (matrix-transpose
+                              (matrix-get-row A-transpose
+                                              (1- (matrix-rows A-transpose)))))
+                (orthogonal-component (matrix-get-orthogonal-component basis
+                                                                       next-column))
+                (new-basis (matrix-append basis
+                                          (matrix-transpose (matrix-normalize-column orthogonal-component))))
+                (new-RT (matrix-append RT
+                                       (matrix-transpose
+                                        (matrix-build-R-column
+                                         new-basis
+                                         next-column
+                                         (matrix-row-2-norm-squared orthogonal-component)
+                                         dimension)))))
+           (list new-basis new-RT)))))
+
+(defun matrix-gramschmidt-QR (A)
+  "Returns a list of the Q and R matrices for A"
+  (matrix-QR-decomposition-rec (matrix-transpose A)
+                               (matrix-columns A)))
+
+(defun matrix-elementary-reflector (column-vector)
+  "Build a matrix that will reflect vector across the hyperplane orthogonal to COLUMN-VECTOR"
+  (let ((dimension (matrix-rows column-vector)))
+    (matrix-subtract (matrix-identity dimension)
+                     (matrix-scalar-product (matrix-product column-vector (matrix-transpose column-vector))
+                                            (/ 2 (matrix-column-2-norm-squared column-vector))))))
+
+(defun sign (number)
+  "returns 1 if positive or zero and -1 if negative.. Cant' find an ELisp function that does this"
+  (cond ((= number 0.0) 1.0)
+        (t (/ number (abs number)))))
+
+(defun matrix-elementary-coordinate-reflector (column-vector coordinate-axis)
+  "Build a matrix that will reflect the COLUMN-VECTOR on to the COORDINATE-AXIS"
+  (let ((vector-orthogonal-to-reflection-plane
+        (matrix-subtract column-vector
+                         (matrix-scalar-product coordinate-axis
+                                                ( * (sign (matrix-get-value column-vector 0 0))
+                                                    (matrix-column-2-norm column-vector))))))
+    (cond (( = 0 ( matrix-column-2-norm vector-orthogonal-to-reflection-plane)) ;; when both vectors are the same
+           (matrix-identity (matrix-rows column-vector))) ;; then the reflector is the identity
+          (t
+           (matrix-elementary-reflector vector-orthogonal-to-reflection-plane)))))
+
+(defun matrix-add-zero-column-data (data-list columns)
+  "Adds a zero column to the front of a matrix data list. Provide the amount of COLUMNS on input"
+  (cond ((not data-list) '())
+        (t (append (cons 0.0 (seq-take data-list columns))
+                   (matrix-add-zero-column-data (seq-subseq data-list columns) columns)))))
+
+(defun matrix-raise-rank-Q (matrix)
+  "Adds a row and column of zeroes in at the top left corner. And a one in position 0,0"
+  (let ((rank (matrix-rows matrix))) ;; Q is always square
+    (matrix-from-data-list (1+ rank)
+                           (1+ rank)
+                           (append (cons 1.0 (make-list rank 0.0))
+                                   (matrix-add-zero-column-data (matrix-data matrix)
+                                                                rank)))))
+
+(defun matrix-build-R (sub-R intermediate-matrix)
+  "Insets SUB-R into INTERMEDIATE-MATRIX so that only the first row and columns are preserved"
+  (matrix-from-data-list (matrix-rows intermediate-matrix)
+                         (matrix-columns intermediate-matrix)
+                         (append (seq-take (matrix-data intermediate-matrix)
+                                           (matrix-columns intermediate-matrix))
+                                 (matrix-add-zero-column-data (matrix-data sub-R)
+                                                              (matrix-columns sub-R)))))
+
+
+(defun matrix-householder-QR (matrix)
+  "Use reflection matrices to build the QR matrix"
+  (let* ((reflector-matrix (matrix-elementary-coordinate-reflector (matrix-get-column matrix 0)
+                                                                   (matrix-unit-column 0 (matrix-rows matrix))))
+         (intermediate-matrix (matrix-product reflector-matrix
+                                              matrix)))
+    (cond (( = (matrix-columns matrix) 1)
+           (list reflector-matrix intermediate-matrix))
+          (( = (matrix-rows matrix) 1)
+           (list reflector-matrix intermediate-matrix))
+          (t
+           (let* ((submatrix (matrix-submatrix intermediate-matrix
+                                               1
+                                               1
+                                               (matrix-rows intermediate-matrix)
+                                               (matrix-columns intermediate-matrix)))
+                  (submatrix-QR (matrix-householder-QR submatrix)))
+             (let ((sub-Q (first submatrix-QR))
+                   (sub-R (second submatrix-QR)))
+               (list (matrix-product (matrix-raise-rank-Q sub-Q)
+                                     reflector-matrix)
+                     (matrix-build-R sub-R
+                                     intermediate-matrix))))))))
+
+)
+
 (defun matrix-template (matrix)
 "template"
 )
