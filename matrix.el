@@ -1,4 +1,3 @@
-
 (defun matrix-from-data-list (number-of-rows number-of-columns data-list)
   "Builds a matrix from a data list"
   (list 
@@ -265,7 +264,7 @@
           rank
           row
           (1+ column))))))
-  
+
   (matrix-from-data-list rank rank (matrix-build-identity-rec rank 0 0 )))
 
 (defun matrix-unit-rowcol-data (index size)
@@ -636,7 +635,7 @@
             (matrix-invert-elementary-lower-triangular (first current-column-reduction-matrices)))
            (third current-column-reduction-matrices)    ; the further reduced matrix
            (1+ column-to-reduce))))))
-    
+
     (matrix-PLU-decomposition-rec
      (matrix-identity rank)
      (matrix-identity rank)
