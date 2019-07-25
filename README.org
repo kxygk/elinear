@@ -1,4 +1,4 @@
-#+TITLE: Linear Systems in ELisp
+#+TITLE: Elinear: linear algebra basics in Clojure
 #+DESCRIPTION: Linear algebra system in ELisp from the basics
 
 #+EXPORT_FILE_NAME: index.html
