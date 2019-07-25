@@ -1,4 +1,4 @@
-#+TITLE: Linear Systems - Part 1: ELisp
+#+TITLE: Linear Systems in ELisp
 #+DESCRIPTION: Linear algebra system in ELisp from the basics
 
 #+EXPORT_FILE_NAME: index.html
