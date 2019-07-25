@@ -10,6 +10,7 @@
 #+HTML_MATHJAX: path: "../MathJax/MathJax.js?config=TeX-AMS_CHTML"
 #+OPTIONS: html-style:nil
 #+OPTIONS: num:nil
+#+OPTIONS: html-scripts:nil
 
 * Preface
 This text is primarily my personal notes on linear algebra as I go through [[https://www.matrixanalysis.com][Matrix Analysis & Applied Linear Algebra]]. At the same time this document is a literate program that can be executed in Emacs so the text will be slowly building up a linear algebra library of sorts. This will often not match the order things are presented in the book. There is no emphasis on performance - just on clarity, extensability and correctness when possible. This is purely (self)educational with my primary motivation being to help me better understand what I learn (through having to explain it) and to sanity check with actual programs. Things that are adequately explained in the book will not be repeated here.
