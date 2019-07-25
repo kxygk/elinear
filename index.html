@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-03-01 五 18:50 -->
+<!-- 2019-07-25 Thu 09:34 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Linear Systems - Part 1: ELisp</title>
@@ -9,7 +9,8 @@
 <meta name="author" content="George Kontsevich">
 <meta name="description" content="Linear algebra system in ELisp from the basics"
 >
-<link rel="stylesheet" type="text/css" href="../static/worg.css" />
+<link rel="stylesheet" type="text/css" href="../web/worg.css" />
+<link rel="shortcut icon" href="../web/panda.svg" type="image/x-icon">
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -77,7 +78,7 @@ for the JavaScript code in this tag.
 });
 </script>
 <script type="text/javascript"
-        src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+        src="../MathJax/MathJax.js?config=TeX-AMS_CHTML"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -90,111 +91,111 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org4480e7b">Preface</a></li>
-<li><a href="#orgf978b37">Systems of linear equations</a>
+<li><a href="#org5c8d7e4">Preface</a></li>
+<li><a href="#org9c85135">Systems of linear equations</a>
 <ul>
-<li><a href="#org4f386a3">A farming problem</a></li>
+<li><a href="#org233c22d">A farming problem</a></li>
 </ul>
 </li>
-<li><a href="#orgaf970a8">Matices as representations of linear systems</a>
+<li><a href="#org11444a1">Matices as representations of linear systems</a>
 <ul>
-<li><a href="#orgad6ddd3">The Matrix in the computer</a>
+<li><a href="#org03c5d1c">The Matrix in the computer</a>
 <ul>
-<li><a href="#orge0587ac">Some helpers</a></li>
+<li><a href="#org4457e4d">Some helpers</a></li>
 </ul>
 </li>
-<li><a href="#org1787a1b">Transposition: Getting the other equivalent matrix</a></li>
+<li><a href="#orgbf052cd">Transposition: Getting the other equivalent matrix</a></li>
 </ul>
 </li>
-<li><a href="#orgeba3cb0">Representing the whole system of equations</a>
+<li><a href="#org980136f">Representing the whole system of equations</a>
 <ul>
-<li><a href="#org5cc021d">Matrix Multiplication</a>
+<li><a href="#orgef60adb">Matrix Multiplication</a>
 <ul>
-<li><a href="#org2f983b6">Inner Product</a></li>
-<li><a href="#org52eacc2">Submatrices</a></li>
-<li><a href="#org6280748">Matrix Product</a></li>
-<li><a href="#org55a6a16">Matrix Conformability</a></li>
-<li><a href="#orgc49d632">Addendum: Scalar Product</a></li>
+<li><a href="#org61a7587">Inner Product</a></li>
+<li><a href="#orgd80d3a4">Submatrices</a></li>
+<li><a href="#orge2bc209">Matrix Product</a></li>
+<li><a href="#orgba005a6">Matrix Conformability</a></li>
+<li><a href="#orga8d09ca">Addendum: Scalar Product</a></li>
 </ul>
 </li>
-<li><a href="#org8f52216">A system of equations as matrix product</a>
+<li><a href="#org3d1cdb0">A system of equations as matrix product</a>
 <ul>
-<li><a href="#org278aa10">The mirror universe</a></li>
+<li><a href="#orgdb51674">The mirror universe</a></li>
 </ul>
 </li>
-<li><a href="#orgb59fe3b">Chaining problems through matrix composition</a>
+<li><a href="#orgb5ef2b4">Chaining problems through matrix composition</a>
 <ul>
-<li><a href="#org331b73f">Taxing our farmers</a></li>
-<li><a href="#orgf2fa29d">EXAMPLE: Geometrical transformations</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#orga7510d7">Equivalent matrices</a>
-<ul>
-<li><a href="#org0d5a5eb">Identity Matrix</a></li>
-<li><a href="#org4e0923f">Unit Column/Rows</a></li>
-<li><a href="#orgd878935">Addition</a></li>
-<li><a href="#orga6f64b7">Elementary Matrices</a>
-<ul>
-<li><a href="#orge7cf9c1">Type I - Row/Column Interchange</a></li>
-<li><a href="#org8cef36b">Type II - Row/Column Multiple</a></li>
-<li><a href="#orgcb40054">Type III - Row/Column Addition</a></li>
+<li><a href="#orgf0bb38d">Taxing our farmers</a></li>
+<li><a href="#orga66c5fe">EXAMPLE: Geometrical transformations</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org6332a18">The LU Decomposition</a>
+<li><a href="#orgf74d2cc">Equivalent matrices</a>
 <ul>
-<li><a href="#org2144d35">Gaussian elimination in matrix form</a>
+<li><a href="#org83c506a">Identity Matrix</a></li>
+<li><a href="#orgf9fb896">Unit Column/Rows</a></li>
+<li><a href="#orga196198">Addition</a></li>
+<li><a href="#orgf298b5f">Elementary Matrices</a>
 <ul>
-<li><a href="#org970cf5e">Elementary Lower Triangular Matrics</a></li>
-<li><a href="#orgd684340">Building the <b>L</b> Matrix</a></li>
-<li><a href="#org9512832">Partial Pivoting</a></li>
-<li><a href="#org68288f0">Extracting the pivots</a></li>
-</ul>
-</li>
-<li><a href="#orgbf60696">Using the LU</a>
-<ul>
-<li><a href="#org7114e64">Solving for x in Ax=b</a></li>
-<li><a href="#org8cf99fe">The LDU Decomposition</a></li>
-<li><a href="#org37e9c7e">The Cholesky Decomposition</a></li>
-<li><a href="#org822a79e">Solving for A<sup>-1</sup></a></li>
-<li><a href="#orgd2098b9">Least Squares</a></li>
+<li><a href="#org821811a">Type I - Row/Column Interchange</a></li>
+<li><a href="#org3932f6a">Type II - Row/Column Multiple</a></li>
+<li><a href="#org48f05e1">Type III - Row/Column Addition</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org40a4579">The QR Decomposition</a>
+<li><a href="#orgfb7c741">The LU Decomposition</a>
 <ul>
-<li><a href="#org1c28059">The Gram-Schmidt procedure</a>
+<li><a href="#orgf61be81">Gaussian elimination in matrix form</a>
 <ul>
-<li><a href="#org5e741bd">The Base case</a></li>
-<li><a href="#org4a68461">Recursive Step</a></li>
+<li><a href="#org777cdf0">Elementary Lower Triangular Matrics</a></li>
+<li><a href="#orgb0b01e4">Building the <b>L</b> Matrix</a></li>
+<li><a href="#orgddc5d76">Partial Pivoting</a></li>
+<li><a href="#org6308a94">Extracting the pivots</a></li>
 </ul>
 </li>
-<li><a href="#orgbff5040">Decomposing</a></li>
-<li><a href="#org83aec0c">The Householder reduction</a>
+<li><a href="#orgca8c625">Using the LU</a>
 <ul>
-<li><a href="#org000d239">elementary reflector</a></li>
-<li><a href="#org52150dd">elementary coordinate reflector</a></li>
-<li><a href="#org0477edc">The QR decomposition - part 2</a></li>
+<li><a href="#org28d2038">Solving for x in Ax=b</a></li>
+<li><a href="#org8f860a4">The LDU Decomposition</a></li>
+<li><a href="#orgee8d8ec">The Cholesky Decomposition</a></li>
+<li><a href="#org1b6c830">Solving for A<sup>-1</sup></a></li>
+<li><a href="#org827e162">Least Squares</a></li>
 </ul>
 </li>
-<li><a href="#org03d1624">Givens reduction</a></li>
-<li><a href="#orgf6722d5">Least Squares again</a></li>
 </ul>
 </li>
-<li><a href="#orgd3d56d0"><span class="todo TODO">TODO</span> s</a></li>
-<li><a href="#org3dd4f1c">SRC<sub>Block</sub> template</a></li>
-<li><a href="#org542c72e">End</a></li>
+<li><a href="#org5a07452">The QR Decomposition</a>
+<ul>
+<li><a href="#orgee68f4b">The Gram-Schmidt procedure</a>
+<ul>
+<li><a href="#org2dddaa0">The Base case</a></li>
+<li><a href="#orgef60609">Recursive Step</a></li>
+</ul>
+</li>
+<li><a href="#orgd00d919">Decomposing</a></li>
+<li><a href="#orgcc0c29e">The Householder reduction</a>
+<ul>
+<li><a href="#orge10dacb">elementary reflector</a></li>
+<li><a href="#org6a9bf8c">elementary coordinate reflector</a></li>
+<li><a href="#orgd339002">The QR decomposition - part 2</a></li>
+</ul>
+</li>
+<li><a href="#org5d57956">Givens reduction</a></li>
+<li><a href="#org13bdcab">Least Squares again</a></li>
+</ul>
+</li>
+<li><a href="#org815586f"><span class="todo TODO">TODO</span> s</a></li>
+<li><a href="#org706a91d">SRC<sub>Block</sub> template</a></li>
+<li><a href="#orgb1ff192">End</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org4480e7b" class="outline-2">
-<h2 id="org4480e7b">Preface</h2>
-<div class="outline-text-2" id="text-org4480e7b">
+<div id="outline-container-org5c8d7e4" class="outline-2">
+<h2 id="org5c8d7e4">Preface</h2>
+<div class="outline-text-2" id="text-org5c8d7e4">
 <p>
 This text is primarily my personal notes on linear algebra as I go through <a href="https://www.matrixanalysis.com">Matrix Analysis &amp; Applied Linear Algebra</a>. At the same time this document is a literate program that can be executed in Emacs so the text will be slowly building up a linear algebra library of sorts. This will often not match the order things are presented in the book. There is no emphasis on performance - just on clarity, extensability and correctness when possible. This is purely (self)educational with my primary motivation being to help me better understand what I learn (through having to explain it) and to sanity check with actual programs. Things that are adequately explained in the book will not be repeated here.
 </p>
@@ -209,16 +210,16 @@ This is very much a work in progress and will change often&#x2026;
 </div>
 </div>
 
-<div id="outline-container-orgf978b37" class="outline-2">
-<h2 id="orgf978b37">Systems of linear equations</h2>
-<div class="outline-text-2" id="text-orgf978b37">
+<div id="outline-container-org9c85135" class="outline-2">
+<h2 id="org9c85135">Systems of linear equations</h2>
+<div class="outline-text-2" id="text-org9c85135">
 <p>
 The book's opening problem from ancient China of calculating the price of bushels of crop serves as a good example of a linear problem. I've simplified the problem a bit for clarity - but I will expand on it and refer back to it extensively:
 </p>
 </div>
-<div id="outline-container-org4f386a3" class="outline-3">
-<h3 id="org4f386a3">A farming problem</h3>
-<div class="outline-text-3" id="text-org4f386a3">
+<div id="outline-container-org233c22d" class="outline-3">
+<h3 id="org233c22d">A farming problem</h3>
+<div class="outline-text-3" id="text-org233c22d">
 <blockquote>
 <p>
 You have a 3 fruit farms in a region of ancient China. In a given year:
@@ -273,9 +274,9 @@ We are looking for the input fruit-prices that will yield the given profits for 
 </div>
 </div>
 
-<div id="outline-container-orgaf970a8" class="outline-2">
-<h2 id="orgaf970a8">Matices as representations of linear systems</h2>
-<div class="outline-text-2" id="text-orgaf970a8">
+<div id="outline-container-org11444a1" class="outline-2">
+<h2 id="org11444a1">Matices as representations of linear systems</h2>
+<div class="outline-text-2" id="text-org11444a1">
 <p>
 The <b>linear system</b> can be represented with a matrix
 </p>
@@ -301,9 +302,9 @@ We prefer the first representation, but both ways work as long as you remember w
 </p>
 </div>
 
-<div id="outline-container-orgad6ddd3" class="outline-3">
-<h3 id="orgad6ddd3">The Matrix in the computer</h3>
-<div class="outline-text-3" id="text-orgad6ddd3">
+<div id="outline-container-org03c5d1c" class="outline-3">
+<h3 id="org03c5d1c">The Matrix in the computer</h3>
+<div class="outline-text-3" id="text-org03c5d1c">
 <p>
 Once we've chosen a layout the easiest way to store the matrix in the computer is to remember 3 values: <code>number-of-rows</code> <code>number-of-columns</code> <code>data</code>
 </p>
@@ -312,8 +313,8 @@ Once we've chosen a layout the easiest way to store the matrix in the computer i
 The <code>data</code> value will be a long list of size <code>num-row * num-col</code> that contains all the values of the matrix; row after row. So given a list <code>data</code> and a pair of sizes we simply build the matrix into a list of these three values: 
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-from-data-list</span> (number-of-rows number-of-columns data-list<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Builds a matrix from a data list"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-from-data-list</span> (number-of-rows number-of-columns data-list<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Builds a matrix from a data list"</span>
   (list 
    number-of-rows 
    number-of-columns 
@@ -321,24 +322,24 @@ The <code>data</code> value will be a long list of size <code>num-row * num-col<
 </pre>
 </div>
 </div>
-<div id="outline-container-orge0587ac" class="outline-4">
-<h4 id="orge0587ac">Some helpers</h4>
-<div class="outline-text-4" id="text-orge0587ac">
+<div id="outline-container-org4457e4d" class="outline-4">
+<h4 id="org4457e4d">Some helpers</h4>
+<div class="outline-text-4" id="text-org4457e4d">
 <p>
 With a couple of helper function we can get back these 3 fields. This will improve the readability of the code as we go along
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-rows</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Get the number of rows"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-rows</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Get the number of rows"</span>
   (nth 0 matrix<span style="color: #999999;">))</span>
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-columns</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Get the number of columns"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-columns</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Get the number of columns"</span>
   (nth 1 matrix<span style="color: #999999;">))</span>
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-data</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Get the data list from the matrix"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-data</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Get the data list from the matrix"</span>
   (nth 2 matrix<span style="color: #999999;">))</span>
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-get-value</span> (matrix row column<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Get the scalar value at position ROW COLUMN (ZERO indexed) from MATRIX"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-get-value</span> (matrix row column<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Get the scalar value at position ROW COLUMN (ZERO indexed) from MATRIX"</span>
   (nth
    (+
     column
@@ -357,34 +358,34 @@ With a couple of helper function we can get back these 3 fields. This will impro
 For debugging and looking at results we also need to be able to print out the matrix for inspection
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-data-get-first-n-values</span> (data n<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Given a list of values, get the first n in a string"</span>
-  (<span style="color: #00af00;">if</span> (zerop n<span style="color: #999999;">)</span>
-      <span style="color: #ff1f8b;">""</span> <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">base case</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-data-get-first-n-values</span> (data n<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Given a list of values, get the first n in a string"</span>
+  (<span style="color: #0000FF;">if</span> (zerop n<span style="color: #999999;">)</span>
+      <span style="color: #008000;">""</span> <span style="color: #8D8D84;">;</span><span style="color: #8D8D84; font-style: italic;">base case</span>
     (concat
      (number-to-string (car data<span style="color: #999999;">))</span>
-     <span style="color: #ff1f8b;">" "</span>
-     (matrix-data-get-first-n-values (cdr data) (1- n))))) <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">iterative step</span>
+     <span style="color: #008000;">" "</span>
+     (matrix-data-get-first-n-values (cdr data) (1- n))))) <span style="color: #8D8D84;">;</span><span style="color: #8D8D84; font-style: italic;">iterative step</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-data-print</span> (number-of-rows number-of-columns data<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Print out the data list gives the dimension of the original matrix"</span>
-  (<span style="color: #00af00;">if</span> (zerop number-of-rows<span style="color: #999999;">)</span>
-      <span style="color: #ff1f8b;">""</span> <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">base case</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-data-print</span> (number-of-rows number-of-columns data<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Print out the data list gives the dimension of the original matrix"</span>
+  (<span style="color: #0000FF;">if</span> (zerop number-of-rows<span style="color: #999999;">)</span>
+      <span style="color: #008000;">""</span> <span style="color: #8D8D84;">;</span><span style="color: #8D8D84; font-style: italic;">base case</span>
     (concat
      (matrix-data-get-first-n-values data number-of-columns<span style="color: #999999;">)</span>
-     <span style="color: #ff1f8b;">"\n"</span>
-     (matrix-data-print <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">iterative step</span>
+     <span style="color: #008000;">"\n"</span>
+     (matrix-data-print <span style="color: #8D8D84;">;</span><span style="color: #8D8D84; font-style: italic;">iterative step</span>
       (1- number-of-rows<span style="color: #999999;">)</span>
       number-of-columns
       (nthcdr number-of-columns data <span style="color: #999999;">)))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-print</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Print out the matrix"</span>
-  (concat <span style="color: #ff1f8b;">"\n"</span> (matrix-data-print
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-print</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Print out the matrix"</span>
+  (concat <span style="color: #008000;">"\n"</span> (matrix-data-print
                 (matrix-rows matrix<span style="color: #999999;">)</span>
                 (matrix-columns matrix<span style="color: #999999;">)</span>
                 (matrix-data matrix<span style="color: #999999;">))))</span>
-<span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">ex:  (message (matrix-print (matrix-from-data-list 2 2 '(1 2 3 4))))</span>
+<span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">ex:  (message (matrix-print (matrix-from-data-list 2 2 '(1 2 3 4))))</span>
 </pre>
 </div>
 <blockquote>
@@ -410,16 +411,16 @@ For debugging and looking at results we also need to be able to print out the ma
 </div>
 </div>
 </div>
-<div id="outline-container-org1787a1b" class="outline-3">
-<h3 id="org1787a1b">Transposition: Getting the other equivalent matrix</h3>
-<div class="outline-text-3" id="text-org1787a1b">
+<div id="outline-container-orgbf052cd" class="outline-3">
+<h3 id="orgbf052cd">Transposition: Getting the other equivalent matrix</h3>
+<div class="outline-text-3" id="text-orgbf052cd">
 <p>
 Since we have two equivalent matrices that represent our linear system we need a mechanism to go from one to the other. This method is the matrix transpose which flips the matrix along the diagonal. The text goes into depth on the properties of the matrix transpose, but in short, as long as you take the transpose of both sides of your equations equivalances will be preserved.
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-transpose</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Get the transpose of a matrix"</span>
-  (<span style="color: #00af00;">if</span> (equal (matrix-columns matrix) 1<span style="color: #999999;">)</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-transpose</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Get the transpose of a matrix"</span>
+  (<span style="color: #0000FF;">if</span> (equal (matrix-columns matrix) 1<span style="color: #999999;">)</span>
     (matrix-from-data-list
      1
      (matrix-rows matrix<span style="color: #999999;">)</span>
@@ -441,16 +442,16 @@ Since we have two equivalent matrices that represent our linear system we need a
 </div>
 </div>
 </div>
-<div id="outline-container-orgeba3cb0" class="outline-2">
-<h2 id="orgeba3cb0">Representing the whole system of equations</h2>
-<div class="outline-text-2" id="text-orgeba3cb0">
+<div id="outline-container-org980136f" class="outline-2">
+<h2 id="org980136f">Representing the whole system of equations</h2>
+<div class="outline-text-2" id="text-org980136f">
 <p>
 Now that we can represent the fruit/profits system we want a mechanism to represent the whole system of equations so that given a constraint, we can solve for a solution.
 </p>
 </div>
-<div id="outline-container-org5cc021d" class="outline-3">
-<h3 id="org5cc021d">Matrix Multiplication</h3>
-<div class="outline-text-3" id="text-org5cc021d">
+<div id="outline-container-orgef60adb" class="outline-3">
+<h3 id="orgef60adb">Matrix Multiplication</h3>
+<div class="outline-text-3" id="text-orgef60adb">
 <p>
 This is done notationally with matrix multiplication. The notation allows us to keep the two <b>Givens</b> separated and allows us to visually chain linear systems together. As a shorthand, we write the product of two matrices <code>A</code> and <code>B</code> as <code>AB = C</code>, with the order of <code>A</code> and <code>B</code> being important. For every value (at a given row and column position) in the resulting matrix <code>C</code> we take the equivalent row in <code>A</code> and multiply it by its equivalent column in <code>B</code>. From this we can conclude that <code>C</code> will have as many rows as <code>A</code> and as many column as <code>B</code>
 </p>
@@ -460,16 +461,16 @@ Multiplying a row times a column is called an <code>inner product</code>
 </p>
 </div>
 
-<div id="outline-container-org2f983b6" class="outline-4">
-<h4 id="org2f983b6">Inner Product</h4>
-<div class="outline-text-4" id="text-org2f983b6">
+<div id="outline-container-org61a7587" class="outline-4">
+<h4 id="org61a7587">Inner Product</h4>
+<div class="outline-text-4" id="text-org61a7587">
 <p>
 The <code>inner-product</code> is defined as the sum of the product of every pair of equivalent elements in the two vectors. The sum will naturally return one scalar value. This operation only makes sense if both the row and column have the same number of values.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-inner-product-data</span> (row-data column-data<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Multiply a row times a column and returns a scalar. If they're empty you will get zero"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-inner-product-data</span> (row-data column-data<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Multiply a row times a column and returns a scalar. If they're empty you will get zero"</span>
   (reduce
    '+
    (for-each-pair
@@ -477,8 +478,8 @@ The <code>inner-product</code> is defined as the sum of the product of every pai
     column-data
    '*<span style="color: #999999;">)))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-inner-product</span> (row column<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Multiply a row times a column and returns a scalar. If they're empty you will get zero"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-inner-product</span> (row column<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Multiply a row times a column and returns a scalar. If they're empty you will get zero"</span>
   (matrix-inner-product-data 
    (matrix-data row<span style="color: #999999;">)</span>
    (matrix-data column<span style="color: #999999;">)))</span>
@@ -492,16 +493,16 @@ The <code>inner-product</code> is defined as the sum of the product of every pai
 </div>
 </div>
 
-<div id="outline-container-org52eacc2" class="outline-4">
-<h4 id="org52eacc2">Submatrices</h4>
-<div class="outline-text-4" id="text-org52eacc2">
+<div id="outline-container-orgd80d3a4" class="outline-4">
+<h4 id="orgd80d3a4">Submatrices</h4>
+<div class="outline-text-4" id="text-orgd80d3a4">
 <p>
 To get rows and columns (and other submatrices) we need a few more helper functions
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-extract-subrow</span> (matrix row start-column end-column<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Get part of a row of a matrix and generate a row matrix from it. START-COLUMN is inclusive,  END-COLUMN is exclusive"</span>
-  (<span style="color: #00af00;">let</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-extract-subrow</span> (matrix row start-column end-column<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Get part of a row of a matrix and generate a row matrix from it. START-COLUMN is inclusive,  END-COLUMN is exclusive"</span>
+  (<span style="color: #0000FF;">let</span>
       ((number-of-columns-on-input (matrix-columns matrix<span style="color: #999999;">))</span>
        (number-of-columns-on-output (-
                                      end-column 
@@ -514,9 +515,9 @@ To get rows and columns (and other submatrices) we need a few more helper functi
       (+ (* row number-of-columns-on-input) start-column<span style="color: #999999;">)</span>
       (+ (* row number-of-columns-on-input) end-column<span style="color: #999999;">)))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-append</span> (matrix1 matrix2<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Append one matrix (set of linear equations) to another"</span>
-  (<span style="color: #00af00;">if</span> (null matrix2<span style="color: #999999;">)</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-append</span> (matrix1 matrix2<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Append one matrix (set of linear equations) to another"</span>
+  (<span style="color: #0000FF;">if</span> (null matrix2<span style="color: #999999;">)</span>
       matrix1
     (matrix-from-data-list
      (+
@@ -527,9 +528,9 @@ To get rows and columns (and other submatrices) we need a few more helper functi
       (matrix-data matrix1<span style="color: #999999;">)</span>
       (matrix-data matrix2<span style="color: #999999;">)))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-submatrix</span> (matrix start-row start-column end-row end-column<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Get a submatrix. start-row/column are inclusive. end-row/column are exclusive"</span>
-  (<span style="color: #00af00;">if</span> (equal start-row end-row<span style="color: #999999;">)</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-submatrix</span> (matrix start-row start-column end-row end-column<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Get a submatrix. start-row/column are inclusive. end-row/column are exclusive"</span>
+  (<span style="color: #0000FF;">if</span> (equal start-row end-row<span style="color: #999999;">)</span>
       '(<span style="color: #999999;">)</span>
     (matrix-append
      (matrix-extract-subrow matrix start-row start-column end-column<span style="color: #999999;">)</span>
@@ -540,16 +541,16 @@ To get rows and columns (and other submatrices) we need a few more helper functi
       end-row
       end-column<span style="color: #999999;">))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-get-row</span> (matrix row<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Get a row from a matrix. Index starts are ZERO"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-get-row</span> (matrix row<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Get a row from a matrix. Index starts are ZERO"</span>
   (matrix-extract-subrow
    matrix
    row
    0
    (matrix-columns matrix<span style="color: #999999;">)))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-get-column</span> (matrix column<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Get a column from a matrix. Index starts are ZERO"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-get-column</span> (matrix column<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Get a column from a matrix. Index starts are ZERO"</span>
   (matrix-submatrix
    matrix
    0
@@ -561,16 +562,16 @@ To get rows and columns (and other submatrices) we need a few more helper functi
 </div>
 </div>
 
-<div id="outline-container-org6280748" class="outline-4">
-<h4 id="org6280748">Matrix Product</h4>
-<div class="outline-text-4" id="text-org6280748">
+<div id="outline-container-orge2bc209" class="outline-4">
+<h4 id="orge2bc209">Matrix Product</h4>
+<div class="outline-text-4" id="text-orge2bc209">
 <p>
 Now we have all the tools we need to write down the algorithm for calculating the matrix product. First we write a function to calculate the product for one value at a given position
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-product-one-value</span> (matrix1 matrix2 row column<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Calculate one value in the resulting matrix of the product of two matrices"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-product-one-value</span> (matrix1 matrix2 row column<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Calculate one value in the resulting matrix of the product of two matrices"</span>
   (matrix-inner-product
    (matrix-get-row matrix1 row <span style="color: #999999;">)</span>
    (matrix-get-column matrix2 column<span style="color: #999999;">)))</span>
@@ -580,14 +581,14 @@ Now we have all the tools we need to write down the algorithm for calculating th
 And then we recursively apply it to construct the resulting matrix
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-product</span> (matrix1 matrix2<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Multiply two matrices"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-product</span> (matrix1 matrix2<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Multiply two matrices"</span>
 
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-product-rec</span> (matrix1 matrix2 row column<span style="color: #999999;">)</span>
-    <span style="color: #cc0000;">"A recursive helper function that builds the matrix multiplication's data vector"</span>
-    (<span style="color: #00af00;">if</span> (equal (matrix-rows matrix1) row<span style="color: #999999;">)</span>
+  (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-product-rec</span> (matrix1 matrix2 row column<span style="color: #999999;">)</span>
+    <span style="color: #036A07;">"A recursive helper function that builds the matrix multiplication's data vector"</span>
+    (<span style="color: #0000FF;">if</span> (equal (matrix-rows matrix1) row<span style="color: #999999;">)</span>
         '(<span style="color: #999999;">)</span>
-      (<span style="color: #00af00;">if</span> (equal (matrix-columns matrix2) column<span style="color: #999999;">)</span>
+      (<span style="color: #0000FF;">if</span> (equal (matrix-columns matrix2) column<span style="color: #999999;">)</span>
           (matrix-product-rec
            matrix1
            matrix2
@@ -617,15 +618,15 @@ And then we recursively apply it to construct the resulting matrix
 </div>
 </div>
 
-<div id="outline-container-org55a6a16" class="outline-4">
-<h4 id="org55a6a16">Matrix Conformability</h4>
-<div class="outline-text-4" id="text-org55a6a16">
+<div id="outline-container-orgba005a6" class="outline-4">
+<h4 id="orgba005a6">Matrix Conformability</h4>
+<div class="outline-text-4" id="text-orgba005a6">
 <p>
 You will notice that the algorithm won't make sense if the number of columns of <code>A</code> doesn't match the number of rows of <code>B</code>. When the values match the matrices are called <b>conformable</b>. When they <i>don't</i> match you will see that inner product isn't defined and therefore neither is the product.
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-conformable?</span> (matrix1 matrix2<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Check that two matrices can be multiplied"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-conformable?</span> (matrix1 matrix2<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Check that two matrices can be multiplied"</span>
   (equal
    (matrix-columns matrix1<span style="color: #999999;">)</span>
    (matrix-rows matrix2<span style="color: #999999;">)))</span>
@@ -633,20 +634,20 @@ You will notice that the algorithm won't make sense if the number of columns of 
 </div>
 </div>
 </div>
-<div id="outline-container-orgc49d632" class="outline-4">
-<h4 id="orgc49d632">Addendum: Scalar Product</h4>
-<div class="outline-text-4" id="text-orgc49d632">
+<div id="outline-container-orga8d09ca" class="outline-4">
+<h4 id="orga8d09ca">Addendum: Scalar Product</h4>
+<div class="outline-text-4" id="text-orga8d09ca">
 <p>
 An additional form of matrix multiplication is between a matrix and a scalar. Here we simply multiply each element of the matrix times the scalar to construct the resulting matrix. The order of multiplication is not important -&gt; <b>&alpha;A=A&alpha;</b>
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-scalar-product</span> (matrix scalar<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Multiple the matrix by a scalar. ie. multiply each value by the scalar"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-scalar-product</span> (matrix scalar<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Multiple the matrix by a scalar. ie. multiply each value by the scalar"</span>
   (matrix-from-data-list
    (matrix-rows matrix<span style="color: #999999;">)</span>
    (matrix-columns matrix<span style="color: #999999;">)</span>
    (mapcar
-   (<span style="color: #00af00;">lambda</span> (x) 
+   (<span style="color: #0000FF;">lambda</span> (x) 
      (* scalar x<span style="color: #999999;">))</span>
    (matrix-data matrix<span style="color: #999999;">))))</span>
 </pre>
@@ -655,9 +656,9 @@ An additional form of matrix multiplication is between a matrix and a scalar. He
 </div>
 </div>
 
-<div id="outline-container-org8f52216" class="outline-3">
-<h3 id="org8f52216">A system of equations as matrix product</h3>
-<div class="outline-text-3" id="text-org8f52216">
+<div id="outline-container-org3d1cdb0" class="outline-3">
+<h3 id="org3d1cdb0">A system of equations as matrix product</h3>
+<div class="outline-text-3" id="text-org3d1cdb0">
 <p>
 Now that we have all our tools we can write down a matrix product that will mimic our system of equation.
 </p>
@@ -700,9 +701,9 @@ x + 2y + 3z\\
 \end{equation}
 </div>
 
-<div id="outline-container-org278aa10" class="outline-4">
-<h4 id="org278aa10">The mirror universe</h4>
-<div class="outline-text-4" id="text-org278aa10">
+<div id="outline-container-orgdb51674" class="outline-4">
+<h4 id="orgdb51674">The mirror universe</h4>
+<div class="outline-text-4" id="text-orgdb51674">
 <p>
 Now I said that flipped matrix was also a valid representation. We can confirm this by taking the transpose of both sides 
 </p>
@@ -731,9 +732,9 @@ It yields another matrix product that mimics the equations, however you'll see i
 </div>
 </div>
 
-<div id="outline-container-orgb59fe3b" class="outline-3">
-<h3 id="orgb59fe3b">Chaining problems through matrix composition</h3>
-<div class="outline-text-3" id="text-orgb59fe3b">
+<div id="outline-container-orgb5ef2b4" class="outline-3">
+<h3 id="orgb5ef2b4">Chaining problems through matrix composition</h3>
+<div class="outline-text-3" id="text-orgb5ef2b4">
 <p>
 The real power of matrix multiplication is in its ability to chain systems together through <b>linear composition</b>
 </p>
@@ -743,9 +744,9 @@ If we are given a new problem that take the output of our first system and produ
 </p>
 </div>
 
-<div id="outline-container-org331b73f" class="outline-4">
-<h4 id="org331b73f">Taxing our farmers</h4>
-<div class="outline-text-4" id="text-org331b73f">
+<div id="outline-container-orgf0bb38d" class="outline-4">
+<h4 id="orgf0bb38d">Taxing our farmers</h4>
+<div class="outline-text-4" id="text-orgf0bb38d">
 <p>
 Say the imperial palace has a system for collecting taxes
 </p>
@@ -799,9 +800,9 @@ Note that the rows of <b>BA</b> are the combination of the rows of <b>A</b> and 
 </p>
 </div>
 </div>
-<div id="outline-container-orgf2fa29d" class="outline-4">
-<h4 id="orgf2fa29d">EXAMPLE: Geometrical transformations</h4>
-<div class="outline-text-4" id="text-orgf2fa29d">
+<div id="outline-container-orga66c5fe" class="outline-4">
+<h4 id="orga66c5fe">EXAMPLE: Geometrical transformations</h4>
+<div class="outline-text-4" id="text-orga66c5fe">
 <p>
 A very simple example are the linear systems that takes coordinates <i>x y</i> and do transformations on them
 </p>
@@ -826,8 +827,8 @@ y_{rotated}\\
 \end{equation}
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-rotate-2D</span> (radians<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Generate a matrix that will rotates a [x y] column vector by RADIANS"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-rotate-2D</span> (radians<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Generate a matrix that will rotates a [x y] column vector by RADIANS"</span>
   (matrix-from-data-list
    2
    2
@@ -858,8 +859,8 @@ y_{reflected}\\
 \end{equation}
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-reflect-around-x-2D</span> (<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Generate a matrix that will reflect a [x y] column vector around the x axis"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-reflect-around-x-2D</span> (<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Generate a matrix that will reflect a [x y] column vector around the x axis"</span>
   (matrix-from-data-list
    2
    2
@@ -886,8 +887,8 @@ y_{projected}\\
 \end{equation}
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-project-on-x=y-diagonal-2D</span> (<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Generate a matrix that projects a point ([x y] column vector) onto a line (defined w/ a unit-vector)"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-project-on-x=y-diagonal-2D</span> (<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Generate a matrix that projects a point ([x y] column vector) onto a line (defined w/ a unit-vector)"</span>
   (matrix-from-data-list
    2
    2
@@ -901,34 +902,34 @@ So given a point <i>[x y]</i> (represented by the column vector <b>v</b>) we can
 </div>
 </div>
 </div>
-<div id="outline-container-orga7510d7" class="outline-2">
-<h2 id="orga7510d7">Equivalent matrices</h2>
-<div class="outline-text-2" id="text-orga7510d7">
+<div id="outline-container-orgf74d2cc" class="outline-2">
+<h2 id="orgf74d2cc">Equivalent matrices</h2>
+<div class="outline-text-2" id="text-orgf74d2cc">
 <p>
 Now thanks to matrix multiplication we can represent linear systems and we can chain them together. The next step is extending multiplication to represent general manipulations of matrices.
 </p>
 </div>
 
-<div id="outline-container-org0d5a5eb" class="outline-3">
-<h3 id="org0d5a5eb">Identity Matrix</h3>
-<div class="outline-text-3" id="text-org0d5a5eb">
+<div id="outline-container-org83c506a" class="outline-3">
+<h3 id="org83c506a">Identity Matrix</h3>
+<div class="outline-text-3" id="text-org83c506a">
 <p>
 For any matrix <b>A</b>, the identity matrix <b>I</b> is such that <b>A*I</b> = <b>A</b> = <b>I*A</b>. Given the dimensions, <b>I</b> has to be a square matrix. It will have <b>1</b>'s on the diagonal (ie. where <code>row==column</code>) and zeroes everywhere else. We build it recursively:
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-identity</span> (rank<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Build an identity matrix of the given size/rank"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-identity</span> (rank<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Build an identity matrix of the given size/rank"</span>
 
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-build-identity-rec</span> (rank row column<span style="color: #999999;">)</span>
-    <span style="color: #cc0000;">"Helper function that build the data vector of the identity matrix"</span>
-    (<span style="color: #00af00;">if</span> (equal column rank) <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">time to build next row</span>
-        (<span style="color: #00af00;">if</span> (equal row (1- rank<span style="color: #999999;">))</span>
-            '() <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">we're done</span>
+  (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-build-identity-rec</span> (rank row column<span style="color: #999999;">)</span>
+    <span style="color: #036A07;">"Helper function that build the data vector of the identity matrix"</span>
+    (<span style="color: #0000FF;">if</span> (equal column rank) <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">time to build next row</span>
+        (<span style="color: #0000FF;">if</span> (equal row (1- rank<span style="color: #999999;">))</span>
+            '() <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">we're done</span>
           (matrix-build-identity-rec
            rank
            (1+ row<span style="color: #999999;">)</span>
            0<span style="color: #999999;">))</span>
-      (<span style="color: #00af00;">if</span> (equal row column<span style="color: #999999;">)</span>
+      (<span style="color: #0000FF;">if</span> (equal row column<span style="color: #999999;">)</span>
           (cons
            1.0
            (matrix-build-identity-rec
@@ -948,9 +949,9 @@ For any matrix <b>A</b>, the identity matrix <b>I</b> is such that <b>A*I</b> = 
 </div>
 </div>
 
-<div id="outline-container-org4e0923f" class="outline-3">
-<h3 id="org4e0923f">Unit Column/Rows</h3>
-<div class="outline-text-3" id="text-org4e0923f">
+<div id="outline-container-orgf9fb896" class="outline-3">
+<h3 id="orgf9fb896">Unit Column/Rows</h3>
+<div class="outline-text-3" id="text-orgf9fb896">
 <p>
 Each column of the <b>identity matrix</b> is a unit column (denoted as <b>e<sub><i>j</i></sub></b>). It contains a <b>1</b> in a given postion (here: <i>j</i>) and <b>0s</b> everwhere else. Its transpose is naturally called the <b>unit row</b><br>
 <b>Ae<sub><i>j</i></sub></b> = the <i>j</i> column of A<br>
@@ -959,11 +960,11 @@ Each column of the <b>identity matrix</b> is a unit column (denoted as <b>e<sub>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-unit-rowcol-data</span> (index size<span style="color: #999999;">)</span>
-<span style="color: #cc0000;">"Create a data-list for a matrix row/column. INDEX (starts at ZERO) matches the row or column where you want a 1. SIZE is the overall size of the vector"</span>
-(<span style="color: #00af00;">if</span> (zerop size<span style="color: #999999;">)</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-unit-rowcol-data</span> (index size<span style="color: #999999;">)</span>
+<span style="color: #036A07;">"Create a data-list for a matrix row/column. INDEX (starts at ZERO) matches the row or column where you want a 1. SIZE is the overall size of the vector"</span>
+(<span style="color: #0000FF;">if</span> (zerop size<span style="color: #999999;">)</span>
     '(<span style="color: #999999;">)</span>
-  (<span style="color: #00af00;">if</span> (zerop index<span style="color: #999999;">)</span>
+  (<span style="color: #0000FF;">if</span> (zerop index<span style="color: #999999;">)</span>
       (cons
        1.0
        (matrix-unit-rowcol-data
@@ -974,16 +975,16 @@ Each column of the <b>identity matrix</b> is a unit column (denoted as <b>e<sub>
      (matrix-unit-rowcol-data
       (1- index<span style="color: #999999;">)</span>
       (1- size<span style="color: #999999;">))))))</span>
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-unit-column</span> (row size<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Build a unit column. ROW is where you want the 1 to be placed (ZERO indexed). SIZE is the overall length"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-unit-column</span> (row size<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Build a unit column. ROW is where you want the 1 to be placed (ZERO indexed). SIZE is the overall length"</span>
       (matrix-from-data-list
        size
        1
        (matrix-unit-rowcol-data
         row
         size<span style="color: #999999;">)))</span>
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-unit-row</span> (column size<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Build a unit column. COLUMN is where you want the 1 to be placed (ZERO indexed). SIZE is the overall length"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-unit-row</span> (column size<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Build a unit column. COLUMN is where you want the 1 to be placed (ZERO indexed). SIZE is the overall length"</span>
       (matrix-from-data-list
        1
        size
@@ -1001,34 +1002,34 @@ Here I'm just trying out a new notation. With <code>letrec</code> we can hide th
 </div>
 </div>
 
-<div id="outline-container-orgd878935" class="outline-3">
-<h3 id="orgd878935">Addition</h3>
-<div class="outline-text-3" id="text-orgd878935">
+<div id="outline-container-orga196198" class="outline-3">
+<h3 id="orga196198">Addition</h3>
+<div class="outline-text-3" id="text-orga196198">
 <p>
 As a tool in building new matrices, we need a way to easily add two matrices, ie. add their values one to one. Matrices that are added need to have the same size.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-equal-size-p</span> (matrix1 matrix2<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Check if 2 matrices are the same size"</span>
-  (<span style="color: #00af00;">and</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-equal-size-p</span> (matrix1 matrix2<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Check if 2 matrices are the same size"</span>
+  (<span style="color: #0000FF;">and</span>
    (equal
     (matrix-rows matrix1<span style="color: #999999;">)</span>
     (matrix-rows matrix2<span style="color: #999999;">))</span>
    (equal
     (matrix-columns matrix1<span style="color: #999999;">)</span>
     (matrix-columns matrix2<span style="color: #999999;">))))</span>
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">for-each-pair</span> (list1 list2 operator<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Go through 2 lists applying an operator on each pair of elements"</span>
-  (<span style="color: #00af00;">if</span> (null list1<span style="color: #999999;">)</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">for-each-pair</span> (list1 list2 operator<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Go through 2 lists applying an operator on each pair of elements"</span>
+  (<span style="color: #0000FF;">if</span> (null list1<span style="color: #999999;">)</span>
       '(<span style="color: #999999;">)</span>
     (cons
      (funcall operator (car list1) (car list2<span style="color: #999999;">))</span>
      (for-each-pair (cdr list1) (cdr list2) operator<span style="color: #999999;">))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-add</span> (matrix1 matrix2<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Add to matrices together"</span>
-  (<span style="color: #00af00;">if</span> (matrix-equal-size-p matrix1 matrix2<span style="color: #999999;">)</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-add</span> (matrix1 matrix2<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Add to matrices together"</span>
+  (<span style="color: #0000FF;">if</span> (matrix-equal-size-p matrix1 matrix2<span style="color: #999999;">)</span>
       (matrix-from-data-list
        (matrix-rows matrix1<span style="color: #999999;">)</span>
        (matrix-columns matrix1<span style="color: #999999;">)</span>
@@ -1037,9 +1038,9 @@ As a tool in building new matrices, we need a way to easily add two matrices, ie
         (matrix-data matrix2<span style="color: #999999;">)</span>
         '+<span style="color: #999999;">))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-subtract</span> (matrix1 matrix2<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Subtract MATRIX2 from MATRIX1"</span>
-  (<span style="color: #00af00;">if</span> (matrix-equal-size-p matrix1 matrix2<span style="color: #999999;">)</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-subtract</span> (matrix1 matrix2<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Subtract MATRIX2 from MATRIX1"</span>
+  (<span style="color: #0000FF;">if</span> (matrix-equal-size-p matrix1 matrix2<span style="color: #999999;">)</span>
       (matrix-from-data-list
        (matrix-rows matrix1<span style="color: #999999;">)</span>
        (matrix-columns matrix1<span style="color: #999999;">)</span>
@@ -1056,9 +1057,9 @@ As a tool in building new matrices, we need a way to easily add two matrices, ie
 </blockquote>
 </div>
 </div>
-<div id="outline-container-orga6f64b7" class="outline-3">
-<h3 id="orga6f64b7">Elementary Matrices</h3>
-<div class="outline-text-3" id="text-orga6f64b7">
+<div id="outline-container-orgf298b5f" class="outline-3">
+<h3 id="orgf298b5f">Elementary Matrices</h3>
+<div class="outline-text-3" id="text-orgf298b5f">
 <p>
 The manipulation of the rows and columns can be broken down into 3 types of <b>elementary matrices</b> that when multiplied with our <b>linear systems</b> will generate <b>equivalent</b> matrices (<b>E</b>). 
 </p>
@@ -1083,16 +1084,16 @@ So Gauss-Jordan elimination for non-singular matrices has given us our first dec
 Row/Column operations come in 3 flavors
 </p>
 </div>
-<div id="outline-container-orge7cf9c1" class="outline-4">
-<h4 id="orge7cf9c1">Type I - Row/Column Interchange</h4>
-<div class="outline-text-4" id="text-orge7cf9c1">
+<div id="outline-container-org821811a" class="outline-4">
+<h4 id="org821811a">Type I - Row/Column Interchange</h4>
+<div class="outline-text-4" id="text-org821811a">
 <p>
 Interchaning rows (or columns) <i>i</i> and <i>j</i>
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-interchange</span> (rowcol1 rowcol2 rank<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Make an elementary row/column interchange matrix for ROWCOL1 and ROWCOL2 (ZERO indexed)"</span>
-  (<span style="color: #00af00;">let</span> ((u
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-elementary-interchange</span> (rowcol1 rowcol2 rank<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Make an elementary row/column interchange matrix for ROWCOL1 and ROWCOL2 (ZERO indexed)"</span>
+  (<span style="color: #0000FF;">let</span> ((u
          (matrix-subtract
           (matrix-unit-column rowcol1 rank<span style="color: #999999;">)</span>
           (matrix-unit-column rowcol2 rank<span style="color: #999999;">))))</span>
@@ -1102,8 +1103,8 @@ Interchaning rows (or columns) <i>i</i> and <i>j</i>
     u
     (matrix-transpose u<span style="color: #999999;">)))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-interchange-inverse</span> (rowcol1 rowcol2 rank<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Make the inverse of the elementary row/column interchange matrix for ROWCOL1 and ROWCOL2 (ZERO indexed). This is identical to (matrix-elementary-interchange)"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-elementary-interchange-inverse</span> (rowcol1 rowcol2 rank<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Make the inverse of the elementary row/column interchange matrix for ROWCOL1 and ROWCOL2 (ZERO indexed). This is identical to (matrix-elementary-interchange)"</span>
   (matrix-elementary-interchange
    rowcol1
    rowcol2
@@ -1113,16 +1114,16 @@ Interchaning rows (or columns) <i>i</i> and <i>j</i>
 </div>
 </div>
 
-<div id="outline-container-org8cef36b" class="outline-4">
-<h4 id="org8cef36b">Type II - Row/Column Multiple</h4>
-<div class="outline-text-4" id="text-org8cef36b">
+<div id="outline-container-org3932f6a" class="outline-4">
+<h4 id="org3932f6a">Type II - Row/Column Multiple</h4>
+<div class="outline-text-4" id="text-org3932f6a">
 <p>
 Multiplying row (or column) <i>i</i> by <i>&alpha;</i>
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-multiply</span> (rowcol scalar rank<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Make an elementary row/column multiple matrix for a given ROWCOL (ZERO indexed)"</span>
-  (<span style="color: #00af00;">let</span> ((elementary-column
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-elementary-multiply</span> (rowcol scalar rank<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Make an elementary row/column multiple matrix for a given ROWCOL (ZERO indexed)"</span>
+  (<span style="color: #0000FF;">let</span> ((elementary-column
          (matrix-unit-column rowcol rank<span style="color: #999999;">)))</span>
   (matrix-subtract
    (matrix-identity rank<span style="color: #999999;">)</span>
@@ -1132,8 +1133,8 @@ Multiplying row (or column) <i>i</i> by <i>&alpha;</i>
      (matrix-transpose elementary-column<span style="color: #999999;">)</span>
      (- 1 scalar<span style="color: #999999;">))))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-multiply-inverse</span> (rowcol scalar rank<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Make the inverseof the elementary row/column multiple matrix for a given ROWCOL (ZERO indexed)"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-elementary-multiply-inverse</span> (rowcol scalar rank<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Make the inverseof the elementary row/column multiple matrix for a given ROWCOL (ZERO indexed)"</span>
   (matrix-elementary-multiply
    rowcol
    (/ 1 scalar<span style="color: #999999;">)</span>
@@ -1143,15 +1144,15 @@ Multiplying row (or column) <i>i</i> by <i>&alpha;</i>
 </div>
 </div>
 
-<div id="outline-container-orgcb40054" class="outline-4">
-<h4 id="orgcb40054">Type III - Row/Column Addition</h4>
-<div class="outline-text-4" id="text-orgcb40054">
+<div id="outline-container-org48f05e1" class="outline-4">
+<h4 id="org48f05e1">Type III - Row/Column Addition</h4>
+<div class="outline-text-4" id="text-org48f05e1">
 <p>
 Adding a multiple of a row (or column) <i>i</i> to row (or column) <i>j</i>
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-addition</span> (rowcol1 rowcol2 scalar rank<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Make an elementary row/column product addition matrix. Multiply ROWCOL1 (ZERO indexed) by SCALAR and add it to ROWCOL2 (ZERO indexed)"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-elementary-addition</span> (rowcol1 rowcol2 scalar rank<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Make an elementary row/column product addition matrix. Multiply ROWCOL1 (ZERO indexed) by SCALAR and add it to ROWCOL2 (ZERO indexed)"</span>
   (matrix-add
    (matrix-identity rank<span style="color: #999999;">)</span>
    (matrix-scalar-product
@@ -1161,8 +1162,8 @@ Adding a multiple of a row (or column) <i>i</i> to row (or column) <i>j</i>
       (matrix-unit-column rowcol1 rank<span style="color: #999999;">)))</span>
     scalar<span style="color: #999999;">)))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-addition-inverse</span> (rowcol1 rowcol2 scalar rank<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Make the inverse of the elementary row/column product addition matrix. Multiply ROWCOL1 (ZERO indexed) by SCALAR and add it to ROWCOL2 (ZERO indexed)"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-elementary-addition-inverse</span> (rowcol1 rowcol2 scalar rank<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Make the inverse of the elementary row/column product addition matrix. Multiply ROWCOL1 (ZERO indexed) by SCALAR and add it to ROWCOL2 (ZERO indexed)"</span>
   (matrix-elementary-addition
    rowcol1
    rowcol2
@@ -1175,13 +1176,13 @@ Adding a multiple of a row (or column) <i>i</i> to row (or column) <i>j</i>
 </div>
 </div>
 
-<div id="outline-container-org6332a18" class="outline-2">
-<h2 id="org6332a18">The LU Decomposition</h2>
-<div class="outline-text-2" id="text-org6332a18">
+<div id="outline-container-orgfb7c741" class="outline-2">
+<h2 id="orgfb7c741">The LU Decomposition</h2>
+<div class="outline-text-2" id="text-orgfb7c741">
 </div>
-<div id="outline-container-org2144d35" class="outline-3">
-<h3 id="org2144d35">Gaussian elimination in matrix form</h3>
-<div class="outline-text-3" id="text-org2144d35">
+<div id="outline-container-orgf61be81" class="outline-3">
+<h3 id="orgf61be81">Gaussian elimination in matrix form</h3>
+<div class="outline-text-3" id="text-orgf61be81">
 <p>
 If linear equations at their simplest take inputs and produce some outputs, then Gaussian elimination is our method of reversing the process. It's a systematic way for taking a known linear system with a given output and solving for its input. Because we know that adding and scaling equations preserves equalities, Gaussian elimination is a scheme for combining and swapping equations so that they reduce to something simpler which can be solved directly. We do this by elimination factors in our equations such that the last one is of the form <b>&alpha;x=b</b>. Equalities being preserved, we can use this simple equation to solve for one of the unknown inputs. Each of the remaining equation includes just one additional unknow input so that through back-substitution we can then solve for all of them one by one. 
 </p>
@@ -1225,9 +1226,9 @@ On a high level the reduction of the equations happens in two repeated steps on 
 </p>
 </blockquote>
 </div>
-<div id="outline-container-org970cf5e" class="outline-4">
-<h4 id="org970cf5e">Elementary Lower Triangular Matrics</h4>
-<div class="outline-text-4" id="text-org970cf5e">
+<div id="outline-container-org777cdf0" class="outline-4">
+<h4 id="org777cdf0">Elementary Lower Triangular Matrics</h4>
+<div class="outline-text-4" id="text-org777cdf0">
 <p>
 The example I used above was done without adjusting any pivots. We reducing the first column by simply eliminated the values below the <code>2</code> (in the upper left) and we could have done that by multiply our <b>A</b> by two <code>Type III</code> <b>elementary matrices</b> from the left like so:
 </p>
@@ -1262,9 +1263,9 @@ The two <code>Type III</code> <b>elementary matrices</b> on the left are pretty 
 Constructing these simple <code>Type III</code> matrices is quick and inverting them is as easy as flipping the sign on the factor (ie. if you subtract some multiple of an equation from another, to reverse the operation you'd simply add the same multiple of the equation back)
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-row-elimination</span> (matrix row column<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Make a matrix that will eliminate an element at the specified ROW/COLUMN (ZERO indexed) using the diagonal element in the same column (typically the pivot)"</span>
-  (<span style="color: #00af00;">let</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-elementary-row-elimination</span> (matrix row column<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Make a matrix that will eliminate an element at the specified ROW/COLUMN (ZERO indexed) using the diagonal element in the same column (typically the pivot)"</span>
+  (<span style="color: #0000FF;">let</span>
       ((pivot (matrix-get-value matrix column column<span style="color: #999999;">))</span>
        (element-to-eliminate (matrix-get-value matrix row column<span style="color: #999999;">)))</span>
     (matrix-elementary-addition
@@ -1332,19 +1333,19 @@ Looking again at the product of 2 <code>Type III</code> matrices with our <b>A</
 The result is surprisingly simple and we can see that we didn't really need to carry out the whole matrix product b/c we've simply merged the factors into one matrix. So we can simply build these matrices that eliminate entire columns and skip making tons of <code>Type III</code> matrices entirely. The new combined matrices are called <b>Elementary Lower-Triangular Matrix</b> and are described on <i>page 142</i>.
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-lower-triangular</span> (matrix column-to-clear<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Make a matrix that will eliminate all rows in a column below the diagonal (pivot position)"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-elementary-lower-triangular</span> (matrix column-to-clear<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Make a matrix that will eliminate all rows in a column below the diagonal (pivot position)"</span>
 
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-lower-triangular-rec</span> (matrix column-to-clear row-to-build rank<span style="color: #999999;">)</span>
-    <span style="color: #cc0000;">"Recursive function to build the elementary lower triangular matrix"</span>
-    (<span style="color: #00af00;">cond</span>
+  (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-elementary-lower-triangular-rec</span> (matrix column-to-clear row-to-build rank<span style="color: #999999;">)</span>
+    <span style="color: #036A07;">"Recursive function to build the elementary lower triangular matrix"</span>
+    (<span style="color: #0000FF;">cond</span>
      ((equal
        rank
-       row-to-build) <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">Done building the matrix</span>
+       row-to-build) <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">Done building the matrix</span>
       '(<span style="color: #999999;">))</span>
      ((&lt;=
        row-to-build
-       column-to-clear) <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">Building the simply "identity" portion above the pivot</span>
+       column-to-clear) <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">Building the simply "identity" portion above the pivot</span>
       (matrix-append
        (matrix-unit-row row-to-build rank<span style="color: #999999;">)</span>
        (matrix-elementary-lower-triangular-rec
@@ -1352,11 +1353,11 @@ The result is surprisingly simple and we can see that we didn't really need to c
         column-to-clear
         (1+ row-to-build<span style="color: #999999;">)</span>
         rank<span style="color: #999999;">)))</span>
-     (t <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">Build the elimination portion below the pivot</span>
-      (<span style="color: #00af00;">let</span>
+     (t <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">Build the elimination portion below the pivot</span>
+      (<span style="color: #0000FF;">let</span>
           ((pivot (matrix-get-value matrix column-to-clear column-to-clear<span style="color: #999999;">))</span>
            (element-to-eliminate (matrix-get-value matrix row-to-build column-to-clear<span style="color: #999999;">)))</span>
-        (<span style="color: #00af00;">let</span>
+        (<span style="color: #0000FF;">let</span>
             ((cancellation-factor (-
                                    (/
                                     element-to-eliminate
@@ -1384,16 +1385,16 @@ The result is surprisingly simple and we can see that we didn't really need to c
 </div>
 </div>
 
-<div id="outline-container-orgd684340" class="outline-4">
-<h4 id="orgd684340">Building the <b>L</b> Matrix</h4>
-<div class="outline-text-4" id="text-orgd684340">
+<div id="outline-container-orgb0b01e4" class="outline-4">
+<h4 id="orgb0b01e4">Building the <b>L</b> Matrix</h4>
+<div class="outline-text-4" id="text-orgb0b01e4">
 <p>
 So now our product of elementary matrices <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>A=U</b> shortens to something similar <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub>A=U</b>, but where each <i>Elementary Lower-Triangular Matrix</i> <b>G</b> takes the place of several <b>R</b> matrices. The product <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub></b> involved a lot of matrix products, but fortunately we have a shortcut. These <b>G</b> matrices have the property that their inverse is just a matter of flipping the sign of the factors' in their column. You can confirm this by inverting our definition <b>G=R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub></b> and remembering that the <b>R</b>'s just involve a sign flip and <b>R<sup>-1</sup></b>'s are also <code>Type III</code> matrices. 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-invert-elementary-lower-triangular</span> (matrix-elementary-lower-triangular<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Inverts an L matrix by changing the sign on all the factors below the diagonal"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-invert-elementary-lower-triangular</span> (matrix-elementary-lower-triangular<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Inverts an L matrix by changing the sign on all the factors below the diagonal"</span>
   (matrix-add
    (matrix-scalar-product
     matrix-elementary-lower-triangular
@@ -1545,15 +1546,15 @@ And we are left with <b>A=LU</b>
 When we do this is code we immediately invert the <b>G</b>'s and build up their product. So as we eliminate <b>A</b> column after column and turn it into the upper triangular <b>U</b> we are in parallel accumulating the inverse of the elimination matrices into <b>L</b>. The function will return us two matrices, <b>L</b> and <b>U</b>
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-LU-decomposition</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Perform Gaussian elimination on MATRIX and return the list (L U), representing the LU-decomposition. If a zero pivot is hit, we terminate and return a string indicating that"</span>
-  (<span style="color: #00af00;">let</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-LU-decomposition</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Perform Gaussian elimination on MATRIX and return the list (L U), representing the LU-decomposition. If a zero pivot is hit, we terminate and return a string indicating that"</span>
+  (<span style="color: #0000FF;">let</span>
       ((rank
         (matrix-rows matrix<span style="color: #999999;">)))</span>
-    (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-LU-decomposition-rec</span> (L-matrix
+    (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-LU-decomposition-rec</span> (L-matrix
                                         reduced-matrix
                                         column-to-eliminate<span style="color: #999999;">)</span>
-      (<span style="color: #00af00;">cond</span>
+      (<span style="color: #0000FF;">cond</span>
        ((equal column-to-eliminate rank<span style="color: #999999;">)</span>
         (list L-matrix reduced-matrix<span style="color: #999999;">))</span>
        ((zerop
@@ -1561,9 +1562,9 @@ When we do this is code we immediately invert the <b>G</b>'s and build up their 
           reduced-matrix
           column-to-eliminate
           column-to-eliminate<span style="color: #999999;">))</span>
-        <span style="color: #ff1f8b;">"ERROR: LU decomposition terminated due to hitting a zero pivot. Consider using the PLU"</span><span style="color: #999999;">)</span>
+        <span style="color: #008000;">"ERROR: LU decomposition terminated due to hitting a zero pivot. Consider using the PLU"</span><span style="color: #999999;">)</span>
        (t
-        (<span style="color: #00af00;">let</span> ((column-elimination-matrix (matrix-elementary-lower-triangular
+        (<span style="color: #0000FF;">let</span> ((column-elimination-matrix (matrix-elementary-lower-triangular
                                           reduced-matrix
                                           column-to-eliminate<span style="color: #999999;">)))</span>
           (matrix-LU-decomposition-rec
@@ -1594,24 +1595,24 @@ Updating <b>U</b> could also be done without doing a whole matrix product and ju
 </div>
 </div>
 
-<div id="outline-container-org9512832" class="outline-4">
-<h4 id="org9512832">Partial Pivoting</h4>
-<div class="outline-text-4" id="text-org9512832">
+<div id="outline-container-orgddc5d76" class="outline-4">
+<h4 id="orgddc5d76">Partial Pivoting</h4>
+<div class="outline-text-4" id="text-orgddc5d76">
 <p>
 Now while in previous section we managed to decompose <b>A</b> into two matrices <b>L</b> and <b>U</b>, you may have noticed there is an error condition our code. The issue is that we may find that after performing elimination on a column we are left with a zero in the next column's pivot position. This makes it impossible to eliminate the factors below it. The solution we have from <i>Gaussian Elimination</i> is to swap in a row from below so that the pivot is non-zero. We are going to take advantage of this and use the strategy called <b>partial pivoting</b> and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and like any row-swap can be done pretty easily with a <code>Type I</code> elementary matrix.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-partial-pivot</span> (matrix pivot-column<span style="color: #999999;">)</span>
-    <span style="color: #cc0000;">"Returns a Type-I matrix that will swap in the row under the pivot that has maximal magnititude"</span>
-    (<span style="color: #00af00;">let</span> ((column-below-pivot (matrix-submatrix
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-partial-pivot</span> (matrix pivot-column<span style="color: #999999;">)</span>
+    <span style="color: #036A07;">"Returns a Type-I matrix that will swap in the row under the pivot that has maximal magnititude"</span>
+    (<span style="color: #0000FF;">let</span> ((column-below-pivot (matrix-submatrix
                                matrix
                                pivot-column
                                pivot-column
                                (matrix-rows matrix<span style="color: #999999;">)</span>
                                (1+ pivot-column<span style="color: #999999;">))))</span>
-      (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">find-max-index</span> (data-list max-val max-index current-index<span style="color: #999999;">)</span>
-        (<span style="color: #00af00;">cond</span>
+      (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">find-max-index</span> (data-list max-val max-index current-index<span style="color: #999999;">)</span>
+        (<span style="color: #0000FF;">cond</span>
          ((null data-list<span style="color: #999999;">)</span>
           max-index<span style="color: #999999;">)</span>
          ((&gt;
@@ -1647,15 +1648,15 @@ So if <b>G<sub>n</sub></b> were the <i>elementary lower-triangular matrices</i> 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-reduce-column</span> (matrix column-to-reduce<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Adjusts the pivot using partial pivoting and eliminates the elements in one column. Returns a list of the elimination matrix, permutation matrix and the resulting matrix with reduced column (list of 3 matrices)"</span>
-  (<span style="color: #00af00;">let*</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-reduce-column</span> (matrix column-to-reduce<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Adjusts the pivot using partial pivoting and eliminates the elements in one column. Returns a list of the elimination matrix, permutation matrix and the resulting matrix with reduced column (list of 3 matrices)"</span>
+  (<span style="color: #0000FF;">let*</span>
       ((pivot-adjusting-matrix
         (matrix-partial-pivot
          matrix
          column-to-reduce) <span style="color: #999999;">)</span>
        (matrix-with-partial-pivoting
-        (matrix-product <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">pivot!</span>
+        (matrix-product <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">pivot!</span>
          pivot-adjusting-matrix
          matrix<span style="color: #999999;">))</span>
        (column-elimination-matrix
@@ -1663,7 +1664,7 @@ So if <b>G<sub>n</sub></b> were the <i>elementary lower-triangular matrices</i> 
          matrix-with-partial-pivoting
          column-to-reduce<span style="color: #999999;">))</span>
        (matrix-with-reduced-column
-        (matrix-product <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">reduce</span>
+        (matrix-product <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">reduce</span>
          column-elimination-matrix
          matrix-with-partial-pivoting<span style="color: #999999;">)))</span>
     (list column-elimination-matrix pivot-adjusting-matrix matrix-with-reduced-column<span style="color: #999999;">)))</span>
@@ -1681,9 +1682,9 @@ Turning back to our orginal <b>Ax=b</b> we can again generate the <b>b<sub>new</
 </div>
 </div>
 
-<div id="outline-container-org68288f0" class="outline-4">
-<h4 id="org68288f0">Extracting the pivots</h4>
-<div class="outline-text-4" id="text-org68288f0">
+<div id="outline-container-org6308a94" class="outline-4">
+<h4 id="org6308a94">Extracting the pivots</h4>
+<div class="outline-text-4" id="text-org6308a94">
 <p>
 On <i>page 150</i> the book shows us how we can fix this situation by extracting the partial pivots out of column reductions so that instead of: <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A=U</b> we are left with something that looks more like  <b>G<sub>1</sub>G<sub>2</sub>..G<sub>r</sub>F<sub>1</sub>F<sub>2</sub>..F<sub>r</sub>A=U</b>. With the <b>G</b>'s together we can use our inversion trick to get our easily-computed <b>L</b> back. Then taking the product of the <b>F</b>'s gives us a new <i>permutation matrix</i> <b>P</b> so that our final equation will look like <b>PA=LU</b>. Looking at the book's solution from a different perspective, the reason we've had the matrices interleaved is because that's how we build them (from right to left). We can't go into the middle of the matrix and adjust the pivot position till we'd carried out all the eliminations in the columns before it. The previous eliminations will mix up the rows and change all the values in that column so the maximal value won't be known ahead of time. So the <i>GFGFGF</i> sequence for building the reduction matrices (from right to left, column by column)  needs to be observed. The trick is that once we've finished Gaussian elimination then we know the final order of the rows in <b>U</b> and what <i>page 150</i> demonstrates is that if we know the row interchanges, we can actually carry them out first as long as we then fix-up any <i>preceding</i> eliminations matrices a bit. Specifically if you adjust some pivot <i>k</i> by swapping it with row <i>k+i</i> then any <i>previous</i> eliminations that involved the row <i>k</i> (and row <i>k+i</i>) now needs to be fixed to reflect that you'll be doing the row interchange ahead of time.
 </p>
@@ -1703,8 +1704,8 @@ To see why this is equivalent to updating all the <b>G</b>'s and then inverting 
 </blockquote>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-update-L-matrix</span> (elementary-lower-triangular-matrix type-i-interchange-matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Take an elementary lower triangular matrix and update it to match a row interchange between ROW1 and ROW2 (ZERO indexed)"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-update-L-matrix</span> (elementary-lower-triangular-matrix type-i-interchange-matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Take an elementary lower triangular matrix and update it to match a row interchange between ROW1 and ROW2 (ZERO indexed)"</span>
     (matrix-product
      type-i-interchange-matrix
      (matrix-product
@@ -1722,36 +1723,36 @@ To see why this is equivalent to updating all the <b>G</b>'s and then inverting 
 So our method will still go reducing the matrix column by column and building up <b>U</b>, but in parallel we will be building <b>L</b> and <b>P</b>. So the result will be the three matrices (<b>P</b> <b>L</b> <b>U</b>).
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-PLU-decomposition</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Perform Gaussian elimination with partial pivoting on MATRIX and return the list (P L U), representing the LU-decomposition "</span>
-  (<span style="color: #00af00;">let</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-PLU-decomposition</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Perform Gaussian elimination with partial pivoting on MATRIX and return the list (P L U), representing the LU-decomposition "</span>
+  (<span style="color: #0000FF;">let</span>
       ((rank
         (matrix-rows matrix<span style="color: #999999;">)))</span>
-    (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-PLU-decomposition-rec</span> (P-matrix
+    (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-PLU-decomposition-rec</span> (P-matrix
                                         L-matrix
                                         reduced-matrix
                                         column-to-reduce<span style="color: #999999;">)</span>
-      (<span style="color: #00af00;">cond</span>
+      (<span style="color: #0000FF;">cond</span>
        ((equal
          column-to-reduce
          rank<span style="color: #999999;">)</span>
         (list P-matrix L-matrix  reduced-matrix<span style="color: #999999;">))</span>
        (t
-        (<span style="color: #00af00;">let</span>
+        (<span style="color: #0000FF;">let</span>
             ((current-column-reduction-matrices
               (matrix-reduce-column
                reduced-matrix
                column-to-reduce<span style="color: #999999;">)))</span>
           (matrix-PLU-decomposition-rec
-           (matrix-product                              <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">update the permutation matrix</span>
+           (matrix-product                              <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">update the permutation matrix</span>
             (second current-column-reduction-matrices<span style="color: #999999;">)</span>
             P-matrix<span style="color: #999999;">)</span>
            (matrix-product
-            (matrix-update-L-matrix       <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">update elimination matrices due to partial pivot</span>
+            (matrix-update-L-matrix       <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">update elimination matrices due to partial pivot</span>
              L-matrix
              (second current-column-reduction-matrices<span style="color: #999999;">))</span>
             (matrix-invert-elementary-lower-triangular (first current-column-reduction-matrices<span style="color: #999999;">)))</span>
-           (third current-column-reduction-matrices)    <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">the further reduced matrix</span>
+           (third current-column-reduction-matrices)    <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">the further reduced matrix</span>
            (1+ column-to-reduce<span style="color: #999999;">))))))</span>
 
     (matrix-PLU-decomposition-rec
@@ -1765,9 +1766,9 @@ So our method will still go reducing the matrix column by column and building up
 </div>
 </div>
 
-<div id="outline-container-orgbf60696" class="outline-3">
-<h3 id="orgbf60696">Using the LU</h3>
-<div class="outline-text-3" id="text-orgbf60696">
+<div id="outline-container-orgca8c625" class="outline-3">
+<h3 id="orgca8c625">Using the LU</h3>
+<div class="outline-text-3" id="text-orgca8c625">
 <blockquote>
 <p>
 <b><i>Notes on getting a good numerical solution:</i></b>
@@ -1788,9 +1789,9 @@ The topic of <i>residuals</i>, <i>sensitivity</i> and <i>coditioning</i> will be
 </div>
 
 
-<div id="outline-container-org7114e64" class="outline-4">
-<h4 id="org7114e64">Solving for x in Ax=b</h4>
-<div class="outline-text-4" id="text-org7114e64">
+<div id="outline-container-org28d2038" class="outline-4">
+<h4 id="org28d2038">Solving for x in Ax=b</h4>
+<div class="outline-text-4" id="text-org28d2038">
 <p>
 Now that we can break a linear system <b>A</b> into two systems <b>L</b> and <b>U</b> we need to go back to where we started and solve for inputs given some outputs.We started with <b>Ax=b</b> and now we know we can do <b>PA=LU</b>. Combinding the two we can get <b>PAx=Pb</b> and then <b>LUx=Pb</b>. As mentioned before, <b>b<sub>new</sub>=Pb</b>, so for simplicity <b>LUx=b<sub>new</sub></b>. The new <b>b</b> has the same output values, just reordered a bit due to pivot adjustments. Since the order of the original equations generally doesn't have a special significance this is just a minor change.
 </p>
@@ -1800,13 +1801,13 @@ Next we define a new intermediary vector <b>Ux=y</b> so that we can write <b>Ly=
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-forward-substitution</span> (lower-triangular-matrix output-vector<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Solve for an input-vector using forward substitution. ie. solve for x in Lx=b where b is OUTPUT-VECTOR and L is the LOWER-TRIANGULAR-MATRIX"</span>
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-forward-substitution-rec</span> (lower-triangular-matrix input-vector-data output-vector-data row<span style="color: #999999;">)</span>
-    (<span style="color: #00af00;">cond</span>
-     ((null output-vector-data) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">BASE CASE</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-forward-substitution</span> (lower-triangular-matrix output-vector<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Solve for an input-vector using forward substitution. ie. solve for x in Lx=b where b is OUTPUT-VECTOR and L is the LOWER-TRIANGULAR-MATRIX"</span>
+  (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-forward-substitution-rec</span> (lower-triangular-matrix input-vector-data output-vector-data row<span style="color: #999999;">)</span>
+    (<span style="color: #0000FF;">cond</span>
+     ((null output-vector-data) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">BASE CASE</span>
       input-vector-data<span style="color: #999999;">)</span>
-     (t                         <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">REST</span>
+     (t                         <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">REST</span>
       (matrix-forward-substitution-rec
        lower-triangular-matrix
        (append
@@ -1815,7 +1816,7 @@ Next we define a new intermediary vector <b>Ux=y</b> so that we can write <b>Ly=
          (/
           (-
            (car output-vector-data<span style="color: #999999;">)</span>
-           <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">on the first iteration this is the product of null vectors.. which in our implementation returns zero</span>
+           <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">on the first iteration this is the product of null vectors.. which in our implementation returns zero</span>
            (matrix-inner-product-data
             (matrix-data
              (matrix-extract-subrow
@@ -1844,8 +1845,8 @@ Once we have <b>y</b> we can go to <b>Ux=y</b> and solve for <b>x</b> by back su
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-back-substitution</span> (upper-triangular-matrix output-vector<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Solve for an input-vector using forward substitution. ie. solve for x in Lx=b where b is OUTPUT-VECTOR and L is the LOWER-TRIANGULAR-MATRIX"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-back-substitution</span> (upper-triangular-matrix output-vector<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Solve for an input-vector using forward substitution. ie. solve for x in Lx=b where b is OUTPUT-VECTOR and L is the LOWER-TRIANGULAR-MATRIX"</span>
   (matrix-from-data-list
    (matrix-rows upper-triangular-matrix<span style="color: #999999;">)</span>
    1
@@ -1854,7 +1855,7 @@ Once we have <b>y</b> we can go to <b>Ux=y</b> and solve for <b>x</b> by back su
      (matrix-forward-substitution
       (matrix-from-data-list
        (matrix-rows upper-triangular-matrix<span style="color: #999999;">)</span>
-       (matrix-rows upper-triangular-matrix) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">rows == columns</span>
+       (matrix-rows upper-triangular-matrix) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">rows == columns</span>
        (reverse (matrix-data upper-triangular-matrix<span style="color: #999999;">)))</span>
       (matrix-from-data-list
        (matrix-rows output-vector<span style="color: #999999;">)</span>
@@ -1873,9 +1874,9 @@ Now glueing everything together is now just a few lines of code
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-solve-for-input</span> (PLU output-vector<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Solve for x in Ax=b where b is OUTPUT-VECTOR and A is given factorized into PLU"</span>
-  (<span style="color: #00af00;">let*</span> ((permuted-output-vector (matrix-product (first PLU) output-vector<span style="color: #999999;">))</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-solve-for-input</span> (PLU output-vector<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Solve for x in Ax=b where b is OUTPUT-VECTOR and A is given factorized into PLU"</span>
+  (<span style="color: #0000FF;">let*</span> ((permuted-output-vector (matrix-product (first PLU) output-vector<span style="color: #999999;">))</span>
          (intermediate-y-vector (matrix-forward-substitution (second PLU) permuted-output-vector<span style="color: #999999;">)))</span>
     (matrix-back-substitution (third PLU) intermediate-y-vector<span style="color: #999999;">)))</span>
 </pre>
@@ -1888,8 +1889,8 @@ Now glueing everything together is now just a few lines of code
 </div>
 
 <ul class="org-ul">
-<li><a id="orga47bee4"></a>EXAMPLE: Vandermonde matrices<br>
-<div class="outline-text-5" id="text-orga47bee4">
+<li><a id="orgccea967"></a>EXAMPLE: Vandermonde matrices<br>
+<div class="outline-text-5" id="text-orgccea967">
 <p>
 For a good immediate usecase see <a href="./vandermonde.html">my explanation of the Vandermonde matrix</a> and how we can now fit polynomials to points (using the code we've just developed)
 </p>
@@ -1897,21 +1898,21 @@ For a good immediate usecase see <a href="./vandermonde.html">my explanation of 
 </li>
 </ul>
 </div>
-<div id="outline-container-org8cf99fe" class="outline-4">
-<h4 id="org8cf99fe">The LDU Decomposition</h4>
-<div class="outline-text-4" id="text-org8cf99fe">
+<div id="outline-container-org8f860a4" class="outline-4">
+<h4 id="org8f860a4">The LDU Decomposition</h4>
+<div class="outline-text-4" id="text-org8f860a4">
 <p>
 As mention on <i>page 154</i>, the <b>LU</b> can be further broken down into <b>LDU</b> - where both <b>L</b> and <b>U</b> have <b>1</b>'s on the diagonal and <b>D</b> is a diagonal matrix with all the pivots. This has the nice property of being more symmetric.
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-LDU-decomposition</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Take the LU decomposition and extract the diagonal coefficients into a diagonal D matrix. Returns ( P L D U ) "</span>
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-extract-D-from-U</span> (matrix<span style="color: #999999;">)</span>
-    <span style="color: #cc0000;">"Extract the diagonal coefficients from an upper triangular matrix into a separate diagonal matrix. Returns ( D U ). D is diagonal and U is upper triangular with 1's on the diagonal"</span>
-    (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-build-D-U-data</span> (matrix row D-data U-data<span style="color: #999999;">)</span>
-      (<span style="color: #00af00;">let</span> ((rank (matrix-rows matrix<span style="color: #999999;">))</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-LDU-decomposition</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Take the LU decomposition and extract the diagonal coefficients into a diagonal D matrix. Returns ( P L D U ) "</span>
+  (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-extract-D-from-U</span> (matrix<span style="color: #999999;">)</span>
+    <span style="color: #036A07;">"Extract the diagonal coefficients from an upper triangular matrix into a separate diagonal matrix. Returns ( D U ). D is diagonal and U is upper triangular with 1's on the diagonal"</span>
+    (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-build-D-U-data</span> (matrix row D-data U-data<span style="color: #999999;">)</span>
+      (<span style="color: #0000FF;">let</span> ((rank (matrix-rows matrix<span style="color: #999999;">))</span>
             (pivot (matrix-get-value matrix row row<span style="color: #999999;">)))</span>
-        (<span style="color: #00af00;">cond</span> ((equal row rank<span style="color: #999999;">)</span>
+        (<span style="color: #0000FF;">cond</span> ((equal row rank<span style="color: #999999;">)</span>
                (list D-data U-data) <span style="color: #999999;">)</span>
               (t
                (matrix-build-D-U-data
@@ -1931,13 +1932,13 @@ As mention on <i>page 154</i>, the <b>LU</b> can be further broken down into <b>
                    (matrix-extract-subrow matrix row (1+ row) rank<span style="color: #999999;">)</span>
                    (/ 1.0 pivot<span style="color: #999999;">)))))))))</span>
 
-    (<span style="color: #00af00;">let</span> ((rank (matrix-rows matrix<span style="color: #999999;">))</span>
+    (<span style="color: #0000FF;">let</span> ((rank (matrix-rows matrix<span style="color: #999999;">))</span>
           (D-U-data (matrix-build-D-U-data matrix 0 '() '(<span style="color: #999999;">))))</span>
       (list
        (matrix-from-data-list rank rank (first D-U-data<span style="color: #999999;">))</span>
        (matrix-from-data-list rank rank (second D-U-data<span style="color: #999999;">)))))</span>
 
-  (<span style="color: #00af00;">let</span> ((LU-decomposition (matrix-LU-decomposition matrix<span style="color: #999999;">)))</span>
+  (<span style="color: #0000FF;">let</span> ((LU-decomposition (matrix-LU-decomposition matrix<span style="color: #999999;">)))</span>
     (nconc
      (list
       (first LU-decomposition<span style="color: #999999;">))</span>
@@ -1950,10 +1951,10 @@ As mention on <i>page 154</i>, the <b>LU</b> can be further broken down into <b>
 An extra nicety is that if <b>A</b> is symmetric then <b>A=A<sup>T</sup></b> and therefore <b>LDU=(LDU)<sup>T</sup>=U<sup>T</sup>D<sup>T</sup>L<sup>T</sup></b>. Since <b>D==D<sup>T</sup></b> and the <b>LU</b> factorization is unique then <b>L</b> must equal <b>U<sup>T</sup></b> and <b>U</b> is equal to <b>L<sup>T</sup></b> - so we can write <b>A=LDL<sup>T</sup></b>
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-is-symmetric</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Test if the matrix is symmetric"</span>
-  (<span style="color: #00af00;">let</span> ((transpose (matrix-transpose matrix<span style="color: #999999;">)))</span>
-    (<span style="color: #00af00;">let</span> ((A-data (matrix-data matrix<span style="color: #999999;">))</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-is-symmetric</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Test if the matrix is symmetric"</span>
+  (<span style="color: #0000FF;">let</span> ((transpose (matrix-transpose matrix<span style="color: #999999;">)))</span>
+    (<span style="color: #0000FF;">let</span> ((A-data (matrix-data matrix<span style="color: #999999;">))</span>
           (A-transpose-data (matrix-data transpose<span style="color: #999999;">)))</span>
       (equal A-data A-transpose-data<span style="color: #999999;">))))</span>
 
@@ -1962,23 +1963,23 @@ An extra nicety is that if <b>A</b> is symmetric then <b>A=A<sup>T</sup></b> and
 </div>
 </div>
 
-<div id="outline-container-org37e9c7e" class="outline-4">
-<h4 id="org37e9c7e">The Cholesky Decomposition</h4>
-<div class="outline-text-4" id="text-org37e9c7e">
+<div id="outline-container-orgee8d8ec" class="outline-4">
+<h4 id="orgee8d8ec">The Cholesky Decomposition</h4>
+<div class="outline-text-4" id="text-orgee8d8ec">
 <p>
 Going one step further - if we have a symmetric matrix (so <b>A=LDL<sup>T</sup></b>) and all the pivots are positive, then we can break up the <b>D</b>  into 2 further matrices <b>D<sub>split</sub></b>. The <b>D<sub>split</sub></b> matrix will be like <b>D</b>, but instead each element on the diagonal (the pivots from the original <b>U</b> matrix) will be replaced by its square root - so that <b>D<sub>split</sub>D<sub>split</sub>=D</b>. This is taking advantage of the fact that a unit diagonal multiplied with itself simply squares the diagonal elements. Note here that if any of the diagonal elements are negative, then you can't really take the square root here b/c you'd get complex numbers.
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-is-positive-definite</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Test if the matrix is symmetric"</span>
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">is-no-data-negative</span> (data<span style="color: #999999;">)</span>
-    (<span style="color: #00af00;">cond</span> ((null data) t<span style="color: #999999;">)</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-is-positive-definite</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Test if the matrix is symmetric"</span>
+  (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">is-no-data-negative</span> (data<span style="color: #999999;">)</span>
+    (<span style="color: #0000FF;">cond</span> ((null data) t<span style="color: #999999;">)</span>
           ((&lt; (car data) 0) nil<span style="color: #999999;">)</span>
           (t (is-no-data-negative (cdr data<span style="color: #999999;">)))))</span>
 
-  (<span style="color: #00af00;">let*</span> ((LDU (matrix-DU-decomposition matrix<span style="color: #999999;">))</span>
+  (<span style="color: #0000FF;">let*</span> ((LDU (matrix-DU-decomposition matrix<span style="color: #999999;">))</span>
          (D (third PLDU<span style="color: #999999;">)))</span>
-    (<span style="color: #00af00;">and</span> (matrix-is-symmetric matrix) (is-no-data-negative (matrix-data D<span style="color: #999999;">)))))</span>
+    (<span style="color: #0000FF;">and</span> (matrix-is-symmetric matrix) (is-no-data-negative (matrix-data D<span style="color: #999999;">)))))</span>
 
 </pre>
 </div>
@@ -1988,17 +1989,17 @@ But if the pivots are positive, then we change <b>A=LDL<sup>T</sup></b> to <b>A=
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-cholesky-decomposition</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Take the output of the LU-decomposition and generate the Cholesky decomposition matrices"</span>
-  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">sqrt-data-elements</span> (data<span style="color: #999999;">)</span>
-    <span style="color: #cc0000;">"Takes a data vector and squares every element and returns the list"</span>
-    (<span style="color: #00af00;">cond</span> ((null data) '(<span style="color: #999999;">))</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-cholesky-decomposition</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Take the output of the LU-decomposition and generate the Cholesky decomposition matrices"</span>
+  (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">sqrt-data-elements</span> (data<span style="color: #999999;">)</span>
+    <span style="color: #036A07;">"Takes a data vector and squares every element and returns the list"</span>
+    (<span style="color: #0000FF;">cond</span> ((null data) '(<span style="color: #999999;">))</span>
           (t
            (cons
             (sqrt (car data<span style="color: #999999;">))</span>
             (sqrt-data-elements (cdr data<span style="color: #999999;">))))))</span>
 
-  (<span style="color: #00af00;">let*</span> ((LDU (matrix-LDU-decomposition matrix<span style="color: #999999;">))</span>
+  (<span style="color: #0000FF;">let*</span> ((LDU (matrix-LDU-decomposition matrix<span style="color: #999999;">))</span>
          (L (first LDU<span style="color: #999999;">))</span>
          (D (second LDU<span style="color: #999999;">))</span>
          (D_sqrt (matrix-from-data-list
@@ -2020,9 +2021,9 @@ see: <a href="https://math.stackexchange.com/questions/621045/why-does-cholesky-
 </blockquote>
 </div>
 </div>
-<div id="outline-container-org822a79e" class="outline-4">
-<h4 id="org822a79e">Solving for A<sup>-1</sup></h4>
-<div class="outline-text-4" id="text-org822a79e">
+<div id="outline-container-org1b6c830" class="outline-4">
+<h4 id="org1b6c830">Solving for A<sup>-1</sup></h4>
+<div class="outline-text-4" id="text-org1b6c830">
 <p>
 On <i>page 148</i> we get a simple algorithm for efficiently contructing <b>A<sup>-1</sup></b>. Basically we are taking the equation <b>AA<sup>-1</sup>=I</b>, where <b>A<sup>-1</sup></b> is unknown, and solving it column by column. Treating each column of <b>A<sup>-1</sup></b> as <b>x</b> and each column of <b>I</b> and <b>b</b> we are reusing <b>Ax=b</b> and writing it as <b>AA<sup>-1</sup><sub>*j</sub>=e<sub>j</sub></b>. Once we solve each column we put them all together and rebuild <b>A<sup>-1</sup></b>.
 </p>
@@ -2031,14 +2032,14 @@ On <i>page 148</i> we get a simple algorithm for efficiently contructing <b>A<su
 Because our data is arranged row-by-row, it'll be easier for me to just build <b>(A<sup>-1</sup>)<sup>T</sup>)</b> and then transpose it back to <b>A<sup>-1</sup></b> at the end.
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-inverse</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"template"</span>
-  (<span style="color: #00af00;">let</span> ((PLU (matrix-PLU-decomposition matrix<span style="color: #999999;">)))</span>
-    (<span style="color: #00af00;">let*</span>((rank (matrix-rows matrix<span style="color: #999999;">))</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-inverse</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"template"</span>
+  (<span style="color: #0000FF;">let</span> ((PLU (matrix-PLU-decomposition matrix<span style="color: #999999;">)))</span>
+    (<span style="color: #0000FF;">let*</span>((rank (matrix-rows matrix<span style="color: #999999;">))</span>
           (identity (matrix-identity rank<span style="color: #999999;">)))</span>
-    (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-inverse-transpose-rec</span> (column<span style="color: #999999;">)</span>
-      <span style="color: #cc0000;">"Computer the transpose of the inverse, appending row after row"</span>
-      (<span style="color: #00af00;">cond</span> ((equal column rank<span style="color: #999999;">)</span>
+    (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-inverse-transpose-rec</span> (column<span style="color: #999999;">)</span>
+      <span style="color: #036A07;">"Computer the transpose of the inverse, appending row after row"</span>
+      (<span style="color: #0000FF;">cond</span> ((equal column rank<span style="color: #999999;">)</span>
             '(<span style="color: #999999;">))</span>
             (t
              (matrix-append
@@ -2055,9 +2056,9 @@ Because our data is arranged row-by-row, it'll be easier for me to just build <b
 </blockquote>
 </div>
 </div>
-<div id="outline-container-orgd2098b9" class="outline-4">
-<h4 id="orgd2098b9">Least Squares</h4>
-<div class="outline-text-4" id="text-orgd2098b9">
+<div id="outline-container-org827e162" class="outline-4">
+<h4 id="org827e162">Least Squares</h4>
+<div class="outline-text-4" id="text-org827e162">
 <p>
 Now that we have a mechanism to solve square linear systems we need to extend <b>Ax=b</b> to the overdefined case where we have more linear equations than parameters. This situation will come up constantly, generally in situations where you only have a few inputs you want to solve for, but you have a lot of redundant measurements. 
 </p>
@@ -2116,8 +2117,8 @@ As we learn in calculus, minimizing a function is done by take its derivative wi
 </div>
 
 <ul class="org-ul">
-<li><a id="orgc52e072"></a>Numerically stable solution<br>
-<div class="outline-text-5" id="text-orgc52e072">
+<li><a id="org7319c83"></a>Numerically stable solution<br>
+<div class="outline-text-5" id="text-org7319c83">
 <p>
 Unfortunately while the solutions turned out in the end to be very clean, it does involve a matrix multiplication and therefore has some numerical issues. A better solution is presented in <b>Exercise 4.6.9</b> with the equations
 </p>
@@ -2160,9 +2161,9 @@ I even double checked that this is true in a <a href="../asparapiss/">little dem
 </div>
 </div>
 </div>
-<div id="outline-container-org40a4579" class="outline-2">
-<h2 id="org40a4579">The QR Decomposition</h2>
-<div class="outline-text-2" id="text-org40a4579">
+<div id="outline-container-org5a07452" class="outline-2">
+<h2 id="org5a07452">The QR Decomposition</h2>
+<div class="outline-text-2" id="text-org5a07452">
 <p>
 The 70 or so pages that follow the "Least Squares" section in the book are rather frustrating b/c there is no end goal in sight, but on paged <i>307-308</i> we have our big reveal. The goal is to construct a new decomposition <b>A=QR</b> that will give us similar benefits to the LU while presenting us with a few more useful properties. It will combine the benefits of lower/upper triangular matrices which gave us forward/back-substitution and the benefits of an orthonormal basis.
 </p>
@@ -2181,9 +2182,9 @@ If <b>A</b> is square then the columns of <b>A</b> are already technically in an
 </p>
 </div>
 
-<div id="outline-container-org1c28059" class="outline-3">
-<h3 id="org1c28059">The Gram-Schmidt procedure</h3>
-<div class="outline-text-3" id="text-org1c28059">
+<div id="outline-container-orgee68f4b" class="outline-3">
+<h3 id="orgee68f4b">The Gram-Schmidt procedure</h3>
+<div class="outline-text-3" id="text-orgee68f4b">
 <p>
 The Gram-Schmidt procedure is a recursive algorithm for taking a set of linearly independent vectors (in the standard basis) and rewriting it as a set of coordinates in a new orthonormal basis that will span the same space. The new basis will naturally be in the same space <b>R<sup>n</sup></b> and its dimension will equal the number of indepenent vectors. So given <b>n</b> linearly independent vectors it will return to you a set of <b>n</b> orthonormal vectors that span the same space.
 </p>
@@ -2192,39 +2193,39 @@ The Gram-Schmidt procedure is a recursive algorithm for taking a set of linearly
 This already at face value seems like something that could prove to be useful. After describing the algorithm we will see how we can use these properties to build up the decomposition we want.
 </p>
 </div>
-<div id="outline-container-org5e741bd" class="outline-4">
-<h4 id="org5e741bd">The Base case</h4>
-<div class="outline-text-4" id="text-org5e741bd">
+<div id="outline-container-org2dddaa0" class="outline-4">
+<h4 id="org2dddaa0">The Base case</h4>
+<div class="outline-text-4" id="text-org2dddaa0">
 <p>
 We will see that the procedure builds the new basis incrementally one basis vector at a time. And that if we've built a basis for <b>n</b> independent vectors, then adding an <b>n+1</b>'th vector will be very easy. So first we look at the simplest case of just one vector (that's.. independent b/c it's just all alone). To make an orthonormal basis for one vector you just normalizes it. Bare in mind that both the vector and the new basis span the same space
 </p>
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-column-2-norm-squared</span> (column<span style="color: #999999;">)</span>
-   <span style="color: #cc0000;">"get the inner product of a column with itself to get its 2-norm"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-column-2-norm-squared</span> (column<span style="color: #999999;">)</span>
+   <span style="color: #036A07;">"get the inner product of a column with itself to get its 2-norm"</span>
    (matrix-inner-product (matrix-transpose column) column<span style="color: #999999;">))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-column-2-norm</span> (column<span style="color: #999999;">)</span>
-   <span style="color: #cc0000;">"get the 2-norm of a column-vector"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-column-2-norm</span> (column<span style="color: #999999;">)</span>
+   <span style="color: #036A07;">"get the 2-norm of a column-vector"</span>
    (sqrt (matrix-column-2-norm-squared column<span style="color: #999999;">)))</span>
 
- (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-normalize-column</span> (column<span style="color: #999999;">)</span>
-   <span style="color: #cc0000;">"takes a column and returns a normalized copy"</span>
+ (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-normalize-column</span> (column<span style="color: #999999;">)</span>
+   <span style="color: #036A07;">"takes a column and returns a normalized copy"</span>
      (matrix-scalar-product
       column
       (/ 1.0 (matrix-column-2-norm column<span style="color: #999999;">))))</span>
 
 
- (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-row-2-norm-squared</span> (row<span style="color: #999999;">)</span>
-   <span style="color: #cc0000;">"takes the inner product of a column with itself to get its 2-norm"</span>
+ (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-row-2-norm-squared</span> (row<span style="color: #999999;">)</span>
+   <span style="color: #036A07;">"takes the inner product of a column with itself to get its 2-norm"</span>
    (matrix-inner-product row (matrix-transpose row<span style="color: #999999;">)))</span>
 
- (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-row-2-norm</span> (row<span style="color: #999999;">)</span>
-   <span style="color: #cc0000;">"get the 2-norm of a column-vector"</span>
+ (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-row-2-norm</span> (row<span style="color: #999999;">)</span>
+   <span style="color: #036A07;">"get the 2-norm of a column-vector"</span>
    (sqrt (matrix-row-2-norm-squared row<span style="color: #999999;">)))</span>
 
- (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-normalize-row</span> (row<span style="color: #999999;">)</span>
-   <span style="color: #cc0000;">"takes a column and returns a normalized copy"</span>
+ (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-normalize-row</span> (row<span style="color: #999999;">)</span>
+   <span style="color: #036A07;">"takes a column and returns a normalized copy"</span>
      (matrix-scalar-product
       row
       (/ 1.0 (matrix-row-2-norm row<span style="color: #999999;">))))</span>
@@ -2232,9 +2233,9 @@ We will see that the procedure builds the new basis incrementally one basis vect
 </div>
 </div>
 </div>
-<div id="outline-container-org4a68461" class="outline-4">
-<h4 id="org4a68461">Recursive Step</h4>
-<div class="outline-text-4" id="text-org4a68461">
+<div id="outline-container-orgef60609" class="outline-4">
+<h4 id="orgef60609">Recursive Step</h4>
+<div class="outline-text-4" id="text-orgef60609">
 <p>
 The recursive step describes how to expand your basis when you're given a new independent vector - ie. one that's not in its span - so that the new basis includes this vector. I think it's not immediately obvious, but this will always involve adding just one additional vector to the basis
 </p>
@@ -2363,9 +2364,9 @@ The code follows the same procedure
 </p>
 </blockquote>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-get-orthogonal-component</span> (matrix-of-orthonormal-rows linearly-independent-vector <span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Given matrix of orthonormal rows and a vector that is linearly independent of them - get its orthogonal component"</span>
-  (<span style="color: #00af00;">let*</span> ((QT matrix-of-orthonormal-rows<span style="color: #999999;">)</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-get-orthogonal-component</span> (matrix-of-orthonormal-rows linearly-independent-vector <span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Given matrix of orthonormal rows and a vector that is linearly independent of them - get its orthogonal component"</span>
+  (<span style="color: #0000FF;">let*</span> ((QT matrix-of-orthonormal-rows<span style="color: #999999;">)</span>
         (Q (matrix-transpose QT<span style="color: #999999;">))</span>
         (in-span-coordinates (matrix-product QT linearly-independent-vector<span style="color: #999999;">))</span>
         (in-span-vector (matrix-product Q in-span-coordinates<span style="color: #999999;">)))</span>
@@ -2396,9 +2397,9 @@ In code it's just a matter of running <code>(matrix-normalize-column ...)</code>
 </div>
 </div>
 </div>
-<div id="outline-container-orgbff5040" class="outline-3">
-<h3 id="orgbff5040">Decomposing</h3>
-<div class="outline-text-3" id="text-orgbff5040">
+<div id="outline-container-orgd00d919" class="outline-3">
+<h3 id="orgd00d919">Decomposing</h3>
+<div class="outline-text-3" id="text-orgd00d919">
 <p>
 So now we have a procedure to build an orthonormal basis <b>Q</b> from linearly independent vectors, but we still need to do the last step of turning this into a decompositon similar in form to <b>A=LU</b> - where given a matrix <b>A</b> we can write it as the product of several other matrices
 </p>
@@ -2426,12 +2427,12 @@ Now to get the orthonormal basis of the columns of <b>A</b>, ie. <b>A<sub>1..n</
 </blockquote>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-gram-schmidt</span> (A-transpose<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"For a column return it's normalized basis. For a matrix adds a new orthonormal vector to the orthonormal basis of A_{n-1}"</span>
-  (<span style="color: #00af00;">cond</span> ((= 1 (matrix-rows A-transpose)) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">base case</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-gram-schmidt</span> (A-transpose<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"For a column return it's normalized basis. For a matrix adds a new orthonormal vector to the orthonormal basis of A_{n-1}"</span>
+  (<span style="color: #0000FF;">cond</span> ((= 1 (matrix-rows A-transpose)) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">base case</span>
          (matrix-normalize-row A-transpose<span style="color: #999999;">))</span>
-        (t <span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">recursive case</span>
-         (<span style="color: #00af00;">let*</span> ((basis (matrix-gram-schmidt
+        (t <span style="color: #8D8D84;">;;</span><span style="color: #8D8D84; font-style: italic;">recursive case</span>
+         (<span style="color: #0000FF;">let*</span> ((basis (matrix-gram-schmidt
                         (matrix-submatrix A-transpose 
                                           0
                                           0
@@ -2524,22 +2525,22 @@ The diagonal values are just scalars, but they still remain rather awkward. Howe
 </blockquote>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-build-R-column-rec</span> (QT next-linearly-independent-vector norm-factor dimension<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Builds the data vector for a column of R"</span>
-  (<span style="color: #00af00;">cond</span> ((= 0 dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">finished building column</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-build-R-column-rec</span> (QT next-linearly-independent-vector norm-factor dimension<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Builds the data vector for a column of R"</span>
+  (<span style="color: #0000FF;">cond</span> ((= 0 dimension) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">finished building column</span>
          '(<span style="color: #999999;">))</span>
 
-        ((&lt; (matrix-rows QT) dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">add bottom zeroes</span>
+        ((&lt; (matrix-rows QT) dimension) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">add bottom zeroes</span>
          (cons
           9.0
           (matrix-build-R-column-rec QT next-linearly-independent-vector norm-factor (1- dimension<span style="color: #999999;">))))</span>
 
-        (( = (matrix-rows QT) dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">add orthogonal part</span>
+        (( = (matrix-rows QT) dimension) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">add orthogonal part</span>
          (cons
           norm-factor
           (matrix-build-R-column-rec QT next-linearly-independent-vector norm-factor (1- dimension<span style="color: #999999;">))))</span>
 
-        ((&gt; (matrix-rows QT) dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">add in-span part</span>
+        ((&gt; (matrix-rows QT) dimension) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">add in-span part</span>
          (cons
           (matrix-get-value (matrix-product
                              (matrix-get-row QT dimension<span style="color: #999999;">)</span>
@@ -2548,20 +2549,20 @@ The diagonal values are just scalars, but they still remain rather awkward. Howe
                             0<span style="color: #999999;">)</span>
           (matrix-build-R-column-rec Q next-linearly-independent-vector norm-factor (1- dimension<span style="color: #999999;">))))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-build-R-column</span> (Q next-linearly-independent-vector norm-factor dimension<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Returns a column vector for the new column of R"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-build-R-column</span> (Q next-linearly-independent-vector norm-factor dimension<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Returns a column vector for the new column of R"</span>
   (matrix-from-data-list dimension 1  (reverse (matrix-build-R-column-rec Q next-linearly-independent-vector norm-factor dimension<span style="color: #999999;">))))</span>
 
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-QR-decomposition-rec</span> (A-transpose dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">'dimension' keeps track of the ultimate size of R</span>
-  <span style="color: #cc0000;">"The recursive helper function that builds up the Q and R matrices"</span>
-  (<span style="color: #00af00;">cond</span> ((= 1 (matrix-rows A-transpose)) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">base case</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-QR-decomposition-rec</span> (A-transpose dimension) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">'dimension' keeps track of the ultimate size of R</span>
+  <span style="color: #036A07;">"The recursive helper function that builds up the Q and R matrices"</span>
+  (<span style="color: #0000FF;">cond</span> ((= 1 (matrix-rows A-transpose)) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">base case</span>
          (list
-          (matrix-normalize-row A-transpose) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">starting Q "matrix"</span>
-          (matrix-scalar-product (matrix-unit-row 0 dimension) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">starting R "matrix"</span>
+          (matrix-normalize-row A-transpose) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">starting Q "matrix"</span>
+          (matrix-scalar-product (matrix-unit-row 0 dimension) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">starting R "matrix"</span>
                                  (matrix-row-2-norm-squared A-transpose<span style="color: #999999;">))))</span>
-        (t <span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">recursive case</span>
-         (<span style="color: #00af00;">let*</span> ((QTRT (matrix-QR-decomposition-rec
+        (t <span style="color: #8D8D84;">;;</span><span style="color: #8D8D84; font-style: italic;">recursive case</span>
+         (<span style="color: #0000FF;">let*</span> ((QTRT (matrix-QR-decomposition-rec
                        (matrix-submatrix A-transpose
                                          0
                                          0
@@ -2586,8 +2587,8 @@ The diagonal values are just scalars, but they still remain rather awkward. Howe
                                          dimension<span style="color: #999999;">)))))</span>
            (list new-basis new-RT<span style="color: #999999;">)))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-gramschmidt-QR</span> (A<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Returns a list of the Q and R matrices for A"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-gramschmidt-QR</span> (A<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Returns a list of the Q and R matrices for A"</span>
   (matrix-QR-decomposition-rec (matrix-transpose A<span style="color: #999999;">)</span>
                                (matrix-columns A<span style="color: #999999;">)))</span>
 </pre>
@@ -2604,17 +2605,17 @@ is in effect doing what we did in the recursive step, but backwards
 </p>
 </div>
 </div>
-<div id="outline-container-org83aec0c" class="outline-3">
-<h3 id="org83aec0c">The Householder reduction</h3>
-<div class="outline-text-3" id="text-org83aec0c">
+<div id="outline-container-orgcc0c29e" class="outline-3">
+<h3 id="orgcc0c29e">The Householder reduction</h3>
+<div class="outline-text-3" id="text-orgcc0c29e">
 <p>
 An alternate method to build a <b>QR</b> matrix is to take a more direct approach like in the <b>LU</b> and to zero out columns to build an upper triangular <b>R</b>. The difference from the <b>LU</b> is that now instead of using row operations to get zeroes we will restrict ourselves to using <b>elementary reflectors</b>. Their key property is that they are orthonormal, so when we carry out a series of reflections <b>Q<sub>1</sub>Q<sub>2</sub>..Q<sub>k</sub>A</b> we can combine them into one matrix which will be guaranteed to be orthonormal too. In the <b>LU</b>'s Gaussian elimination the elementary matrices we used were not  orthonormal so we didn't have this same guarantee (for a simple example consider row-addition: it's not orthogonal and its norm isn't equal to 1)
 </p>
 </div>
 
-<div id="outline-container-org000d239" class="outline-4">
-<h4 id="org000d239">elementary reflector</h4>
-<div class="outline-text-4" id="text-org000d239">
+<div id="outline-container-orge10dacb" class="outline-4">
+<h4 id="orge10dacb">elementary reflector</h4>
+<div class="outline-text-4" id="text-orge10dacb">
 <p>
 An elementary reflector is a special matrix/linear-system which when given a vector produces its reflection across a hyperplane. The hyperplane is orthogonal to some reference vector <b>u</b>. The textbook has a nice illustration for the <b>R<sup>3</sup></b> case , but to understand it in higher dimensions you need to break up the problem. The hyperplane you reflect over is the <i>not-in-span-of</i> <b>u</b> space. So in effect to get the reflection you are taking the component of your vector that's in the direction of <b>u</b> and subtracting it twice to create its reflection. If the input vector is <b>x</b> then:
 </p>
@@ -2628,9 +2629,9 @@ An elementary reflector is a special matrix/linear-system which when given a vec
 In matrix form we'd factor out the <b>x</b> and get <b>(I-2uu<sup>t</sup>/u<sup>t</sup>u)x</b>
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-reflector</span> (column-vector<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Build a matrix that will reflect vector across the hyperplane orthogonal to COLUMN-VECTOR"</span>
-  (<span style="color: #00af00;">let</span> ((dimension (matrix-rows column-vector<span style="color: #999999;">)))</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-elementary-reflector</span> (column-vector<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Build a matrix that will reflect vector across the hyperplane orthogonal to COLUMN-VECTOR"</span>
+  (<span style="color: #0000FF;">let</span> ((dimension (matrix-rows column-vector<span style="color: #999999;">)))</span>
     (matrix-subtract (matrix-identity dimension<span style="color: #999999;">)</span>
                      (matrix-scalar-product (matrix-product column-vector (matrix-transpose column-vector<span style="color: #999999;">))</span>
                                             (/ 2 (matrix-column-2-norm-squared column-vector<span style="color: #999999;">))))))</span>
@@ -2638,9 +2639,9 @@ In matrix form we'd factor out the <b>x</b> and get <b>(I-2uu<sup>t</sup>/u<sup>
 </div>
 </div>
 </div>
-<div id="outline-container-org52150dd" class="outline-4">
-<h4 id="org52150dd">elementary coordinate reflector</h4>
-<div class="outline-text-4" id="text-org52150dd">
+<div id="outline-container-org6a9bf8c" class="outline-4">
+<h4 id="org6a9bf8c">elementary coordinate reflector</h4>
+<div class="outline-text-4" id="text-org6a9bf8c">
 <p>
 To build an upper triangular matrix we need to zero out values below the diagonal. The way we're going to do is by reflecting those columns onto coordinate axis. Ocne a vector is on a coordinate axis then its other components are naturally zero!
 </p>
@@ -2665,20 +2666,20 @@ The <code>sign(x_{1})</code> is a bit confusion for me to think about&#x2026; If
 So given a vector and a coordinate axis we can quickly build this on top of our previous function. We just need to add a little catch for the case where the vector is already on axis (then it's ofcourse simply the identity matrix!)
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">sign</span> (number<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"returns 1 if positive or zero and -1 if negative.. Cant' find an ELisp function that does this"</span>
-  (<span style="color: #00af00;">cond</span> ((= number 0.0) 1.0<span style="color: #999999;">)</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">sign</span> (number<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"returns 1 if positive or zero and -1 if negative.. Cant' find an ELisp function that does this"</span>
+  (<span style="color: #0000FF;">cond</span> ((= number 0.0) 1.0<span style="color: #999999;">)</span>
         (t (/ number (abs number<span style="color: #999999;">)))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-elementary-coordinate-reflector</span> (column-vector coordinate-axis<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Build a matrix that will reflect the COLUMN-VECTOR on to the COORDINATE-AXIS"</span>
-  (<span style="color: #00af00;">let</span> ((vector-orthogonal-to-reflection-plane
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-elementary-coordinate-reflector</span> (column-vector coordinate-axis<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Build a matrix that will reflect the COLUMN-VECTOR on to the COORDINATE-AXIS"</span>
+  (<span style="color: #0000FF;">let</span> ((vector-orthogonal-to-reflection-plane
         (matrix-subtract column-vector
                          (matrix-scalar-product coordinate-axis
                                                 ( * (sign (matrix-get-value column-vector 0 0<span style="color: #999999;">))</span>
                                                     (matrix-column-2-norm column-vector<span style="color: #999999;">))))))</span>
-    (<span style="color: #00af00;">cond</span> (( = 0 ( matrix-column-2-norm vector-orthogonal-to-reflection-plane)) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">when both vectors are the same</span>
-           (matrix-identity (matrix-rows column-vector))) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">then the reflector is the identity</span>
+    (<span style="color: #0000FF;">cond</span> (( = 0 ( matrix-column-2-norm vector-orthogonal-to-reflection-plane)) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">when both vectors are the same</span>
+           (matrix-identity (matrix-rows column-vector))) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">then the reflector is the identity</span>
           (t
            (matrix-elementary-reflector vector-orthogonal-to-reflection-plane<span style="color: #999999;">)))))</span>
 </pre>
@@ -2686,9 +2687,9 @@ So given a vector and a coordinate axis we can quickly build this on top of our 
 </div>
 </div>
 
-<div id="outline-container-org0477edc" class="outline-4">
-<h4 id="org0477edc">The QR decomposition - part 2</h4>
-<div class="outline-text-4" id="text-org0477edc">
+<div id="outline-container-orgd339002" class="outline-4">
+<h4 id="orgd339002">The QR decomposition - part 2</h4>
+<div class="outline-text-4" id="text-orgd339002">
 <p>
 So now we can build matrices that reflect vector onto axis. We need to leverage this to build the upper triangluar matrix <b>R</b> of the <b>QR</b>. If we directly start to zero out things column after column with reflectors like we did in the <b>LU</b> case we would get an equation of the form  <b>Q<sub>k</sub>..Q<sub>2</sub>Q<sub>1</sub>A=R</b>. But the problem is that the <b>Q<sub>i</sub></b>'s are not as clean as row operations and the column of zeroes will not get preserved between reflections. In other words <b>Q<sub>1</sub></b> will reflect the first column onto <b>e<sub>1</sub></b>, but then the second reflector <b>Q<sub>2</sub></b> will reflect it away somewhere else and you will lose those zeroes. So we need to be a little more clever here and find a way to preserve these columns as we go forward.
 </p>
@@ -2768,23 +2769,23 @@ B/c of inadequacies of my matrix format and the minimal array of helper function
 </p>
 </blockquote>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-add-zero-column-data</span> (data-list columns<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Adds a zero column to the front of a matrix data list. Provide the amount of COLUMNS on input"</span>
-  (<span style="color: #00af00;">cond</span> ((not data-list) '(<span style="color: #999999;">))</span>
+<pre class="src src-emacs-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-add-zero-column-data</span> (data-list columns<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Adds a zero column to the front of a matrix data list. Provide the amount of COLUMNS on input"</span>
+  (<span style="color: #0000FF;">cond</span> ((not data-list) '(<span style="color: #999999;">))</span>
         (t (append (cons 0.0 (seq-take data-list columns<span style="color: #999999;">))</span>
                    (matrix-add-zero-column-data (seq-subseq data-list columns) columns<span style="color: #999999;">)))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-raise-rank-Q</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Adds a row and column of zeroes in at the top left corner. And a one in position 0,0"</span>
-  (<span style="color: #00af00;">let</span> ((rank (matrix-rows matrix))) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">Q is always square</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-raise-rank-Q</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Adds a row and column of zeroes in at the top left corner. And a one in position 0,0"</span>
+  (<span style="color: #0000FF;">let</span> ((rank (matrix-rows matrix))) <span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">Q is always square</span>
     (matrix-from-data-list (1+ rank<span style="color: #999999;">)</span>
                            (1+ rank<span style="color: #999999;">)</span>
                            (append (cons 1.0 (make-list rank 0.0<span style="color: #999999;">))</span>
                                    (matrix-add-zero-column-data (matrix-data matrix<span style="color: #999999;">)</span>
                                                                 rank<span style="color: #999999;">)))))</span>
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-build-R</span> (sub-R intermediate-matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Insets SUB-R into INTERMEDIATE-MATRIX so that only the first row and columns are preserved"</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-build-R</span> (sub-R intermediate-matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Insets SUB-R into INTERMEDIATE-MATRIX so that only the first row and columns are preserved"</span>
   (matrix-from-data-list (matrix-rows intermediate-matrix<span style="color: #999999;">)</span>
                          (matrix-columns intermediate-matrix<span style="color: #999999;">)</span>
                          (append (seq-take (matrix-data intermediate-matrix<span style="color: #999999;">)</span>
@@ -2793,24 +2794,24 @@ B/c of inadequacies of my matrix format and the minimal array of helper function
                                                               (matrix-columns sub-R<span style="color: #999999;">)))))</span>
 
 
-(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-householder-QR</span> (matrix<span style="color: #999999;">)</span>
-  <span style="color: #cc0000;">"Use reflection matrices to build the QR matrix"</span>
-  (<span style="color: #00af00;">let*</span> ((reflector-matrix (matrix-elementary-coordinate-reflector (matrix-get-column matrix 0<span style="color: #999999;">)</span>
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-householder-QR</span> (matrix<span style="color: #999999;">)</span>
+  <span style="color: #036A07;">"Use reflection matrices to build the QR matrix"</span>
+  (<span style="color: #0000FF;">let*</span> ((reflector-matrix (matrix-elementary-coordinate-reflector (matrix-get-column matrix 0<span style="color: #999999;">)</span>
                                                                    (matrix-unit-column 0 (matrix-rows matrix<span style="color: #999999;">))))</span>
          (intermediate-matrix (matrix-product reflector-matrix
                                               matrix<span style="color: #999999;">)))</span>
-    (<span style="color: #00af00;">cond</span> (( = (matrix-columns matrix) 1<span style="color: #999999;">)</span>
+    (<span style="color: #0000FF;">cond</span> (( = (matrix-columns matrix) 1<span style="color: #999999;">)</span>
            (list reflector-matrix intermediate-matrix<span style="color: #999999;">))</span>
           (( = (matrix-rows matrix) 1<span style="color: #999999;">)</span>
            (list reflector-matrix intermediate-matrix<span style="color: #999999;">))</span>
           (t
-           (<span style="color: #00af00;">let*</span> ((submatrix (matrix-submatrix intermediate-matrix
+           (<span style="color: #0000FF;">let*</span> ((submatrix (matrix-submatrix intermediate-matrix
                                                1
                                                1
                                                (matrix-rows intermediate-matrix<span style="color: #999999;">)</span>
                                                (matrix-columns intermediate-matrix<span style="color: #999999;">)))</span>
                   (submatrix-QR (matrix-householder-QR submatrix<span style="color: #999999;">)))</span>
-             (<span style="color: #00af00;">let</span> ((sub-Q (first submatrix-QR<span style="color: #999999;">))</span>
+             (<span style="color: #0000FF;">let</span> ((sub-Q (first submatrix-QR<span style="color: #999999;">))</span>
                    (sub-R (second submatrix-QR<span style="color: #999999;">)))</span>
                (list (matrix-product (matrix-raise-rank-Q sub-Q<span style="color: #999999;">)</span>
                                      reflector-matrix<span style="color: #999999;">)</span>
@@ -2826,17 +2827,17 @@ In some ways this method is nicer than Gram-Schmidt b/c the goal is more direct 
 </div>
 </div>
 </div>
-<div id="outline-container-org03d1624" class="outline-3">
-<h3 id="org03d1624">Givens reduction</h3>
-<div class="outline-text-3" id="text-org03d1624">
+<div id="outline-container-org5d57956" class="outline-3">
+<h3 id="org5d57956">Givens reduction</h3>
+<div class="outline-text-3" id="text-org5d57956">
 <p>
 Is similar to the Householder by uses plane rotations instead. These can eliminate value in your matrix one rotation at a time. It can make sense for sparse matrices&#x2026; I will return to this if it turns out crucial.
 </p>
 </div>
 </div>
-<div id="outline-container-orgf6722d5" class="outline-3">
-<h3 id="orgf6722d5">Least Squares again</h3>
-<div class="outline-text-3" id="text-orgf6722d5">
+<div id="outline-container-org13bdcab" class="outline-3">
+<h3 id="org13bdcab">Least Squares again</h3>
+<div class="outline-text-3" id="text-org13bdcab">
 <p>
 While the new <b>QR</b> matrices seem to have some very desirable qualities as compared to the <b>LU</b>, one major issue is still outstanding. When we perform Gaussian Elimination the upper and lower triangular matrices directly inform us about how to solve the <b>Ax=b</b> system of linear equations. Given an output <b>b</b> we can use back/forward substitution to pop out an <b>x</b> input that satisfies the system of equations. However with the <b>QR</b> the <b>Q</b> doesn't really make this same method possible b/c it's not triangular.
 </p>
@@ -2851,9 +2852,9 @@ Notice that we did that all in theoretical equation form and how we've avoided h
 </div>
 </div>
 </div>
-<div id="outline-container-orgd3d56d0" class="outline-2">
-<h2 id="orgd3d56d0"><span class="todo TODO">TODO</span> s</h2>
-<div class="outline-text-2" id="text-orgd3d56d0">
+<div id="outline-container-org815586f" class="outline-2">
+<h2 id="org815586f"><span class="todo TODO">TODO</span> s</h2>
+<div class="outline-text-2" id="text-org815586f">
 <ul class="org-ul">
 <li>Write a better example that I can expand on easily later</li>
 <li>Implement the Sherman-Morrison update formula</li>
@@ -2863,21 +2864,21 @@ Notice that we did that all in theoretical equation form and how we've avoided h
 </ul>
 </div>
 </div>
-<div id="outline-container-org3dd4f1c" class="outline-2">
-<h2 id="org3dd4f1c">SRC<sub>Block</sub> template</h2>
-<div class="outline-text-2" id="text-org3dd4f1c">
+<div id="outline-container-org706a91d" class="outline-2">
+<h2 id="org706a91d">SRC<sub>Block</sub> template</h2>
+<div class="outline-text-2" id="text-org706a91d">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">matrix-template</span> (matrix<span style="color: #999999;">)</span>
-<span style="color: #cc0000;">"template"</span>
+<pre class="src src-emacs-lisp">  (<span style="color: #0000FF;">defun</span> <span style="color: #006699;">matrix-template</span> (matrix<span style="color: #999999;">)</span>
+<span style="color: #036A07;">"template"</span>
 <span style="color: #999999;">)</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org542c72e" class="outline-2">
-<h2 id="org542c72e">End</h2>
-<div class="outline-text-2" id="text-org542c72e">
+<div id="outline-container-orgb1ff192" class="outline-2">
+<h2 id="orgb1ff192">End</h2>
+<div class="outline-text-2" id="text-orgb1ff192">
 <blockquote>
 <p>
 This webpage is generated from an org-document (at <code>./index.org</code>) that also generates all the files described. 
@@ -2898,7 +2899,7 @@ Once opened in Emacs:<br>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: George Kontsevich</p>
-<p class="date">Created: 2019-03-01 五 18:50</p>
+<p class="date">Created: 2019-07-25 Thu 09:34</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
