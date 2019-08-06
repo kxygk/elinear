@@ -10,6 +10,7 @@
 #+HTML_MATHJAX: path: "../MathJax/MathJax.js?config=TeX-AMS_CHTML"
 #+OPTIONS: html-style:nil
 #+OPTIONS: num:nil
+#+OPTIONS: html-postamble:nil
 #+OPTIONS: html-scripts:nil
 
 * Preface
@@ -2091,14 +2092,21 @@ Notice that we did that all in theoretical equation form and how we've avoided h
 - Sensitivity/Condition numbers needs to be revisited and expanded on (page 126-128)
 - Do exercise 3.8.8
 - Tridiagonal matrices - 3.10.6
-* SRC_Block template
-#+BEGIN_SRC emacs-lisp :results output silent :session :tangle matrix.el
-  (defun matrix-template (matrix)
-"template"
-)
-#+END_SRC
-
 * End
+
+* Notes from the Author
+This was a very fun exercise and has been very education however I felt the project was heading in a bit of the wrong direction and a few issues have started to crop up:
+- The ELisp linear algebra system I developed was done very much on the fly, from scratch, with no previous experience. Certain deficiencies started to accumulate and as the algorithms got a bit more complicated. At first it was interesting developing the different primitives I needed, but with time I started I started to spend more and more time writing helper functions and fixing things and less time writing actual algorithms. Certain fixes would have required a major refactoring
+- It only runs in Emacs, which is a great environment, but it has it's limitation and can't be hooked up to the real world like digital input or a GUI
+- I wanted to try using a more practical general purpose language and to see how a standard linear algebra library woud
+- This has turned into a huge mega-document and while there are motivating examples it becomes easy to loose sight of the big picture. What the goals are and where it was all heading. In directly following the book I had actually lost sight of an important advantage I have. Books and text are inherantly linear but hypertext is hierachical and structures. Once can organize material in ways that keep the reading focused on the larger goal while presenting details only when neededsupposed to solve this with this landing page showering the big-picture goals and smaller sub-pages providing proofs and algorithms - which I will try to keep independent of each other
+
+In an effort to resolve all these issue in one go, I've "continued" this document in a separate more organzied project called [[../morelinear][MoreLinear]]. It has a small overlap with the end of this project, but maybe in time it will cover the material presented here as well
+
+This isn't so much a deprication notice b/c I think this project still fulfills its inteded purpose of building a linear algebra system from scratch and I still think it can be useful, but I don't plan on expanding on it going forward.
+
+It does still however need a lot of editing...
+
 #+BEGIN_QUOTE
 This webpage is generated from an org-document (at ~./index.org~) that also generates all the files described. 
 

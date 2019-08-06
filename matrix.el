@@ -991,7 +991,3 @@
                                      intermediate-matrix))))))))
 
 )
-
-(defun matrix-template (matrix)
-"template"
-)
