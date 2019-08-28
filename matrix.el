@@ -989,5 +989,3 @@
                                      reflector-matrix)
                      (matrix-build-R sub-R
                                      intermediate-matrix))))))))
-
-)

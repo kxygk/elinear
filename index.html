@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-08-06 Tue 21:30 -->
+<!-- 2019-08-28 Wed 18:04 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Elinear: linear algebra basics in Clojure</title>
@@ -45,111 +45,111 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org3b084e9">Preface</a></li>
-<li><a href="#orgcd503c5">Systems of linear equations</a>
+<li><a href="#orgc1f3607">Preface</a></li>
+<li><a href="#org8a93bb2">Systems of linear equations</a>
 <ul>
-<li><a href="#orga6700ad">A farming problem</a></li>
+<li><a href="#org42f889f">A farming problem</a></li>
 </ul>
 </li>
-<li><a href="#org54c54ea">Matices as representations of linear systems</a>
+<li><a href="#org8c2eb22">Matices as representations of linear systems</a>
 <ul>
-<li><a href="#org40aaa74">The Matrix in the computer</a>
+<li><a href="#org18f9659">The Matrix in the computer</a>
 <ul>
-<li><a href="#orgd9fc1e1">Some helpers</a></li>
+<li><a href="#org4216a33">Some helpers</a></li>
 </ul>
 </li>
-<li><a href="#orgb502b89">Transposition: Getting the other equivalent matrix</a></li>
+<li><a href="#org8190b1e">Transposition: Getting the other equivalent matrix</a></li>
 </ul>
 </li>
-<li><a href="#org63a367b">Representing the whole system of equations</a>
+<li><a href="#orgbf09bea">Representing the whole system of equations</a>
 <ul>
-<li><a href="#org941eb4d">Matrix Multiplication</a>
+<li><a href="#org69bd649">Matrix Multiplication</a>
 <ul>
-<li><a href="#orgd4ed471">Inner Product</a></li>
-<li><a href="#org288b583">Submatrices</a></li>
-<li><a href="#org1883cd0">Matrix Product</a></li>
-<li><a href="#orgaf35196">Matrix Conformability</a></li>
-<li><a href="#orgd6d4764">Addendum: Scalar Product</a></li>
+<li><a href="#org6122d7b">Inner Product</a></li>
+<li><a href="#org7e3057d">Submatrices</a></li>
+<li><a href="#orgf081d3b">Matrix Product</a></li>
+<li><a href="#org68d3443">Matrix Conformability</a></li>
+<li><a href="#org0152e5d">Addendum: Scalar Product</a></li>
 </ul>
 </li>
-<li><a href="#orgde0bed0">A system of equations as matrix product</a>
+<li><a href="#org7ce0c81">A system of equations as matrix product</a>
 <ul>
-<li><a href="#org60ab1af">The mirror universe</a></li>
+<li><a href="#org4d1956a">The mirror universe</a></li>
 </ul>
 </li>
-<li><a href="#orgce8824a">Chaining problems through matrix composition</a>
+<li><a href="#orgf5c2234">Chaining problems through matrix composition</a>
 <ul>
-<li><a href="#orgb53c44c">Taxing our farmers</a></li>
-<li><a href="#org1ce007f">EXAMPLE: Geometrical transformations</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#org3863c61">Equivalent matrices</a>
-<ul>
-<li><a href="#orga76854c">Identity Matrix</a></li>
-<li><a href="#org92a565b">Unit Column/Rows</a></li>
-<li><a href="#org755d874">Addition</a></li>
-<li><a href="#orge016f22">Elementary Matrices</a>
-<ul>
-<li><a href="#orgd923ff9">Type I - Row/Column Interchange</a></li>
-<li><a href="#org1853184">Type II - Row/Column Multiple</a></li>
-<li><a href="#org743b960">Type III - Row/Column Addition</a></li>
+<li><a href="#org44d1529">Taxing our farmers</a></li>
+<li><a href="#org2da90ba">EXAMPLE: Geometrical transformations</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgeb206cf">The LU Decomposition</a>
+<li><a href="#org7df7c9a">Equivalent matrices</a>
 <ul>
-<li><a href="#org5e23117">Gaussian elimination in matrix form</a>
+<li><a href="#orgea3d75b">Identity Matrix</a></li>
+<li><a href="#org7000662">Unit Column/Rows</a></li>
+<li><a href="#org02c1f79">Addition</a></li>
+<li><a href="#org2fa5457">Elementary Matrices</a>
 <ul>
-<li><a href="#org1c1c3a2">Elementary Lower Triangular Matrics</a></li>
-<li><a href="#orga6124f0">Building the <b>L</b> Matrix</a></li>
-<li><a href="#org2adbd06">Partial Pivoting</a></li>
-<li><a href="#org857b3b9">Extracting the pivots</a></li>
-</ul>
-</li>
-<li><a href="#orgb5dc421">Using the LU</a>
-<ul>
-<li><a href="#org1e2d93c">Solving for x in Ax=b</a></li>
-<li><a href="#orgba1da00">The LDU Decomposition</a></li>
-<li><a href="#orgcc072f8">The Cholesky Decomposition</a></li>
-<li><a href="#orgd5d3dbb">Solving for A<sup>-1</sup></a></li>
-<li><a href="#org30290e0">Least Squares</a></li>
+<li><a href="#org4cfd0db">Type I - Row/Column Interchange</a></li>
+<li><a href="#org1c3a0b4">Type II - Row/Column Multiple</a></li>
+<li><a href="#org52bfbda">Type III - Row/Column Addition</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgcfd9a31">The QR Decomposition</a>
+<li><a href="#org66c6817">The LU Decomposition</a>
 <ul>
-<li><a href="#org028765d">The Gram-Schmidt procedure</a>
+<li><a href="#orgca0294c">Gaussian elimination in matrix form</a>
 <ul>
-<li><a href="#org6462401">The Base case</a></li>
-<li><a href="#orga054e8e">Recursive Step</a></li>
+<li><a href="#org886b21d">Elementary Lower Triangular Matrics</a></li>
+<li><a href="#orgec68ac9">Building the <b>L</b> Matrix</a></li>
+<li><a href="#org3709d27">Partial Pivoting</a></li>
+<li><a href="#org304cb08">Extracting the pivots</a></li>
 </ul>
 </li>
-<li><a href="#org45dcfd5">Decomposing</a></li>
-<li><a href="#org8b20794">The Householder reduction</a>
+<li><a href="#org9db8819">Using the LU</a>
 <ul>
-<li><a href="#org70aaf6e">elementary reflector</a></li>
-<li><a href="#org2f029f9">elementary coordinate reflector</a></li>
-<li><a href="#org7ca8579">The QR decomposition - part 2</a></li>
+<li><a href="#org9e7536d">Solving for x in Ax=b</a></li>
+<li><a href="#orga61e74c">The LDU Decomposition</a></li>
+<li><a href="#org2b4f662">The Cholesky Decomposition</a></li>
+<li><a href="#org52fddae">Solving for A<sup>-1</sup></a></li>
+<li><a href="#org352a5fa">Least Squares</a></li>
 </ul>
 </li>
-<li><a href="#org1513f63">Givens reduction</a></li>
-<li><a href="#orgb8a4e05">Least Squares again</a></li>
 </ul>
 </li>
-<li><a href="#orge2c66c3"><span class="todo TODO">TODO</span> s</a></li>
-<li><a href="#org486d8e3">End</a></li>
-<li><a href="#orgd055c49">Notes from the Author</a></li>
+<li><a href="#org6fe1db3">The QR Decomposition</a>
+<ul>
+<li><a href="#org0fd1556">The Gram-Schmidt procedure</a>
+<ul>
+<li><a href="#orgb5750a5">The Base case</a></li>
+<li><a href="#orgfd31a2a">Recursive Step</a></li>
+</ul>
+</li>
+<li><a href="#org77cab40">Decomposing</a></li>
+<li><a href="#org5a3d0ad">The Householder reduction</a>
+<ul>
+<li><a href="#org1406244">elementary reflector</a></li>
+<li><a href="#orgcbb562a">elementary coordinate reflector</a></li>
+<li><a href="#org49e5026">The QR decomposition - part 2</a></li>
+</ul>
+</li>
+<li><a href="#org0e3219c">Givens reduction</a></li>
+<li><a href="#orgbd50524">Least Squares again</a></li>
+</ul>
+</li>
+<li><a href="#org7588cdc"><span class="todo TODO">TODO</span> s</a></li>
+<li><a href="#org5795772">End</a></li>
+<li><a href="#org32f96c8">Notes from the Author</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org3b084e9" class="outline-2">
-<h2 id="org3b084e9">Preface</h2>
-<div class="outline-text-2" id="text-org3b084e9">
+<div id="outline-container-orgc1f3607" class="outline-2">
+<h2 id="orgc1f3607">Preface</h2>
+<div class="outline-text-2" id="text-orgc1f3607">
 <p>
 This text is primarily my personal notes on linear algebra as I go through <a href="https://www.matrixanalysis.com">Matrix Analysis &amp; Applied Linear Algebra</a>. At the same time this document is a literate program that can be executed in Emacs so the text will be slowly building up a linear algebra library of sorts. This will often not match the order things are presented in the book. There is no emphasis on performance - just on clarity, extensability and correctness when possible. This is purely (self)educational with my primary motivation being to help me better understand what I learn (through having to explain it) and to sanity check with actual programs. Things that are adequately explained in the book will not be repeated here.
 </p>
@@ -164,16 +164,16 @@ This is very much a work in progress and will change often&#x2026;
 </div>
 </div>
 
-<div id="outline-container-orgcd503c5" class="outline-2">
-<h2 id="orgcd503c5">Systems of linear equations</h2>
-<div class="outline-text-2" id="text-orgcd503c5">
+<div id="outline-container-org8a93bb2" class="outline-2">
+<h2 id="org8a93bb2">Systems of linear equations</h2>
+<div class="outline-text-2" id="text-org8a93bb2">
 <p>
 The book's opening problem from ancient China of calculating the price of bushels of crop serves as a good example of a linear problem. I've simplified the problem a bit for clarity - but I will expand on it and refer back to it extensively:
 </p>
 </div>
-<div id="outline-container-orga6700ad" class="outline-3">
-<h3 id="orga6700ad">A farming problem</h3>
-<div class="outline-text-3" id="text-orga6700ad">
+<div id="outline-container-org42f889f" class="outline-3">
+<h3 id="org42f889f">A farming problem</h3>
+<div class="outline-text-3" id="text-org42f889f">
 <blockquote>
 <p>
 You have a 3 fruit farms in a region of ancient China. In a given year:
@@ -228,9 +228,9 @@ We are looking for the input fruit-prices that will yield the given profits for 
 </div>
 </div>
 
-<div id="outline-container-org54c54ea" class="outline-2">
-<h2 id="org54c54ea">Matices as representations of linear systems</h2>
-<div class="outline-text-2" id="text-org54c54ea">
+<div id="outline-container-org8c2eb22" class="outline-2">
+<h2 id="org8c2eb22">Matices as representations of linear systems</h2>
+<div class="outline-text-2" id="text-org8c2eb22">
 <p>
 The <b>linear system</b> can be represented with a matrix
 </p>
@@ -256,9 +256,9 @@ We prefer the first representation, but both ways work as long as you remember w
 </p>
 </div>
 
-<div id="outline-container-org40aaa74" class="outline-3">
-<h3 id="org40aaa74">The Matrix in the computer</h3>
-<div class="outline-text-3" id="text-org40aaa74">
+<div id="outline-container-org18f9659" class="outline-3">
+<h3 id="org18f9659">The Matrix in the computer</h3>
+<div class="outline-text-3" id="text-org18f9659">
 <p>
 Once we've chosen a layout the easiest way to store the matrix in the computer is to remember 3 values: <code>number-of-rows</code> <code>number-of-columns</code> <code>data</code>
 </p>
@@ -276,9 +276,9 @@ The <code>data</code> value will be a long list of size <code>num-row * num-col<
 </pre>
 </div>
 </div>
-<div id="outline-container-orgd9fc1e1" class="outline-4">
-<h4 id="orgd9fc1e1">Some helpers</h4>
-<div class="outline-text-4" id="text-orgd9fc1e1">
+<div id="outline-container-org4216a33" class="outline-4">
+<h4 id="org4216a33">Some helpers</h4>
+<div class="outline-text-4" id="text-org4216a33">
 <p>
 With a couple of helper function we can get back these 3 fields. This will improve the readability of the code as we go along
 </p>
@@ -365,9 +365,9 @@ For debugging and looking at results we also need to be able to print out the ma
 </div>
 </div>
 </div>
-<div id="outline-container-orgb502b89" class="outline-3">
-<h3 id="orgb502b89">Transposition: Getting the other equivalent matrix</h3>
-<div class="outline-text-3" id="text-orgb502b89">
+<div id="outline-container-org8190b1e" class="outline-3">
+<h3 id="org8190b1e">Transposition: Getting the other equivalent matrix</h3>
+<div class="outline-text-3" id="text-org8190b1e">
 <p>
 Since we have two equivalent matrices that represent our linear system we need a mechanism to go from one to the other. This method is the matrix transpose which flips the matrix along the diagonal. The text goes into depth on the properties of the matrix transpose, but in short, as long as you take the transpose of both sides of your equations equivalances will be preserved.
 </p>
@@ -396,16 +396,16 @@ Since we have two equivalent matrices that represent our linear system we need a
 </div>
 </div>
 </div>
-<div id="outline-container-org63a367b" class="outline-2">
-<h2 id="org63a367b">Representing the whole system of equations</h2>
-<div class="outline-text-2" id="text-org63a367b">
+<div id="outline-container-orgbf09bea" class="outline-2">
+<h2 id="orgbf09bea">Representing the whole system of equations</h2>
+<div class="outline-text-2" id="text-orgbf09bea">
 <p>
 Now that we can represent the fruit/profits system we want a mechanism to represent the whole system of equations so that given a constraint, we can solve for a solution.
 </p>
 </div>
-<div id="outline-container-org941eb4d" class="outline-3">
-<h3 id="org941eb4d">Matrix Multiplication</h3>
-<div class="outline-text-3" id="text-org941eb4d">
+<div id="outline-container-org69bd649" class="outline-3">
+<h3 id="org69bd649">Matrix Multiplication</h3>
+<div class="outline-text-3" id="text-org69bd649">
 <p>
 This is done notationally with matrix multiplication. The notation allows us to keep the two <b>Givens</b> separated and allows us to visually chain linear systems together. As a shorthand, we write the product of two matrices <code>A</code> and <code>B</code> as <code>AB = C</code>, with the order of <code>A</code> and <code>B</code> being important. For every value (at a given row and column position) in the resulting matrix <code>C</code> we take the equivalent row in <code>A</code> and multiply it by its equivalent column in <code>B</code>. From this we can conclude that <code>C</code> will have as many rows as <code>A</code> and as many column as <code>B</code>
 </p>
@@ -415,9 +415,9 @@ Multiplying a row times a column is called an <code>inner product</code>
 </p>
 </div>
 
-<div id="outline-container-orgd4ed471" class="outline-4">
-<h4 id="orgd4ed471">Inner Product</h4>
-<div class="outline-text-4" id="text-orgd4ed471">
+<div id="outline-container-org6122d7b" class="outline-4">
+<h4 id="org6122d7b">Inner Product</h4>
+<div class="outline-text-4" id="text-org6122d7b">
 <p>
 The <code>inner-product</code> is defined as the sum of the product of every pair of equivalent elements in the two vectors. The sum will naturally return one scalar value. This operation only makes sense if both the row and column have the same number of values.
 </p>
@@ -447,9 +447,9 @@ The <code>inner-product</code> is defined as the sum of the product of every pai
 </div>
 </div>
 
-<div id="outline-container-org288b583" class="outline-4">
-<h4 id="org288b583">Submatrices</h4>
-<div class="outline-text-4" id="text-org288b583">
+<div id="outline-container-org7e3057d" class="outline-4">
+<h4 id="org7e3057d">Submatrices</h4>
+<div class="outline-text-4" id="text-org7e3057d">
 <p>
 To get rows and columns (and other submatrices) we need a few more helper functions
 </p>
@@ -516,9 +516,9 @@ To get rows and columns (and other submatrices) we need a few more helper functi
 </div>
 </div>
 
-<div id="outline-container-org1883cd0" class="outline-4">
-<h4 id="org1883cd0">Matrix Product</h4>
-<div class="outline-text-4" id="text-org1883cd0">
+<div id="outline-container-orgf081d3b" class="outline-4">
+<h4 id="orgf081d3b">Matrix Product</h4>
+<div class="outline-text-4" id="text-orgf081d3b">
 <p>
 Now we have all the tools we need to write down the algorithm for calculating the matrix product. First we write a function to calculate the product for one value at a given position
 </p>
@@ -572,9 +572,9 @@ And then we recursively apply it to construct the resulting matrix
 </div>
 </div>
 
-<div id="outline-container-orgaf35196" class="outline-4">
-<h4 id="orgaf35196">Matrix Conformability</h4>
-<div class="outline-text-4" id="text-orgaf35196">
+<div id="outline-container-org68d3443" class="outline-4">
+<h4 id="org68d3443">Matrix Conformability</h4>
+<div class="outline-text-4" id="text-org68d3443">
 <p>
 You will notice that the algorithm won't make sense if the number of columns of <code>A</code> doesn't match the number of rows of <code>B</code>. When the values match the matrices are called <b>conformable</b>. When they <i>don't</i> match you will see that inner product isn't defined and therefore neither is the product.
 </p>
@@ -588,9 +588,9 @@ You will notice that the algorithm won't make sense if the number of columns of 
 </div>
 </div>
 </div>
-<div id="outline-container-orgd6d4764" class="outline-4">
-<h4 id="orgd6d4764">Addendum: Scalar Product</h4>
-<div class="outline-text-4" id="text-orgd6d4764">
+<div id="outline-container-org0152e5d" class="outline-4">
+<h4 id="org0152e5d">Addendum: Scalar Product</h4>
+<div class="outline-text-4" id="text-org0152e5d">
 <p>
 An additional form of matrix multiplication is between a matrix and a scalar. Here we simply multiply each element of the matrix times the scalar to construct the resulting matrix. The order of multiplication is not important -&gt; <b>&alpha;A=A&alpha;</b>
 </p>
@@ -610,9 +610,9 @@ An additional form of matrix multiplication is between a matrix and a scalar. He
 </div>
 </div>
 
-<div id="outline-container-orgde0bed0" class="outline-3">
-<h3 id="orgde0bed0">A system of equations as matrix product</h3>
-<div class="outline-text-3" id="text-orgde0bed0">
+<div id="outline-container-org7ce0c81" class="outline-3">
+<h3 id="org7ce0c81">A system of equations as matrix product</h3>
+<div class="outline-text-3" id="text-org7ce0c81">
 <p>
 Now that we have all our tools we can write down a matrix product that will mimic our system of equation.
 </p>
@@ -655,9 +655,9 @@ x + 2y + 3z\\
 \end{equation}
 </div>
 
-<div id="outline-container-org60ab1af" class="outline-4">
-<h4 id="org60ab1af">The mirror universe</h4>
-<div class="outline-text-4" id="text-org60ab1af">
+<div id="outline-container-org4d1956a" class="outline-4">
+<h4 id="org4d1956a">The mirror universe</h4>
+<div class="outline-text-4" id="text-org4d1956a">
 <p>
 Now I said that flipped matrix was also a valid representation. We can confirm this by taking the transpose of both sides 
 </p>
@@ -686,9 +686,9 @@ It yields another matrix product that mimics the equations, however you'll see i
 </div>
 </div>
 
-<div id="outline-container-orgce8824a" class="outline-3">
-<h3 id="orgce8824a">Chaining problems through matrix composition</h3>
-<div class="outline-text-3" id="text-orgce8824a">
+<div id="outline-container-orgf5c2234" class="outline-3">
+<h3 id="orgf5c2234">Chaining problems through matrix composition</h3>
+<div class="outline-text-3" id="text-orgf5c2234">
 <p>
 The real power of matrix multiplication is in its ability to chain systems together through <b>linear composition</b>
 </p>
@@ -698,9 +698,9 @@ If we are given a new problem that take the output of our first system and produ
 </p>
 </div>
 
-<div id="outline-container-orgb53c44c" class="outline-4">
-<h4 id="orgb53c44c">Taxing our farmers</h4>
-<div class="outline-text-4" id="text-orgb53c44c">
+<div id="outline-container-org44d1529" class="outline-4">
+<h4 id="org44d1529">Taxing our farmers</h4>
+<div class="outline-text-4" id="text-org44d1529">
 <p>
 Say the imperial palace has a system for collecting taxes
 </p>
@@ -754,9 +754,9 @@ Note that the rows of <b>BA</b> are the combination of the rows of <b>A</b> and 
 </p>
 </div>
 </div>
-<div id="outline-container-org1ce007f" class="outline-4">
-<h4 id="org1ce007f">EXAMPLE: Geometrical transformations</h4>
-<div class="outline-text-4" id="text-org1ce007f">
+<div id="outline-container-org2da90ba" class="outline-4">
+<h4 id="org2da90ba">EXAMPLE: Geometrical transformations</h4>
+<div class="outline-text-4" id="text-org2da90ba">
 <p>
 A very simple example are the linear systems that takes coordinates <i>x y</i> and do transformations on them
 </p>
@@ -856,17 +856,17 @@ So given a point <i>[x y]</i> (represented by the column vector <b>v</b>) we can
 </div>
 </div>
 </div>
-<div id="outline-container-org3863c61" class="outline-2">
-<h2 id="org3863c61">Equivalent matrices</h2>
-<div class="outline-text-2" id="text-org3863c61">
+<div id="outline-container-org7df7c9a" class="outline-2">
+<h2 id="org7df7c9a">Equivalent matrices</h2>
+<div class="outline-text-2" id="text-org7df7c9a">
 <p>
 Now thanks to matrix multiplication we can represent linear systems and we can chain them together. The next step is extending multiplication to represent general manipulations of matrices.
 </p>
 </div>
 
-<div id="outline-container-orga76854c" class="outline-3">
-<h3 id="orga76854c">Identity Matrix</h3>
-<div class="outline-text-3" id="text-orga76854c">
+<div id="outline-container-orgea3d75b" class="outline-3">
+<h3 id="orgea3d75b">Identity Matrix</h3>
+<div class="outline-text-3" id="text-orgea3d75b">
 <p>
 For any matrix <b>A</b>, the identity matrix <b>I</b> is such that <b>A*I</b> = <b>A</b> = <b>I*A</b>. Given the dimensions, <b>I</b> has to be a square matrix. It will have <b>1</b>'s on the diagonal (ie. where <code>row==column</code>) and zeroes everywhere else. We build it recursively:
 </p>
@@ -903,9 +903,9 @@ For any matrix <b>A</b>, the identity matrix <b>I</b> is such that <b>A*I</b> = 
 </div>
 </div>
 
-<div id="outline-container-org92a565b" class="outline-3">
-<h3 id="org92a565b">Unit Column/Rows</h3>
-<div class="outline-text-3" id="text-org92a565b">
+<div id="outline-container-org7000662" class="outline-3">
+<h3 id="org7000662">Unit Column/Rows</h3>
+<div class="outline-text-3" id="text-org7000662">
 <p>
 Each column of the <b>identity matrix</b> is a unit column (denoted as <b>e<sub><i>j</i></sub></b>). It contains a <b>1</b> in a given postion (here: <i>j</i>) and <b>0s</b> everwhere else. Its transpose is naturally called the <b>unit row</b><br>
 <b>Ae<sub><i>j</i></sub></b> = the <i>j</i> column of A<br>
@@ -956,9 +956,9 @@ Here I'm just trying out a new notation. With <code>letrec</code> we can hide th
 </div>
 </div>
 
-<div id="outline-container-org755d874" class="outline-3">
-<h3 id="org755d874">Addition</h3>
-<div class="outline-text-3" id="text-org755d874">
+<div id="outline-container-org02c1f79" class="outline-3">
+<h3 id="org02c1f79">Addition</h3>
+<div class="outline-text-3" id="text-org02c1f79">
 <p>
 As a tool in building new matrices, we need a way to easily add two matrices, ie. add their values one to one. Matrices that are added need to have the same size.
 </p>
@@ -1011,9 +1011,9 @@ As a tool in building new matrices, we need a way to easily add two matrices, ie
 </blockquote>
 </div>
 </div>
-<div id="outline-container-orge016f22" class="outline-3">
-<h3 id="orge016f22">Elementary Matrices</h3>
-<div class="outline-text-3" id="text-orge016f22">
+<div id="outline-container-org2fa5457" class="outline-3">
+<h3 id="org2fa5457">Elementary Matrices</h3>
+<div class="outline-text-3" id="text-org2fa5457">
 <p>
 The manipulation of the rows and columns can be broken down into 3 types of <b>elementary matrices</b> that when multiplied with our <b>linear systems</b> will generate <b>equivalent</b> matrices (<b>E</b>). 
 </p>
@@ -1038,9 +1038,9 @@ So Gauss-Jordan elimination for non-singular matrices has given us our first dec
 Row/Column operations come in 3 flavors
 </p>
 </div>
-<div id="outline-container-orgd923ff9" class="outline-4">
-<h4 id="orgd923ff9">Type I - Row/Column Interchange</h4>
-<div class="outline-text-4" id="text-orgd923ff9">
+<div id="outline-container-org4cfd0db" class="outline-4">
+<h4 id="org4cfd0db">Type I - Row/Column Interchange</h4>
+<div class="outline-text-4" id="text-org4cfd0db">
 <p>
 Interchaning rows (or columns) <i>i</i> and <i>j</i>
 </p>
@@ -1068,9 +1068,9 @@ Interchaning rows (or columns) <i>i</i> and <i>j</i>
 </div>
 </div>
 
-<div id="outline-container-org1853184" class="outline-4">
-<h4 id="org1853184">Type II - Row/Column Multiple</h4>
-<div class="outline-text-4" id="text-org1853184">
+<div id="outline-container-org1c3a0b4" class="outline-4">
+<h4 id="org1c3a0b4">Type II - Row/Column Multiple</h4>
+<div class="outline-text-4" id="text-org1c3a0b4">
 <p>
 Multiplying row (or column) <i>i</i> by <i>&alpha;</i>
 </p>
@@ -1098,9 +1098,9 @@ Multiplying row (or column) <i>i</i> by <i>&alpha;</i>
 </div>
 </div>
 
-<div id="outline-container-org743b960" class="outline-4">
-<h4 id="org743b960">Type III - Row/Column Addition</h4>
-<div class="outline-text-4" id="text-org743b960">
+<div id="outline-container-org52bfbda" class="outline-4">
+<h4 id="org52bfbda">Type III - Row/Column Addition</h4>
+<div class="outline-text-4" id="text-org52bfbda">
 <p>
 Adding a multiple of a row (or column) <i>i</i> to row (or column) <i>j</i>
 </p>
@@ -1130,13 +1130,13 @@ Adding a multiple of a row (or column) <i>i</i> to row (or column) <i>j</i>
 </div>
 </div>
 
-<div id="outline-container-orgeb206cf" class="outline-2">
-<h2 id="orgeb206cf">The LU Decomposition</h2>
-<div class="outline-text-2" id="text-orgeb206cf">
+<div id="outline-container-org66c6817" class="outline-2">
+<h2 id="org66c6817">The LU Decomposition</h2>
+<div class="outline-text-2" id="text-org66c6817">
 </div>
-<div id="outline-container-org5e23117" class="outline-3">
-<h3 id="org5e23117">Gaussian elimination in matrix form</h3>
-<div class="outline-text-3" id="text-org5e23117">
+<div id="outline-container-orgca0294c" class="outline-3">
+<h3 id="orgca0294c">Gaussian elimination in matrix form</h3>
+<div class="outline-text-3" id="text-orgca0294c">
 <p>
 If linear equations at their simplest take inputs and produce some outputs, then Gaussian elimination is our method of reversing the process. It's a systematic way for taking a known linear system with a given output and solving for its input. Because we know that adding and scaling equations preserves equalities, Gaussian elimination is a scheme for combining and swapping equations so that they reduce to something simpler which can be solved directly. We do this by elimination factors in our equations such that the last one is of the form <b>&alpha;x=b</b>. Equalities being preserved, we can use this simple equation to solve for one of the unknown inputs. Each of the remaining equation includes just one additional unknow input so that through back-substitution we can then solve for all of them one by one. 
 </p>
@@ -1180,9 +1180,9 @@ On a high level the reduction of the equations happens in two repeated steps on 
 </p>
 </blockquote>
 </div>
-<div id="outline-container-org1c1c3a2" class="outline-4">
-<h4 id="org1c1c3a2">Elementary Lower Triangular Matrics</h4>
-<div class="outline-text-4" id="text-org1c1c3a2">
+<div id="outline-container-org886b21d" class="outline-4">
+<h4 id="org886b21d">Elementary Lower Triangular Matrics</h4>
+<div class="outline-text-4" id="text-org886b21d">
 <p>
 The example I used above was done without adjusting any pivots. We reducing the first column by simply eliminated the values below the <code>2</code> (in the upper left) and we could have done that by multiply our <b>A</b> by two <code>Type III</code> <b>elementary matrices</b> from the left like so:
 </p>
@@ -1339,9 +1339,9 @@ The result is surprisingly simple and we can see that we didn't really need to c
 </div>
 </div>
 
-<div id="outline-container-orga6124f0" class="outline-4">
-<h4 id="orga6124f0">Building the <b>L</b> Matrix</h4>
-<div class="outline-text-4" id="text-orga6124f0">
+<div id="outline-container-orgec68ac9" class="outline-4">
+<h4 id="orgec68ac9">Building the <b>L</b> Matrix</h4>
+<div class="outline-text-4" id="text-orgec68ac9">
 <p>
 So now our product of elementary matrices <b>R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub>A=U</b> shortens to something similar <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub>A=U</b>, but where each <i>Elementary Lower-Triangular Matrix</i> <b>G</b> takes the place of several <b>R</b> matrices. The product <b>G<sub>r</sub>G<sub>&#x2026;</sub>G<sub>2</sub>G<sub>1</sub></b> involved a lot of matrix products, but fortunately we have a shortcut. These <b>G</b> matrices have the property that their inverse is just a matter of flipping the sign of the factors' in their column. You can confirm this by inverting our definition <b>G=R<sub>n</sub>R<sub>&#x2026;</sub>R<sub>2</sub>R<sub>1</sub></b> and remembering that the <b>R</b>'s just involve a sign flip and <b>R<sup>-1</sup></b>'s are also <code>Type III</code> matrices. 
 </p>
@@ -1549,9 +1549,9 @@ Updating <b>U</b> could also be done without doing a whole matrix product and ju
 </div>
 </div>
 
-<div id="outline-container-org2adbd06" class="outline-4">
-<h4 id="org2adbd06">Partial Pivoting</h4>
-<div class="outline-text-4" id="text-org2adbd06">
+<div id="outline-container-org3709d27" class="outline-4">
+<h4 id="org3709d27">Partial Pivoting</h4>
+<div class="outline-text-4" id="text-org3709d27">
 <p>
 Now while in previous section we managed to decompose <b>A</b> into two matrices <b>L</b> and <b>U</b>, you may have noticed there is an error condition our code. The issue is that we may find that after performing elimination on a column we are left with a zero in the next column's pivot position. This makes it impossible to eliminate the factors below it. The solution we have from <i>Gaussian Elimination</i> is to swap in a row from below so that the pivot is non-zero. We are going to take advantage of this and use the strategy called <b>partial pivoting</b> and will swap in to the pivot position whichever row has the maximal value for that column. It will ensure that our results have less error and like any row-swap can be done pretty easily with a <code>Type I</code> elementary matrix.
 </p>
@@ -1636,9 +1636,9 @@ Turning back to our orginal <b>Ax=b</b> we can again generate the <b>b<sub>new</
 </div>
 </div>
 
-<div id="outline-container-org857b3b9" class="outline-4">
-<h4 id="org857b3b9">Extracting the pivots</h4>
-<div class="outline-text-4" id="text-org857b3b9">
+<div id="outline-container-org304cb08" class="outline-4">
+<h4 id="org304cb08">Extracting the pivots</h4>
+<div class="outline-text-4" id="text-org304cb08">
 <p>
 On <i>page 150</i> the book shows us how we can fix this situation by extracting the partial pivots out of column reductions so that instead of: <b>G<sub>1</sub>F<sub>1</sub>G<sub>2</sub>F<sub>2</sub>..G<sub>r</sub>F<sub>r</sub>A=U</b> we are left with something that looks more like  <b>G<sub>1</sub>G<sub>2</sub>..G<sub>r</sub>F<sub>1</sub>F<sub>2</sub>..F<sub>r</sub>A=U</b>. With the <b>G</b>'s together we can use our inversion trick to get our easily-computed <b>L</b> back. Then taking the product of the <b>F</b>'s gives us a new <i>permutation matrix</i> <b>P</b> so that our final equation will look like <b>PA=LU</b>. Looking at the book's solution from a different perspective, the reason we've had the matrices interleaved is because that's how we build them (from right to left). We can't go into the middle of the matrix and adjust the pivot position till we'd carried out all the eliminations in the columns before it. The previous eliminations will mix up the rows and change all the values in that column so the maximal value won't be known ahead of time. So the <i>GFGFGF</i> sequence for building the reduction matrices (from right to left, column by column)  needs to be observed. The trick is that once we've finished Gaussian elimination then we know the final order of the rows in <b>U</b> and what <i>page 150</i> demonstrates is that if we know the row interchanges, we can actually carry them out first as long as we then fix-up any <i>preceding</i> eliminations matrices a bit. Specifically if you adjust some pivot <i>k</i> by swapping it with row <i>k+i</i> then any <i>previous</i> eliminations that involved the row <i>k</i> (and row <i>k+i</i>) now needs to be fixed to reflect that you'll be doing the row interchange ahead of time.
 </p>
@@ -1720,9 +1720,9 @@ So our method will still go reducing the matrix column by column and building up
 </div>
 </div>
 
-<div id="outline-container-orgb5dc421" class="outline-3">
-<h3 id="orgb5dc421">Using the LU</h3>
-<div class="outline-text-3" id="text-orgb5dc421">
+<div id="outline-container-org9db8819" class="outline-3">
+<h3 id="org9db8819">Using the LU</h3>
+<div class="outline-text-3" id="text-org9db8819">
 <blockquote>
 <p>
 <b><i>Notes on getting a good numerical solution:</i></b>
@@ -1743,9 +1743,9 @@ The topic of <i>residuals</i>, <i>sensitivity</i> and <i>coditioning</i> will be
 </div>
 
 
-<div id="outline-container-org1e2d93c" class="outline-4">
-<h4 id="org1e2d93c">Solving for x in Ax=b</h4>
-<div class="outline-text-4" id="text-org1e2d93c">
+<div id="outline-container-org9e7536d" class="outline-4">
+<h4 id="org9e7536d">Solving for x in Ax=b</h4>
+<div class="outline-text-4" id="text-org9e7536d">
 <p>
 Now that we can break a linear system <b>A</b> into two systems <b>L</b> and <b>U</b> we need to go back to where we started and solve for inputs given some outputs.We started with <b>Ax=b</b> and now we know we can do <b>PA=LU</b>. Combinding the two we can get <b>PAx=Pb</b> and then <b>LUx=Pb</b>. As mentioned before, <b>b<sub>new</sub>=Pb</b>, so for simplicity <b>LUx=b<sub>new</sub></b>. The new <b>b</b> has the same output values, just reordered a bit due to pivot adjustments. Since the order of the original equations generally doesn't have a special significance this is just a minor change.
 </p>
@@ -1843,8 +1843,8 @@ Now glueing everything together is now just a few lines of code
 </div>
 
 <ul class="org-ul">
-<li><a id="orgefa5cab"></a>EXAMPLE: Vandermonde matrices<br>
-<div class="outline-text-5" id="text-orgefa5cab">
+<li><a id="org05dc419"></a>EXAMPLE: Vandermonde matrices<br>
+<div class="outline-text-5" id="text-org05dc419">
 <p>
 For a good immediate usecase see <a href="./vandermonde.html">my explanation of the Vandermonde matrix</a> and how we can now fit polynomials to points (using the code we've just developed)
 </p>
@@ -1852,9 +1852,9 @@ For a good immediate usecase see <a href="./vandermonde.html">my explanation of 
 </li>
 </ul>
 </div>
-<div id="outline-container-orgba1da00" class="outline-4">
-<h4 id="orgba1da00">The LDU Decomposition</h4>
-<div class="outline-text-4" id="text-orgba1da00">
+<div id="outline-container-orga61e74c" class="outline-4">
+<h4 id="orga61e74c">The LDU Decomposition</h4>
+<div class="outline-text-4" id="text-orga61e74c">
 <p>
 As mention on <i>page 154</i>, the <b>LU</b> can be further broken down into <b>LDU</b> - where both <b>L</b> and <b>U</b> have <b>1</b>'s on the diagonal and <b>D</b> is a diagonal matrix with all the pivots. This has the nice property of being more symmetric.
 </p>
@@ -1917,9 +1917,9 @@ An extra nicety is that if <b>A</b> is symmetric then <b>A=A<sup>T</sup></b> and
 </div>
 </div>
 
-<div id="outline-container-orgcc072f8" class="outline-4">
-<h4 id="orgcc072f8">The Cholesky Decomposition</h4>
-<div class="outline-text-4" id="text-orgcc072f8">
+<div id="outline-container-org2b4f662" class="outline-4">
+<h4 id="org2b4f662">The Cholesky Decomposition</h4>
+<div class="outline-text-4" id="text-org2b4f662">
 <p>
 Going one step further - if we have a symmetric matrix (so <b>A=LDL<sup>T</sup></b>) and all the pivots are positive, then we can break up the <b>D</b>  into 2 further matrices <b>D<sub>split</sub></b>. The <b>D<sub>split</sub></b> matrix will be like <b>D</b>, but instead each element on the diagonal (the pivots from the original <b>U</b> matrix) will be replaced by its square root - so that <b>D<sub>split</sub>D<sub>split</sub>=D</b>. This is taking advantage of the fact that a unit diagonal multiplied with itself simply squares the diagonal elements. Note here that if any of the diagonal elements are negative, then you can't really take the square root here b/c you'd get complex numbers.
 </p>
@@ -1975,9 +1975,9 @@ see: <a href="https://math.stackexchange.com/questions/621045/why-does-cholesky-
 </blockquote>
 </div>
 </div>
-<div id="outline-container-orgd5d3dbb" class="outline-4">
-<h4 id="orgd5d3dbb">Solving for A<sup>-1</sup></h4>
-<div class="outline-text-4" id="text-orgd5d3dbb">
+<div id="outline-container-org52fddae" class="outline-4">
+<h4 id="org52fddae">Solving for A<sup>-1</sup></h4>
+<div class="outline-text-4" id="text-org52fddae">
 <p>
 On <i>page 148</i> we get a simple algorithm for efficiently contructing <b>A<sup>-1</sup></b>. Basically we are taking the equation <b>AA<sup>-1</sup>=I</b>, where <b>A<sup>-1</sup></b> is unknown, and solving it column by column. Treating each column of <b>A<sup>-1</sup></b> as <b>x</b> and each column of <b>I</b> and <b>b</b> we are reusing <b>Ax=b</b> and writing it as <b>AA<sup>-1</sup><sub>*j</sub>=e<sub>j</sub></b>. Once we solve each column we put them all together and rebuild <b>A<sup>-1</sup></b>.
 </p>
@@ -2010,9 +2010,9 @@ Because our data is arranged row-by-row, it'll be easier for me to just build <b
 </blockquote>
 </div>
 </div>
-<div id="outline-container-org30290e0" class="outline-4">
-<h4 id="org30290e0">Least Squares</h4>
-<div class="outline-text-4" id="text-org30290e0">
+<div id="outline-container-org352a5fa" class="outline-4">
+<h4 id="org352a5fa">Least Squares</h4>
+<div class="outline-text-4" id="text-org352a5fa">
 <p>
 Now that we have a mechanism to solve square linear systems we need to extend <b>Ax=b</b> to the overdefined case where we have more linear equations than parameters. This situation will come up constantly, generally in situations where you only have a few inputs you want to solve for, but you have a lot of redundant measurements. 
 </p>
@@ -2071,8 +2071,8 @@ As we learn in calculus, minimizing a function is done by take its derivative wi
 </div>
 
 <ul class="org-ul">
-<li><a id="org2aa2984"></a>Numerically stable solution<br>
-<div class="outline-text-5" id="text-org2aa2984">
+<li><a id="org4265e8f"></a>Numerically stable solution<br>
+<div class="outline-text-5" id="text-org4265e8f">
 <p>
 Unfortunately while the solutions turned out in the end to be very clean, it does involve a matrix multiplication and therefore has some numerical issues. A better solution is presented in <b>Exercise 4.6.9</b> with the equations
 </p>
@@ -2115,9 +2115,9 @@ I even double checked that this is true in a <a href="../asparapiss/">little dem
 </div>
 </div>
 </div>
-<div id="outline-container-orgcfd9a31" class="outline-2">
-<h2 id="orgcfd9a31">The QR Decomposition</h2>
-<div class="outline-text-2" id="text-orgcfd9a31">
+<div id="outline-container-org6fe1db3" class="outline-2">
+<h2 id="org6fe1db3">The QR Decomposition</h2>
+<div class="outline-text-2" id="text-org6fe1db3">
 <p>
 The 70 or so pages that follow the "Least Squares" section in the book are rather frustrating b/c there is no end goal in sight, but on paged <i>307-308</i> we have our big reveal. The goal is to construct a new decomposition <b>A=QR</b> that will give us similar benefits to the LU while presenting us with a few more useful properties. It will combine the benefits of lower/upper triangular matrices which gave us forward/back-substitution and the benefits of an orthonormal basis.
 </p>
@@ -2136,9 +2136,9 @@ If <b>A</b> is square then the columns of <b>A</b> are already technically in an
 </p>
 </div>
 
-<div id="outline-container-org028765d" class="outline-3">
-<h3 id="org028765d">The Gram-Schmidt procedure</h3>
-<div class="outline-text-3" id="text-org028765d">
+<div id="outline-container-org0fd1556" class="outline-3">
+<h3 id="org0fd1556">The Gram-Schmidt procedure</h3>
+<div class="outline-text-3" id="text-org0fd1556">
 <p>
 The Gram-Schmidt procedure is a recursive algorithm for taking a set of linearly independent vectors (in the standard basis) and rewriting it as a set of coordinates in a new orthonormal basis that will span the same space. The new basis will naturally be in the same space <b>R<sup>n</sup></b> and its dimension will equal the number of indepenent vectors. So given <b>n</b> linearly independent vectors it will return to you a set of <b>n</b> orthonormal vectors that span the same space.
 </p>
@@ -2147,9 +2147,9 @@ The Gram-Schmidt procedure is a recursive algorithm for taking a set of linearly
 This already at face value seems like something that could prove to be useful. After describing the algorithm we will see how we can use these properties to build up the decomposition we want.
 </p>
 </div>
-<div id="outline-container-org6462401" class="outline-4">
-<h4 id="org6462401">The Base case</h4>
-<div class="outline-text-4" id="text-org6462401">
+<div id="outline-container-orgb5750a5" class="outline-4">
+<h4 id="orgb5750a5">The Base case</h4>
+<div class="outline-text-4" id="text-orgb5750a5">
 <p>
 We will see that the procedure builds the new basis incrementally one basis vector at a time. And that if we've built a basis for <b>n</b> independent vectors, then adding an <b>n+1</b>'th vector will be very easy. So first we look at the simplest case of just one vector (that's.. independent b/c it's just all alone). To make an orthonormal basis for one vector you just normalizes it. Bare in mind that both the vector and the new basis span the same space
 </p>
@@ -2187,9 +2187,9 @@ We will see that the procedure builds the new basis incrementally one basis vect
 </div>
 </div>
 </div>
-<div id="outline-container-orga054e8e" class="outline-4">
-<h4 id="orga054e8e">Recursive Step</h4>
-<div class="outline-text-4" id="text-orga054e8e">
+<div id="outline-container-orgfd31a2a" class="outline-4">
+<h4 id="orgfd31a2a">Recursive Step</h4>
+<div class="outline-text-4" id="text-orgfd31a2a">
 <p>
 The recursive step describes how to expand your basis when you're given a new independent vector - ie. one that's not in its span - so that the new basis includes this vector. I think it's not immediately obvious, but this will always involve adding just one additional vector to the basis
 </p>
@@ -2351,9 +2351,9 @@ In code it's just a matter of running <code>(matrix-normalize-column ...)</code>
 </div>
 </div>
 </div>
-<div id="outline-container-org45dcfd5" class="outline-3">
-<h3 id="org45dcfd5">Decomposing</h3>
-<div class="outline-text-3" id="text-org45dcfd5">
+<div id="outline-container-org77cab40" class="outline-3">
+<h3 id="org77cab40">Decomposing</h3>
+<div class="outline-text-3" id="text-org77cab40">
 <p>
 So now we have a procedure to build an orthonormal basis <b>Q</b> from linearly independent vectors, but we still need to do the last step of turning this into a decompositon similar in form to <b>A=LU</b> - where given a matrix <b>A</b> we can write it as the product of several other matrices
 </p>
@@ -2559,17 +2559,17 @@ is in effect doing what we did in the recursive step, but backwards
 </p>
 </div>
 </div>
-<div id="outline-container-org8b20794" class="outline-3">
-<h3 id="org8b20794">The Householder reduction</h3>
-<div class="outline-text-3" id="text-org8b20794">
+<div id="outline-container-org5a3d0ad" class="outline-3">
+<h3 id="org5a3d0ad">The Householder reduction</h3>
+<div class="outline-text-3" id="text-org5a3d0ad">
 <p>
 An alternate method to build a <b>QR</b> matrix is to take a more direct approach like in the <b>LU</b> and to zero out columns to build an upper triangular <b>R</b>. The difference from the <b>LU</b> is that now instead of using row operations to get zeroes we will restrict ourselves to using <b>elementary reflectors</b>. Their key property is that they are orthonormal, so when we carry out a series of reflections <b>Q<sub>1</sub>Q<sub>2</sub>..Q<sub>k</sub>A</b> we can combine them into one matrix which will be guaranteed to be orthonormal too. In the <b>LU</b>'s Gaussian elimination the elementary matrices we used were not  orthonormal so we didn't have this same guarantee (for a simple example consider row-addition: it's not orthogonal and its norm isn't equal to 1)
 </p>
 </div>
 
-<div id="outline-container-org70aaf6e" class="outline-4">
-<h4 id="org70aaf6e">elementary reflector</h4>
-<div class="outline-text-4" id="text-org70aaf6e">
+<div id="outline-container-org1406244" class="outline-4">
+<h4 id="org1406244">elementary reflector</h4>
+<div class="outline-text-4" id="text-org1406244">
 <p>
 An elementary reflector is a special matrix/linear-system which when given a vector produces its reflection across a hyperplane. The hyperplane is orthogonal to some reference vector <b>u</b>. The textbook has a nice illustration for the <b>R<sup>3</sup></b> case , but to understand it in higher dimensions you need to break up the problem. The hyperplane you reflect over is the <i>not-in-span-of</i> <b>u</b> space. So in effect to get the reflection you are taking the component of your vector that's in the direction of <b>u</b> and subtracting it twice to create its reflection. If the input vector is <b>x</b> then:
 </p>
@@ -2593,9 +2593,9 @@ In matrix form we'd factor out the <b>x</b> and get <b>(I-2uu<sup>t</sup>/u<sup>
 </div>
 </div>
 </div>
-<div id="outline-container-org2f029f9" class="outline-4">
-<h4 id="org2f029f9">elementary coordinate reflector</h4>
-<div class="outline-text-4" id="text-org2f029f9">
+<div id="outline-container-orgcbb562a" class="outline-4">
+<h4 id="orgcbb562a">elementary coordinate reflector</h4>
+<div class="outline-text-4" id="text-orgcbb562a">
 <p>
 To build an upper triangular matrix we need to zero out values below the diagonal. The way we're going to do is by reflecting those columns onto coordinate axis. Ocne a vector is on a coordinate axis then its other components are naturally zero!
 </p>
@@ -2641,9 +2641,9 @@ So given a vector and a coordinate axis we can quickly build this on top of our 
 </div>
 </div>
 
-<div id="outline-container-org7ca8579" class="outline-4">
-<h4 id="org7ca8579">The QR decomposition - part 2</h4>
-<div class="outline-text-4" id="text-org7ca8579">
+<div id="outline-container-org49e5026" class="outline-4">
+<h4 id="org49e5026">The QR decomposition - part 2</h4>
+<div class="outline-text-4" id="text-org49e5026">
 <p>
 So now we can build matrices that reflect vector onto axis. We need to leverage this to build the upper triangluar matrix <b>R</b> of the <b>QR</b>. If we directly start to zero out things column after column with reflectors like we did in the <b>LU</b> case we would get an equation of the form  <b>Q<sub>k</sub>..Q<sub>2</sub>Q<sub>1</sub>A=R</b>. But the problem is that the <b>Q<sub>i</sub></b>'s are not as clean as row operations and the column of zeroes will not get preserved between reflections. In other words <b>Q<sub>1</sub></b> will reflect the first column onto <b>e<sub>1</sub></b>, but then the second reflector <b>Q<sub>2</sub></b> will reflect it away somewhere else and you will lose those zeroes. So we need to be a little more clever here and find a way to preserve these columns as we go forward.
 </p>
@@ -2771,8 +2771,6 @@ B/c of inadequacies of my matrix format and the minimal array of helper function
                                      reflector-matrix<span style="color: #999999;">)</span>
                      (matrix-build-R sub-R
                                      intermediate-matrix<span style="color: #999999;">))))))))</span>
-
-<span style="color: #999999;">)</span>
 </pre>
 </div>
 <p>
@@ -2781,17 +2779,17 @@ In some ways this method is nicer than Gram-Schmidt b/c the goal is more direct 
 </div>
 </div>
 </div>
-<div id="outline-container-org1513f63" class="outline-3">
-<h3 id="org1513f63">Givens reduction</h3>
-<div class="outline-text-3" id="text-org1513f63">
+<div id="outline-container-org0e3219c" class="outline-3">
+<h3 id="org0e3219c">Givens reduction</h3>
+<div class="outline-text-3" id="text-org0e3219c">
 <p>
 Is similar to the Householder by uses plane rotations instead. These can eliminate value in your matrix one rotation at a time. It can make sense for sparse matrices&#x2026; I will return to this if it turns out crucial.
 </p>
 </div>
 </div>
-<div id="outline-container-orgb8a4e05" class="outline-3">
-<h3 id="orgb8a4e05">Least Squares again</h3>
-<div class="outline-text-3" id="text-orgb8a4e05">
+<div id="outline-container-orgbd50524" class="outline-3">
+<h3 id="orgbd50524">Least Squares again</h3>
+<div class="outline-text-3" id="text-orgbd50524">
 <p>
 While the new <b>QR</b> matrices seem to have some very desirable qualities as compared to the <b>LU</b>, one major issue is still outstanding. When we perform Gaussian Elimination the upper and lower triangular matrices directly inform us about how to solve the <b>Ax=b</b> system of linear equations. Given an output <b>b</b> we can use back/forward substitution to pop out an <b>x</b> input that satisfies the system of equations. However with the <b>QR</b> the <b>Q</b> doesn't really make this same method possible b/c it's not triangular.
 </p>
@@ -2806,9 +2804,9 @@ Notice that we did that all in theoretical equation form and how we've avoided h
 </div>
 </div>
 </div>
-<div id="outline-container-orge2c66c3" class="outline-2">
-<h2 id="orge2c66c3"><span class="todo TODO">TODO</span> s</h2>
-<div class="outline-text-2" id="text-orge2c66c3">
+<div id="outline-container-org7588cdc" class="outline-2">
+<h2 id="org7588cdc"><span class="todo TODO">TODO</span> s</h2>
+<div class="outline-text-2" id="text-org7588cdc">
 <ul class="org-ul">
 <li>Write a better example that I can expand on easily later</li>
 <li>Implement the Sherman-Morrison update formula</li>
@@ -2818,13 +2816,13 @@ Notice that we did that all in theoretical equation form and how we've avoided h
 </ul>
 </div>
 </div>
-<div id="outline-container-org486d8e3" class="outline-2">
-<h2 id="org486d8e3">End</h2>
+<div id="outline-container-org5795772" class="outline-2">
+<h2 id="org5795772">End</h2>
 </div>
 
-<div id="outline-container-orgd055c49" class="outline-2">
-<h2 id="orgd055c49">Notes from the Author</h2>
-<div class="outline-text-2" id="text-orgd055c49">
+<div id="outline-container-org32f96c8" class="outline-2">
+<h2 id="org32f96c8">Notes from the Author</h2>
+<div class="outline-text-2" id="text-org32f96c8">
 <p>
 This was a very fun exercise and has been very education however I felt the project was heading in a bit of the wrong direction and a few issues have started to crop up:
 </p>

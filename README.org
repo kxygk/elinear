@@ -2074,8 +2074,6 @@ B/c of inadequacies of my matrix format and the minimal array of helper function
                                        reflector-matrix)
                        (matrix-build-R sub-R
                                        intermediate-matrix))))))))
-
-  )
 #+END_SRC
  In some ways this method is nicer than Gram-Schmidt b/c the goal is more direct - to zero out the columns; and the method is very clean and recursive. However the end result is harder to interpret. *Q* is now a product of reflectors each working on a different dimensions. It's easy to see why it's orthonormal, but what this final product signifies is not as clear as with Gram Schmidt. B/c both methods produce the same result we can use both to glean insight.
 ** Givens reduction
